@@ -33,7 +33,7 @@ class Config:
     # Comma-separated list of feeds from environment variables
     _RSS_FEEDS_RAW: str = os.getenv(
         "RSS_FEEDS", 
-        "https://kubernetes.io/feed.xml,https://aws.amazon.com/blogs/aws/feed/"
+        "https://kubernetes.io/feed.xml,https://aws.amazon.com/blogs/aws/feed/,https://www.cncf.io/blog/feed/,https://github.blog/feed/,https://openai.com/blog/rss.xml"
     )
     
     @property
@@ -42,5 +42,6 @@ class Config:
         return [feed.strip() for feed in self._RSS_FEEDS_RAW.split(",") if feed.strip()]
 
 config = Config()
+
 
 

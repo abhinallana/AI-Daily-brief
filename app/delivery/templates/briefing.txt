@@ -1,24 +1,45 @@
 ==================================================
-AI DAILY BRIEF
+OPSIAI - TODAY'S LATEST AI UPDATES
 ==================================================
 Date: {{ date_str }}
 
-{% if grouped_articles %}
-{% for category, articles in grouped_articles.items() %}
-[{{ category }}]
+{% if grouped_articles.Strategic %}
+[🔴 STRATEGIC]
 --------------------------------------------------
-{% for article in articles %}
+{% for article in grouped_articles.Strategic %}
 * {{ article.title }}
-  Source: {{ article.source }} | Date: {{ article.published_at }}
-  Link: {{ article.link }}
-  Summary: {% if article.ai_summary %}{{ article.ai_summary }}{% elif article.summary %}{{ article.summary | striptags | truncate(150) }}{% else %}No description available.{% endif %}
-
+  Source: {{ article.source }} | Link: {{ article.link }}
 {% endfor %}
-{% endfor %}
-{% else %}
-No new updates for today. You are fully caught up!
 {% endif %}
 
+{% if grouped_articles.Important %}
+[🟡 IMPORTANT]
+--------------------------------------------------
+{% for article in grouped_articles.Important %}
+* {{ article.title }}
+  Source: {{ article.source }} | Link: {{ article.link }}
+{% endfor %}
+{% endif %}
+
+{% if grouped_articles.Informational %}
+[🟢 INFORMATIONAL]
+--------------------------------------------------
+{% for article in grouped_articles.Informational %}
+* {{ article.title }}
+  Source: {{ article.source }} | Link: {{ article.link }}
+{% endfor %}
+{% endif %}
+
+==================================================
+📋 EXECUTIVE SUMMARY INDEX
+==================================================
+{% for article in all_articles %}
+* {{ article.title }}
+  Summary: {% if article.ai_summary %}{{ article.ai_summary }}{% else %}{{ article.summary | striptags | truncate(100) }}{% endif %}
+  Link: {{ article.link }}
+
+{% endfor %}
+
 --
-Sent with love by AI Daily Brief
+Sent with love by OpsiAI
 Running autonomously on your machine.

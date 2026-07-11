@@ -29,6 +29,7 @@ class DatabaseManager:
             source TEXT,
             ai_summary TEXT,
             category TEXT,
+            priority TEXT,
             is_relevant INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -47,6 +48,9 @@ class DatabaseManager:
                 if "category" not in columns:
                     logger.info("Migrating database: adding 'category' column.")
                     conn.execute("ALTER TABLE articles ADD COLUMN category TEXT")
+                if "priority" not in columns:
+                    logger.info("Migrating database: adding 'priority' column.")
+                    conn.execute("ALTER TABLE articles ADD COLUMN priority TEXT")
                 if "is_relevant" not in columns:
                     logger.info("Migrating database: adding 'is_relevant' column.")
                     conn.execute("ALTER TABLE articles ADD COLUMN is_relevant INTEGER DEFAULT 1")
@@ -63,8 +67,8 @@ class DatabaseManager:
         Returns the number of new articles inserted.
         """
         query = """
-        INSERT OR IGNORE INTO articles (title, link, published_at, summary, source, ai_summary, category, is_relevant)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO articles (title, link, published_at, summary, source, ai_summary, category, priority, is_relevant)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         inserted_count = 0
         try:
@@ -79,6 +83,7 @@ class DatabaseManager:
                         art.source,
                         art.ai_summary,
                         art.category,
+                        art.priority,
                         1 if art.is_relevant else 0
                     )
                     for art in articles
@@ -107,7 +112,7 @@ class DatabaseManager:
         """Fetches the most recently inserted articles from the database."""
         if only_relevant:
             query = """
-            SELECT title, link, published_at, summary, source, ai_summary, category, is_relevant
+            SELECT title, link, published_at, summary, source, ai_summary, category, priority, is_relevant
             FROM articles
             WHERE is_relevant = 1
             ORDER BY id DESC
@@ -115,7 +120,7 @@ class DatabaseManager:
             """
         else:
             query = """
-            SELECT title, link, published_at, summary, source, ai_summary, category, is_relevant
+            SELECT title, link, published_at, summary, source, ai_summary, category, priority, is_relevant
             FROM articles
             ORDER BY id DESC
             LIMIT ?
@@ -133,6 +138,7 @@ class DatabaseManager:
                         source=row["source"],
                         ai_summary=row["ai_summary"],
                         category=row["category"],
+                        priority=row["priority"],
                         is_relevant=bool(row["is_relevant"])
                     )
                     for row in rows
@@ -140,4 +146,5 @@ class DatabaseManager:
         except sqlite3.Error as e:
             logger.error(f"Error retrieving recent articles: {e}", exc_info=True)
             return []
+
 

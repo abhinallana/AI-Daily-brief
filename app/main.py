@@ -54,26 +54,28 @@ def main() -> None:
             logger.info(f"   Link: {article.link}")
             logger.info("-" * 40)
             
-    # Retrieve recent relevant articles for the daily brief email
-    recent_articles = db.get_recent_articles(limit=25, only_relevant=True)
+    # Retrieve recent relevant articles for the daily brief email (maximum 12 as requested)
+    recent_articles = db.get_recent_articles(limit=12, only_relevant=True)
     
     if recent_articles:
-        logger.info(f"Generating briefing containing {len(recent_articles)} recent relevant articles...")
+        logger.info(f"Generating OpsiAI briefing containing {len(recent_articles)} recent articles...")
         
-        # Group articles by category
+        # Group articles by priority: Strategic, Important, Informational
         grouped = defaultdict(list)
         for article in recent_articles:
-            category = article.category or "General Tech Updates"
-            grouped[category].append(article)
+            priority = article.priority or "Informational"
+            grouped[priority].append(article)
+
             
         # Send Email Briefing
         date_str = datetime.now().strftime("%B %d, %Y")
         email_service = EmailService()
-        email_service.send_briefing(date_str, dict(grouped))
+        email_service.send_briefing(date_str, dict(grouped), recent_articles)
     else:
-        logger.info("No recent relevant articles found. Skipping email briefing.")
+        logger.info("No recent relevant articles found. Skipping OpsiAI email briefing.")
 
 if __name__ == "__main__":
     main()
+
 
 

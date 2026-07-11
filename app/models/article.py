@@ -10,5 +10,7 @@ class Article:
     source: Optional[str] = None
     ai_summary: Optional[str] = None
     category: Optional[str] = None
+    priority: Optional[str] = None
     is_relevant: bool = True
+
 

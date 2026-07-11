@@ -18,6 +18,9 @@ class ArticleAnalysis(BaseModel):
     ai_summary: str = Field(
         description="A clear, professional, 1-2 sentence summary of the main points in the article. Must be empty if is_relevant is false."
     )
+    priority: str = Field(
+        description="Priority rating for the article based on tech impact. Must be exactly 'Strategic', 'Important', or 'Informational'. Must be empty if is_relevant is false."
+    )
 
 class GeminiSummarizer:
     def __init__(self) -> None:
@@ -29,12 +32,12 @@ class GeminiSummarizer:
         else:
             self.client = genai.Client(api_key=self.api_key)
 
-
     def analyze_article(self, article: Article) -> Article:
         """Analyzes an article using Gemini: determines relevance, category, and summary."""
         if not self.client:
             logger.warning(f"Gemini client not initialized. Skipping analysis for: {article.title}")
-            return article
+            # Fallback default priority for unanalyzed entries
+            return dataclasses.replace(article, priority="Informational")
 
         topics_list = ", ".join(config.TOPICS)
         
@@ -51,6 +54,10 @@ class GeminiSummarizer:
         1. Determine if the article is relevant to any of the Whitelisted Topics. If it is about general news, lifestyle, politics, or other tech topics not listed, set is_relevant to false.
         2. If relevant, select the single most accurate category from the Whitelisted Topics list. It MUST match one of the items exactly.
         3. If relevant, generate a professional, concise 1-2 sentence executive summary.
+        4. If relevant, rate the importance of this news as either 'Strategic', 'Important', or 'Informational':
+           - 'Strategic': Critical architectural shifts, major framework/language releases, core security patches, or breakthrough AI model announcements.
+           - 'Important': Weekly roundups, standard service updates, plugin announcements, or standard releases.
+           - 'Informational': Minor patches, documentation updates, or small incremental improvements.
         """
 
         try:
@@ -69,6 +76,7 @@ class GeminiSummarizer:
             result = ArticleAnalysis.model_validate_json(response.text)
             
             matched_category = None
+            matched_priority = "Informational"
             if result.is_relevant:
                 category_val = result.category.strip()
                 for topic in config.TOPICS:
@@ -78,15 +86,22 @@ class GeminiSummarizer:
                 if not matched_category:
                     logger.debug(f"AI returned category '{category_val}' which is not in whitelist. Defaulting to first whitelist item.")
                     matched_category = config.TOPICS[0]
+                
+                priority_val = result.priority.strip()
+                if priority_val in ("Strategic", "Important", "Informational"):
+                    matched_priority = priority_val
 
             updated_article = dataclasses.replace(
                 article,
                 is_relevant=result.is_relevant,
                 category=matched_category if result.is_relevant else None,
-                ai_summary=result.ai_summary if result.is_relevant else None
+                ai_summary=result.ai_summary if result.is_relevant else None,
+                priority=matched_priority if result.is_relevant else "Informational"
             )
             return updated_article
             
         except Exception as e:
             logger.error(f"Error during Gemini analysis for article '{article.title}': {e}", exc_info=True)
-            return article
+            return dataclasses.replace(article, priority="Informational")
+
+

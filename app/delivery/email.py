@@ -25,14 +25,20 @@ class EmailService:
         templates_dir = os.path.join(current_dir, "templates")
         self.jinja_env = Environment(loader=FileSystemLoader(templates_dir))
 
-    def _render_templates(self, date_str: str, grouped_articles: Dict[str, List[Article]]) -> tuple[str, str]:
+    def _render_templates(
+        self, 
+        date_str: str, 
+        grouped_articles: Dict[str, List[Article]], 
+        all_articles: List[Article]
+    ) -> tuple[str, str]:
         """Renders both the plaintext and HTML templates."""
         html_template = self.jinja_env.get_template("briefing.html")
         txt_template = self.jinja_env.get_template("briefing.txt")
 
         context = {
             "date_str": date_str,
-            "grouped_articles": grouped_articles
+            "grouped_articles": grouped_articles,
+            "all_articles": all_articles
         }
 
         html_content = html_template.render(context)
@@ -40,9 +46,15 @@ class EmailService:
 
         return html_content, txt_content
 
-    def send_briefing(self, date_str: str, grouped_articles: Dict[str, List[Article]]) -> bool:
+    def send_briefing(
+        self, 
+        date_str: str, 
+        grouped_articles: Dict[str, List[Article]], 
+        all_articles: List[Article]
+    ) -> bool:
         """Constructs and sends the daily brief email."""
         # Ensure credentials are set and are not placeholder defaults
+
         is_configured = (
             self.smtp_username and 
             self.smtp_password and 
@@ -53,14 +65,15 @@ class EmailService:
             logger.warning("SMTP credentials are not configured or are using template placeholder defaults. Skipping email delivery.")
             return False
 
-        html_content, txt_content = self._render_templates(date_str, grouped_articles)
+        html_content, txt_content = self._render_templates(date_str, grouped_articles, all_articles)
 
 
         # Create MIME container
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"AI & DevOps Daily Brief - {date_str}"
+        msg["Subject"] = f"OpsiAI - Today's Latest AI Updates - {date_str}"
         msg["From"] = self.email_from
         msg["To"] = self.email_to
+
 
         # Attach text and html parts
         # The last attached part is preferred by email clients (HTML is attached second)
