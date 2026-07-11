@@ -1,0 +1,24 @@
+==================================================
+AI DAILY BRIEF
+==================================================
+Date: {{ date_str }}
+
+{% if grouped_articles %}
+{% for category, articles in grouped_articles.items() %}
+[{{ category }}]
+--------------------------------------------------
+{% for article in articles %}
+* {{ article.title }}
+  Source: {{ article.source }} | Date: {{ article.published_at }}
+  Link: {{ article.link }}
+  Summary: {% if article.ai_summary %}{{ article.ai_summary }}{% elif article.summary %}{{ article.summary | striptags | truncate(150) }}{% else %}No description available.{% endif %}
+
+{% endfor %}
+{% endfor %}
+{% else %}
+No new updates for today. You are fully caught up!
+{% endif %}
+
+--
+Sent with love by AI Daily Brief
+Running autonomously on your machine.

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & DevOps Daily Brief</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.15);
+            --accent: #06b6d4;
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .date {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        h2.category-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 40px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-left: 3px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .card-title a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .card-title a:hover {
+            color: var(--primary);
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .card-meta span {
+            margin-right: 12px;
+        }
+
+        .card-summary {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 9999px;
+            background-color: var(--primary-glow);
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">AI Daily Brief</div>
+            <div class="date">{{ date_str }}</div>
+        </header>
+
+        {% if grouped_articles %}
+            {% for category, articles in grouped_articles.items() %}
+                <h2 class="category-title">{{ category }}</h2>
+                {% for article in articles %}
+                    <div class="card">
+                        <div class="card-title">
+                            <a href="{{ article.link }}" target="_blank">{{ article.title }}</a>
+                        </div>
+                        <div class="card-meta">
+                            <span class="badge">{{ article.source }}</span>
+                            <span>{{ article.published_at }}</span>
+                        </div>
+                        <p class="card-summary">
+                            {% if article.ai_summary %}
+                                {{ article.ai_summary }}
+                            {% elif article.summary %}
+                                {{ article.summary | striptags | truncate(180) }}
+                            {% else %}
+                                No description available.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        {% else %}
+            <div class="card" style="text-align: center;">
+                <p class="card-summary">No updates for today. You are fully caught up!</p>
+            </div>
+        {% endif %}
+
+        <footer>
+            <p>Sent with ❤️ by AI Daily Brief | Running autonomously on your machine</p>
+        </footer>
+    </div>
+</body>
+</html>

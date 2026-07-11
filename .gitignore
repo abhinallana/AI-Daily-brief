@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+
+# Local logs
+logs/
+*.log
+
+# Sensitive secrets (leaking prevention)
+.env
+.env.local
+.env.*.local
+secrets.yaml
+
+# SQLite temp files (do NOT ignore daily_brief.db since it acts as our persistent state in GitOps)
+*.db-journal
+*.db-shm
+*.db-wal
