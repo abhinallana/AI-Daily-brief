@@ -4,7 +4,6 @@ OPSIAI - TODAY'S LATEST AI UPDATES
 Date: {{ date_str }}
 
 {{ greeting_time }}, {{ greeting_name }} 👋
-Here's the latest AI Updates for the date - {{ greeting_date }}.
 
 ==================================================
 TODAY'S AI SNAPSHOT
