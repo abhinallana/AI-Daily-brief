@@ -4,42 +4,61 @@ OPSIAI - TODAY'S LATEST AI UPDATES
 Date: {{ date_str }}
 
 {% if grouped_articles.Strategic %}
-[🔴 STRATEGIC]
+[🚨 STRATEGIC]
 --------------------------------------------------
 {% for article in grouped_articles.Strategic %}
 * {{ article.title }}
-  Source: {{ article.source }} | Link: {{ article.link }}
+  Source: {{ article.source or 'Unknown' }}
+  Summary: {{ article.ai_summary or 'N/A' }}
+  Why it matters: {{ article.why_it_matters or 'N/A' }}
+  Link: {{ article.link }}
+
 {% endfor %}
 {% endif %}
 
 {% if grouped_articles.Important %}
-[🟡 IMPORTANT]
+[⚠️ IMPORTANT]
 --------------------------------------------------
 {% for article in grouped_articles.Important %}
 * {{ article.title }}
-  Source: {{ article.source }} | Link: {{ article.link }}
+  Source: {{ article.source or 'Unknown' }}
+  Summary: {{ article.ai_summary or 'N/A' }}
+  Why it matters: {{ article.why_it_matters or 'N/A' }}
+  Link: {{ article.link }}
+
 {% endfor %}
 {% endif %}
 
 {% if grouped_articles.Informational %}
-[🟢 INFORMATIONAL]
+[ℹ️ INFORMATIONAL]
 --------------------------------------------------
 {% for article in grouped_articles.Informational %}
 * {{ article.title }}
-  Source: {{ article.source }} | Link: {{ article.link }}
-{% endfor %}
-{% endif %}
-
-==================================================
-📋 EXECUTIVE SUMMARY INDEX
-==================================================
-{% for article in all_articles %}
-* {{ article.title }}
-  Summary: {% if article.ai_summary %}{{ article.ai_summary }}{% else %}{{ article.summary | striptags | truncate(100) }}{% endif %}
+  Source: {{ article.source or 'Unknown' }}
+  Summary: {{ article.ai_summary or 'N/A' }}
+  Why it matters: {{ article.why_it_matters or 'N/A' }}
   Link: {{ article.link }}
 
 {% endfor %}
+{% endif %}
 
+{% if takeaways %}
+==================================================
+🎯 TODAY'S TAKEAWAY
+==================================================
+* Biggest announcement:
+  {{ takeaways.biggest_announcement }}
+
+* Biggest trend:
+  {{ takeaways.biggest_trend }}
+
+* One thing every AI engineer should know:
+  {{ takeaways.one_thing_to_know }}
+
+* Estimated reading time saved:
+  {{ takeaways.reading_time_saved_minutes }} minutes
+
+{% endif %}
 --
 Sent with love by OpsiAI
 Running autonomously on your machine.

@@ -24,9 +24,18 @@ class ArticleAnalysis(BaseModel):
     priority: str = Field(
         description="Priority rating for the article based on tech impact. Must be exactly 'Strategic', 'Important', or 'Informational'. Must be empty if is_relevant is false."
     )
+    why_it_matters: str = Field(
+        description="A concise explanation of why this article/news matters to developers or AI engineers. Must be empty if is_relevant is false."
+    )
 
 class BatchArticleAnalysis(BaseModel):
     results: List[ArticleAnalysis] = Field(description="List of analysis results matching the input articles list.")
+
+class TakeawayAnalysis(BaseModel):
+    biggest_announcement: str = Field(description="The single most important technical or product announcement from today's brief.")
+    biggest_trend: str = Field(description="The primary trend or direction observed across these updates.")
+    one_thing_to_know: str = Field(description="One critical thing every AI engineer or developer should know from today's brief.")
+    reading_time_saved_minutes: int = Field(description="Estimated reading time saved in minutes for the reader (e.g. 18).")
 
 class GeminiSummarizer:
     def __init__(self) -> None:
@@ -80,11 +89,12 @@ class GeminiSummarizer:
         For each article in the input list:
         1. Determine if the article is relevant to any of the Whitelisted Topics. If it is about general news, lifestyle, politics, or other tech topics not listed, set is_relevant to false.
         2. If relevant, select the single most accurate category from the Whitelisted Topics list. It MUST match one of the items exactly.
-        3. If relevant, generate a professional, concise 1-2 sentence executive summary.
-        4. If relevant, rate the importance of this news as either 'Strategic', 'Important', or 'Informational':
+        3. If relevant, generate a professional, concise 1-2 sentence executive summary (ai_summary).
+        4. If relevant, rate the importance of this news as either 'Strategic', 'Important', or 'Informational' (priority):
            - 'Strategic': Critical architectural shifts, major framework/language releases, core security patches, or breakthrough AI model announcements.
            - 'Important': Weekly roundups, standard service updates, plugin announcements, or standard releases.
            - 'Informational': Minor patches, documentation updates, or small incremental improvements.
+        5. If relevant, generate a concise explanation of why this news/article matters to developers or AI engineers (why_it_matters).
         
         Input Articles List:
         """
@@ -132,7 +142,8 @@ class GeminiSummarizer:
                     is_relevant=True,
                     category=matched_category,
                     ai_summary=result.ai_summary,
-                    priority=matched_priority
+                    priority=matched_priority,
+                    why_it_matters=result.why_it_matters
                 ))
             else:
                 # Not relevant or missing result
@@ -162,8 +173,9 @@ class GeminiSummarizer:
         Instructions:
         1. Determine if the article is relevant to the Whitelisted Topics (set is_relevant).
         2. If relevant, select category from the whitelist.
-        3. If relevant, write a 1-2 sentence summary.
-        4. If relevant, rate priority as 'Strategic', 'Important', or 'Informational'.
+        3. If relevant, write a 1-2 sentence summary (ai_summary).
+        4. If relevant, rate priority as 'Strategic', 'Important', or 'Informational' (priority).
+        5. If relevant, generate a concise explanation of why this news/article matters to developers or AI engineers (why_it_matters).
         """
         try:
             # We reuse the single analysis schema by passing a list structure of 1 item
@@ -172,6 +184,7 @@ class GeminiSummarizer:
                 category: str
                 ai_summary: str
                 priority: str
+                why_it_matters: str
 
             response = self.client.models.generate_content(
                 model=config.GEMINI_MODEL,
@@ -203,10 +216,55 @@ class GeminiSummarizer:
                     is_relevant=True,
                     category=matched_category,
                     ai_summary=result.ai_summary,
-                    priority=matched_priority
+                    priority=matched_priority,
+                    why_it_matters=result.why_it_matters
                 )
             else:
                 return dataclasses.replace(article, is_relevant=False, priority="Informational")
         except Exception as e:
             logger.error(f"Fallback single analysis failed for '{article.title}': {e}")
             return dataclasses.replace(article, priority="Informational")
+
+    def generate_takeaways(self, articles: List[Article]) -> TakeawayAnalysis:
+        """Generates Today's Takeaway summary from the list of briefing articles."""
+        if not articles or not self.client:
+            return TakeawayAnalysis(
+                biggest_announcement="No major announcements today.",
+                biggest_trend="No major trends observed.",
+                one_thing_to_know="Stay tuned for tomorrow's updates.",
+                reading_time_saved_minutes=0
+            )
+            
+        prompt = """
+        You are a Senior Tech Editor and Software Architect. Analyze the following list of summarized tech news articles and synthesize 'Today's Takeaway'.
+        
+        Provide:
+        1. biggest_announcement: A single sentence describing the most significant announcement from these articles.
+        2. biggest_trend: A single sentence describing the key trend observed across these articles.
+        3. one_thing_to_know: A single key actionable takeaway or crucial detail that every AI engineer must know.
+        4. reading_time_saved_minutes: Estimate how many minutes an engineer saved by reading this briefing instead of all full articles. (A reasonable estimate, e.g. between 10 to 30 minutes, based on the quantity and depth of articles).
+        
+        Articles List:
+        """
+        for idx, art in enumerate(articles):
+            prompt += f"\n- {art.title} (Source: {art.source})\n  Summary: {art.ai_summary or art.summary or 'N/A'}\n"
+            
+        try:
+            response = self.client.models.generate_content(
+                model=config.GEMINI_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=TakeawayAnalysis,
+                    temperature=0.2,
+                ),
+            )
+            return TakeawayAnalysis.model_validate_json(response.text)
+        except Exception as e:
+            logger.error(f"Error generating takeaways: {e}", exc_info=True)
+            return TakeawayAnalysis(
+                biggest_announcement="Unable to generate summary at this time.",
+                biggest_trend="Unable to generate trend at this time.",
+                one_thing_to_know="Check the individual article details.",
+                reading_time_saved_minutes=0
+            )

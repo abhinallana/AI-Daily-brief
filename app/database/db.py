@@ -30,6 +30,7 @@ class DatabaseManager:
             ai_summary TEXT,
             category TEXT,
             priority TEXT,
+            why_it_matters TEXT,
             is_relevant INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -51,6 +52,9 @@ class DatabaseManager:
                 if "priority" not in columns:
                     logger.info("Migrating database: adding 'priority' column.")
                     conn.execute("ALTER TABLE articles ADD COLUMN priority TEXT")
+                if "why_it_matters" not in columns:
+                    logger.info("Migrating database: adding 'why_it_matters' column.")
+                    conn.execute("ALTER TABLE articles ADD COLUMN why_it_matters TEXT")
                 if "is_relevant" not in columns:
                     logger.info("Migrating database: adding 'is_relevant' column.")
                     conn.execute("ALTER TABLE articles ADD COLUMN is_relevant INTEGER DEFAULT 1")
@@ -67,8 +71,8 @@ class DatabaseManager:
         Returns the number of new articles inserted.
         """
         query = """
-        INSERT OR IGNORE INTO articles (title, link, published_at, summary, source, ai_summary, category, priority, is_relevant)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO articles (title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, is_relevant)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         inserted_count = 0
         try:
@@ -84,6 +88,7 @@ class DatabaseManager:
                         art.ai_summary,
                         art.category,
                         art.priority,
+                        art.why_it_matters,
                         1 if art.is_relevant else 0
                     )
                     for art in articles
@@ -112,7 +117,7 @@ class DatabaseManager:
         """Fetches the most recently inserted articles from the database."""
         if only_relevant:
             query = """
-            SELECT title, link, published_at, summary, source, ai_summary, category, priority, is_relevant
+            SELECT title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, is_relevant
             FROM articles
             WHERE is_relevant = 1
             ORDER BY id DESC
@@ -120,7 +125,7 @@ class DatabaseManager:
             """
         else:
             query = """
-            SELECT title, link, published_at, summary, source, ai_summary, category, priority, is_relevant
+            SELECT title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, is_relevant
             FROM articles
             ORDER BY id DESC
             LIMIT ?
@@ -139,6 +144,7 @@ class DatabaseManager:
                         ai_summary=row["ai_summary"],
                         category=row["category"],
                         priority=row["priority"],
+                        why_it_matters=row["why_it_matters"],
                         is_relevant=bool(row["is_relevant"])
                     )
                     for row in rows

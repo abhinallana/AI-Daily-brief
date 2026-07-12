@@ -94,10 +94,14 @@ def main() -> None:
             priority = article.priority or "Informational"
             grouped[priority].append(article)
             
+        # Generate Today's Takeaway summary
+        logger.info("Generating Today's Takeaway summary...")
+        takeaways = summarizer.generate_takeaways(balanced_articles)
+        
         # Send Email Briefing
         date_str = datetime.now().strftime("%B %d, %Y")
         email_service = EmailService()
-        email_service.send_briefing(date_str, dict(grouped), balanced_articles)
+        email_service.send_briefing(date_str, dict(grouped), balanced_articles, takeaways)
     else:
         logger.info("No recent relevant articles found. Skipping OpsiAI email briefing.")
 

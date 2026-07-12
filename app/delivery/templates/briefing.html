@@ -6,21 +6,21 @@
     <title>Today's Latest AI Updates - OpsiAI</title>
     <style>
         :root {
-            --bg-color: #f8fafc;
-            --container-bg: #ffffff;
-            --text-color: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --bg-color: #0d0e12;
+            --container-bg: #121318;
+            --card-bg: #1a1b23;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #272935;
             
-            /* Section header dark colors for perfect visibility as requested */
-            --heading-strategic: #b91c1c;       /* Dark Red (Strategic) */
-            --heading-important: #d97706;       /* Dark Amber/Orange (Important) */
-            --heading-informational: #047857;   /* Dark Emerald Green (Informational) */
-            --heading-summary: #312e81;         /* Dark Indigo (Summary) */
+            --heading-strategic: #f87171;
+            --heading-important: #fbbf24;
+            --heading-informational: #34d399;
+            --heading-takeaway: #818cf8;
             
-            --primary: #4f46e5;
-            --accent: #0891b2;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --primary: #818cf8;
+            --accent: #22d3ee;
+            --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         body {
@@ -39,7 +39,7 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 40px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
 
         header {
@@ -82,109 +82,152 @@
             padding-bottom: 6px;
         }
 
-        /* Distinct dark colors for headings as requested */
         .title-strategic {
             color: var(--heading-strategic) !important;
-            border-bottom: 2px solid #fee2e2;
+            border-bottom: 2px solid rgba(248, 113, 113, 0.2);
         }
         .title-important {
             color: var(--heading-important) !important;
-            border-bottom: 2px solid #ffedd5;
+            border-bottom: 2px solid rgba(251, 191, 36, 0.2);
         }
         .title-informational {
             color: var(--heading-informational) !important;
-            border-bottom: 2px solid #d1fae5;
+            border-bottom: 2px solid rgba(52, 211, 153, 0.2);
         }
-        .title-summary {
-            color: var(--heading-summary) !important;
-            border-bottom: 2px solid #e0e7ff;
+        .title-takeaway {
+            color: var(--heading-takeaway) !important;
+            border-bottom: 2px solid rgba(129, 140, 248, 0.2);
         }
 
         .card {
-            background-color: var(--container-bg);
+            background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             box-shadow: var(--card-shadow);
         }
 
+        .card-header-line {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-strategic {
+            background-color: rgba(248, 113, 113, 0.15);
+            color: var(--heading-strategic);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .badge-important {
+            background-color: rgba(251, 191, 36, 0.15);
+            color: var(--heading-important);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .badge-informational {
+            background-color: rgba(52, 211, 153, 0.15);
+            color: var(--heading-informational);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .badge-category {
+            background-color: rgba(129, 140, 248, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(129, 140, 248, 0.3);
+        }
+
         .card-title {
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 700;
             margin-top: 0;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
+            line-height: 1.4;
         }
 
         .card-title a {
             color: var(--text-color);
             text-decoration: none;
-            transition: color 0.2s ease;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .card-title a:hover {
             color: var(--primary);
+            border-bottom: 1px solid var(--primary);
         }
 
-        .card-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-            font-weight: 500;
+        .card-section {
+            margin-bottom: 16px;
         }
 
-        .card-meta span {
-            margin-right: 14px;
-        }
-
-        .card-summary {
-            font-size: 14px;
-            color: #334155;
+        .card-section:last-child {
             margin-bottom: 0;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            font-size: 10px;
+        .section-label {
+            font-size: 12px;
             font-weight: 700;
-            border-radius: 6px;
-            background-color: #f1f5f9;
-            color: #475569;
-            border: 1px solid var(--border);
-        }
-
-        /* Summary section list styles */
-        .summary-list {
-            margin: 20px 0 0 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .summary-item {
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .summary-item:last-child {
-            border-bottom: none;
-        }
-
-        .summary-item-title {
-            font-weight: 700;
-            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             margin-bottom: 4px;
         }
 
-        .summary-item-title a {
+        .section-content {
+            font-size: 14px;
             color: var(--text-color);
-            text-decoration: none;
+            line-height: 1.5;
         }
 
-        .summary-item-text {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin: 0;
+        /* Takeaway card styles */
+        .card-takeaway {
+            background: linear-gradient(135deg, #16152b 0%, #0d0f17 100%);
+            border: 1px solid #312e81;
+        }
+
+        .takeaway-section {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(49, 46, 129, 0.4);
+        }
+
+        .takeaway-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .takeaway-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        .takeaway-content {
+            font-size: 14px;
+            color: #e0e7ff;
+            line-height: 1.5;
+        }
+
+        .highlight-accent {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 16px;
         }
 
         footer {
@@ -207,99 +250,147 @@
 
         {# 1. Section for Strategic articles #}
         {% if grouped_articles.Strategic %}
-            <h2 class="category-title title-strategic">🔴 Strategic</h2>
+            <h2 class="category-title title-strategic">🚨 Strategic</h2>
             {% for article in grouped_articles.Strategic %}
                 <div class="card">
+                    <div class="card-header-line">
+                        <span class="badge badge-strategic">🚨 Strategic</span>
+                        {% if article.category %}
+                            <span class="badge badge-category">{{ article.category }}</span>
+                        {% endif %}
+                    </div>
+                    
                     <div class="card-title">
                         <a href="{{ article.link }}" target="_blank">{{ article.title }}</a>
                     </div>
-                    <div class="card-meta">
-                        <span class="badge">{{ article.source }}</span>
-                        <span>{{ article.published_at }}</span>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Source</div>
+                        <div class="section-content">{{ article.source or 'Unknown' }}</div>
                     </div>
-                    <p class="card-summary">
-                        {% if article.summary %}
-                            {{ article.summary | striptags | truncate(200) }}
-                        {% else %}
-                            No description available.
-                        {% endif %}
-                    </p>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Summary</div>
+                        <div class="section-content">
+                            {{ article.ai_summary or article.summary | striptags | truncate(200) }}
+                        </div>
+                    </div>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Why it matters</div>
+                        <div class="section-content">
+                            {{ article.why_it_matters or 'N/A' }}
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         {% endif %}
 
         {# 2. Section for Important articles #}
         {% if grouped_articles.Important %}
-            <h2 class="category-title title-important">🟡 Important</h2>
+            <h2 class="category-title title-important">⚠️ Important</h2>
             {% for article in grouped_articles.Important %}
                 <div class="card">
+                    <div class="card-header-line">
+                        <span class="badge badge-important">⚠️ Important</span>
+                        {% if article.category %}
+                            <span class="badge badge-category">{{ article.category }}</span>
+                        {% endif %}
+                    </div>
+                    
                     <div class="card-title">
                         <a href="{{ article.link }}" target="_blank">{{ article.title }}</a>
                     </div>
-                    <div class="card-meta">
-                        <span class="badge">{{ article.source }}</span>
-                        <span>{{ article.published_at }}</span>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Source</div>
+                        <div class="section-content">{{ article.source or 'Unknown' }}</div>
                     </div>
-                    <p class="card-summary">
-                        {% if article.summary %}
-                            {{ article.summary | striptags | truncate(200) }}
-                        {% else %}
-                            No description available.
-                        {% endif %}
-                    </p>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Summary</div>
+                        <div class="section-content">
+                            {{ article.ai_summary or article.summary | striptags | truncate(200) }}
+                        </div>
+                    </div>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Why it matters</div>
+                        <div class="section-content">
+                            {{ article.why_it_matters or 'N/A' }}
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         {% endif %}
 
         {# 3. Section for Informational articles #}
         {% if grouped_articles.Informational %}
-            <h2 class="category-title title-informational">🟢 Informational</h2>
+            <h2 class="category-title title-informational">ℹ️ Informational</h2>
             {% for article in grouped_articles.Informational %}
                 <div class="card">
+                    <div class="card-header-line">
+                        <span class="badge badge-informational">ℹ️ Informational</span>
+                        {% if article.category %}
+                            <span class="badge badge-category">{{ article.category }}</span>
+                        {% endif %}
+                    </div>
+                    
                     <div class="card-title">
                         <a href="{{ article.link }}" target="_blank">{{ article.title }}</a>
                     </div>
-                    <div class="card-meta">
-                        <span class="badge">{{ article.source }}</span>
-                        <span>{{ article.published_at }}</span>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Source</div>
+                        <div class="section-content">{{ article.source or 'Unknown' }}</div>
                     </div>
-                    <p class="card-summary">
-                        {% if article.summary %}
-                            {{ article.summary | striptags | truncate(200) }}
-                        {% else %}
-                            No description available.
-                        {% endif %}
-                    </p>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Summary</div>
+                        <div class="section-content">
+                            {{ article.ai_summary or article.summary | striptags | truncate(200) }}
+                        </div>
+                    </div>
+                    
+                    <div class="card-section">
+                        <div class="section-label">Why it matters</div>
+                        <div class="section-content">
+                            {{ article.why_it_matters or 'N/A' }}
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         {% endif %}
 
         {% if not grouped_articles.Strategic and not grouped_articles.Important and not grouped_articles.Informational %}
             <div class="card" style="text-align: center;">
-                <p class="card-summary">No updates for today. You are fully caught up!</p>
+                <p class="section-content">No updates for today. You are fully caught up!</p>
             </div>
         {% endif %}
 
-        {# 4. Summary Index tab #}
-        {% if all_articles %}
-            <h2 class="category-title title-summary">📋 Executive Summary Index</h2>
-            <div class="card" style="padding: 10px 24px;">
-                <ul class="summary-list">
-                    {% for article in all_articles %}
-                        <li class="summary-item">
-                            <div class="summary-item-title">
-                                <a href="{{ article.link }}" target="_blank">{{ article.title }}</a>
-                            </div>
-                            <p class="summary-item-text">
-                                {% if article.ai_summary %}
-                                    {{ article.ai_summary }}
-                                {% else %}
-                                    {{ article.summary | striptags | truncate(120) or 'No summary index generated.' }}
-                                {% endif %}
-                            </p>
-                        </li>
-                    {% endfor %}
-                </ul>
+        {# 4. Today's Takeaway #}
+        {% if takeaways %}
+            <h2 class="category-title title-takeaway">🎯 Today's Takeaway</h2>
+            <div class="card card-takeaway">
+                <div class="takeaway-section">
+                    <div class="takeaway-label">Biggest announcement</div>
+                    <div class="takeaway-content">{{ takeaways.biggest_announcement }}</div>
+                </div>
+                
+                <div class="takeaway-section">
+                    <div class="takeaway-label">Biggest trend</div>
+                    <div class="takeaway-content">{{ takeaways.biggest_trend }}</div>
+                </div>
+                
+                <div class="takeaway-section">
+                    <div class="takeaway-label">One thing every AI engineer should know</div>
+                    <div class="takeaway-content">{{ takeaways.one_thing_to_know }}</div>
+                </div>
+                
+                <div class="takeaway-section">
+                    <div class="takeaway-label">Estimated reading time saved</div>
+                    <div class="takeaway-content highlight-accent">{{ takeaways.reading_time_saved_minutes }} minutes</div>
+                </div>
             </div>
         {% endif %}
 

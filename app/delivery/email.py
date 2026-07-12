@@ -29,7 +29,8 @@ class EmailService:
         self, 
         date_str: str, 
         grouped_articles: Dict[str, List[Article]], 
-        all_articles: List[Article]
+        all_articles: List[Article],
+        takeaways: any
     ) -> tuple[str, str]:
         """Renders both the plaintext and HTML templates."""
         html_template = self.jinja_env.get_template("briefing.html")
@@ -38,7 +39,8 @@ class EmailService:
         context = {
             "date_str": date_str,
             "grouped_articles": grouped_articles,
-            "all_articles": all_articles
+            "all_articles": all_articles,
+            "takeaways": takeaways
         }
 
         html_content = html_template.render(context)
@@ -50,7 +52,8 @@ class EmailService:
         self, 
         date_str: str, 
         grouped_articles: Dict[str, List[Article]], 
-        all_articles: List[Article]
+        all_articles: List[Article],
+        takeaways: any
     ) -> bool:
         """Constructs and sends the daily brief email."""
         # Ensure credentials are set and are not placeholder defaults
@@ -65,7 +68,7 @@ class EmailService:
             logger.warning("SMTP credentials are not configured or are using template placeholder defaults. Skipping email delivery.")
             return False
 
-        html_content, txt_content = self._render_templates(date_str, grouped_articles, all_articles)
+        html_content, txt_content = self._render_templates(date_str, grouped_articles, all_articles, takeaways)
 
 
         # Create MIME container
