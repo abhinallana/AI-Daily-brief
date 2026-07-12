@@ -4,6 +4,7 @@ import { SnapshotBar } from './components/SnapshotBar';
 import { Takeaways } from './components/Takeaways';
 import { ArticleFeed } from './components/ArticleFeed';
 import { Preferences } from './components/Preferences';
+import { AboutUs } from './components/AboutUs';
 import { fetchTodayReport } from './services/api';
 import type { DailyReport } from './services/api';
 
@@ -88,6 +89,7 @@ const App: React.FC = () => {
       <main className="main-content">
         {activeView === 'today' && renderTodayView()}
         {activeView === 'preferences' && <Preferences />}
+        {activeView === 'about' && <AboutUs />}
       </main>
     </div>
   );

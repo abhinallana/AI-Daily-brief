@@ -24,6 +24,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
         >
           <span>⚙️</span> Preferences
         </li>
+        <li 
+          className={`nav-item ${activeView === 'about' ? 'active' : ''}`}
+          onClick={() => onViewChange('about')}
+        >
+          <span>ℹ️</span> About us
+        </li>
       </ul>
     </aside>
   );

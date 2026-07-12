@@ -7,14 +7,42 @@ interface ArticleFeedProps {
 
 export const ArticleFeed: React.FC<ArticleFeedProps> = ({ articles }) => {
   const [filter, setFilter] = useState<'All' | 'Strategic' | 'Important' | 'Insights'>('All');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredArticles = articles.filter(art => {
-    if (filter === 'All') return true;
-    const pri = art.priority || 'Insights';
-    if (filter === 'Insights') {
-      return pri === 'Insights' || pri === 'Informational';
+    // 1. Priority filter
+    let matchesPriority = true;
+    if (filter !== 'All') {
+      const pri = art.priority || 'Insights';
+      if (filter === 'Insights') {
+        matchesPriority = (pri === 'Insights' || pri === 'Informational');
+      } else {
+        matchesPriority = pri.toLowerCase() === filter.toLowerCase();
+      }
     }
-    return pri.toLowerCase() === filter.toLowerCase();
+
+    // 2. Search query keyword filter
+    let matchesSearch = true;
+    if (searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase();
+      const title = (art.title || '').toLowerCase();
+      const category = (art.category || '').toLowerCase();
+      const source = (art.source || '').toLowerCase();
+      const summary = (art.summary || '').toLowerCase();
+      const aiSummary = (art.ai_summary || '').toLowerCase();
+      const whyItMatters = (art.why_it_matters || '').toLowerCase();
+
+      matchesSearch = (
+        title.includes(query) ||
+        category.includes(query) ||
+        source.includes(query) ||
+        summary.includes(query) ||
+        aiSummary.includes(query) ||
+        whyItMatters.includes(query)
+      );
+    }
+
+    return matchesPriority && matchesSearch;
   });
 
   const strategicArticles = filteredArticles.filter(a => a.priority === 'Strategic');
@@ -66,16 +94,27 @@ export const ArticleFeed: React.FC<ArticleFeedProps> = ({ articles }) => {
     <div style={{ marginTop: '30px' }}>
       <div className="feed-filter-bar">
         <h2 style={{ fontSize: '18px', fontWeight: 800 }}>AI Updates Feed</h2>
-        <div className="filter-group">
-          {(['All', 'Strategic', 'Important', 'Insights'] as const).map(tab => (
-            <button
-              key={tab}
-              className={`filter-btn ${filter === tab ? 'active' : ''}`}
-              onClick={() => setFilter(tab)}
-            >
-              {tab}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="search-container">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search keyword (e.g. OpenAI, CNCF, k8s)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="filter-group">
+            {(['All', 'Strategic', 'Important', 'Insights'] as const).map(tab => (
+              <button
+                key={tab}
+                className={`filter-btn ${filter === tab ? 'active' : ''}`}
+                onClick={() => setFilter(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
