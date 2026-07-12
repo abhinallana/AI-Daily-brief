@@ -1,6 +1,7 @@
-from dataclasses import dataclass
-from typing import Optional
 import hashlib
+from dataclasses import dataclass
+from datetime import date
+from typing import Optional, List
 
 @dataclass(frozen=True)
 class Article:
@@ -76,5 +77,18 @@ class Article:
             return "☁️"
         return "📰"
 
+@dataclass(frozen=True)
+class TakeawayAnalysis:
+    biggest_announcement: str
+    biggest_trend: str
+    one_thing_to_know: str
+    reading_time_saved_minutes: int
 
-
+@dataclass(frozen=True)
+class DailyReport:
+    report_date: date
+    biggest_announcement: str
+    biggest_trend: str
+    one_thing_to_know: str
+    reading_time_saved_minutes: int
+    articles: List[Article]

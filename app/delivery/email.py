@@ -6,10 +6,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
 from typing import Dict, List
-from collections import Counter
+from collections import Counter, defaultdict
 from jinja2 import Environment, FileSystemLoader
 from app.config.config import config
-from app.models.article import Article
+from app.domain.entities import DailyReport
 
 logger = logging.getLogger(__name__)
 
@@ -47,16 +47,18 @@ class EmailService:
         templates_dir = os.path.join(current_dir, "templates")
         self.jinja_env = Environment(loader=FileSystemLoader(templates_dir))
 
-    def _render_templates(
-        self, 
-        date_str: str, 
-        grouped_articles: Dict[str, List[Article]], 
-        all_articles: List[Article],
-        takeaways: any
-    ) -> tuple[str, str]:
+    def _render_templates(self, report: DailyReport) -> tuple[str, str]:
         """Renders both the plaintext and HTML templates."""
         html_template = self.jinja_env.get_template("briefing.html")
         txt_template = self.jinja_env.get_template("briefing.txt")
+
+        # Group articles by priority
+        grouped = defaultdict(list)
+        for article in report.articles:
+            priority = article.priority or "Insights"
+            if priority == "Informational":
+                priority = "Insights"
+            grouped[priority].append(article)
 
         # Compute Greeting Info
         first_name = extract_first_name(self.email_to)
@@ -79,30 +81,29 @@ class EmailService:
         greeting_date = local_now.strftime("%d-%m-%Y")
 
         # Compute Snapshot Info
-        strategic_count = len(grouped_articles.get("Strategic", []))
-        important_count = len(grouped_articles.get("Important", []))
-        insights_count = len(grouped_articles.get("Insights", []))
+        strategic_count = len(grouped.get("Strategic", []))
+        important_count = len(grouped.get("Important", []))
+        insights_count = len(grouped.get("Insights", []))
 
         # Categories
-        categories = [art.category for art in all_articles if art.category]
+        categories = [art.category for art in report.articles if art.category]
         top_topics = [item[0] for item in Counter(categories).most_common(4)]
 
         # Sum reading times
         total_reading_time = 0
-        for art in all_articles:
+        for art in report.articles:
             if art.reading_time:
                 match = re.search(r'\d+', art.reading_time)
                 if match:
                     total_reading_time += int(match.group())
         if total_reading_time == 0:
-            # Fallback if no reading times were generated
-            total_reading_time = len(all_articles) * 2
+            total_reading_time = len(report.articles) * 2
 
         context = {
-            "date_str": date_str,
-            "grouped_articles": grouped_articles,
-            "all_articles": all_articles,
-            "takeaways": takeaways,
+            "date_str": report.report_date.strftime("%B %d, %Y"),
+            "grouped_articles": dict(grouped),
+            "all_articles": report.articles,
+            "takeaways": report,
             "greeting_name": first_name,
             "greeting_time": greeting_time,
             "greeting_date": greeting_date,
@@ -118,16 +119,8 @@ class EmailService:
 
         return html_content, txt_content
 
-    def send_briefing(
-        self, 
-        date_str: str, 
-        grouped_articles: Dict[str, List[Article]], 
-        all_articles: List[Article],
-        takeaways: any
-    ) -> bool:
+    def send_briefing(self, report: DailyReport) -> bool:
         """Constructs and sends the daily brief email."""
-        # Ensure credentials are set and are not placeholder defaults
-
         is_configured = (
             self.smtp_username and 
             self.smtp_password and 
@@ -138,33 +131,28 @@ class EmailService:
             logger.warning("SMTP credentials are not configured or are using template placeholder defaults. Skipping email delivery.")
             return False
 
-        html_content, txt_content = self._render_templates(date_str, grouped_articles, all_articles, takeaways)
-
+        html_content, txt_content = self._render_templates(report)
 
         # Create MIME container
         msg = MIMEMultipart("alternative")
+        date_str = report.report_date.strftime("%B %d, %Y")
         msg["Subject"] = f"OpsiAI - Today's Latest AI Updates - {date_str}"
         msg["From"] = self.email_from
         msg["To"] = self.email_to
 
-
         # Attach text and html parts
-        # The last attached part is preferred by email clients (HTML is attached second)
         msg.attach(MIMEText(txt_content, "plain"))
         msg.attach(MIMEText(html_content, "html"))
 
         try:
             logger.info(f"Connecting to SMTP server at {self.smtp_host}:{self.smtp_port}...")
             
-            # Choose correct connection method based on port
             if self.smtp_port == 465:
-                # SSL Port
                 server = smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, timeout=15)
             else:
-                # TLS Port (usually 587)
                 server = smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=15)
                 server.ehlo()
-                server.starttls() # Secure the connection
+                server.starttls()
                 server.ehlo()
 
             with server:

@@ -1,19 +1,19 @@
-# AI Daily Brief
+# OpsiAI - AI Intelligence Platform & Briefing Pipeline
 
-AI Daily Brief is an automated tech newsletter pipeline designed to help DevOps Engineers, Backend Engineers, and Platform Architects keep up with the latest advancements in Artificial Intelligence and Cloud Engineering.
+OpsiAI is a modern, clean-architecture AI intelligence platform designed to aggregate, analyze, categorize, and deliver high-value technical briefings for DevOps Engineers, Platform Architects, and Software Developers.
 
-The application automatically pulls updates from trusted RSS feeds, filters for relevance against a whitelist of topics, uses Google's **Gemini AI** to generate structured executive summaries and categorizations, stores history in an **SQLite** database to prevent duplicate notifications, and sends a beautifully styled responsive HTML newsletter via **SMTP**.
+The system is built as a monolithic SaaS backend serving an interactive React dashboard web app alongside automated daily HTML email dispatches.
 
 ---
 
 ## Key Features
 
-- ⚙️ **Modular Backend Architecture**: Decoupled packages (collectors, models, database, summarizer, delivery, utils) for scalability and testability.
-- 🗄️ **SQLite persistent storage**: Prevents processing or delivering the same article twice. 
-- 🤖 **Gemini AI Integration**: Uses the modern `google-genai` SDK with **Pydantic schema validation** to output clean, structured JSON classifications.
-- 📧 **Jinja2 Templating**: Renders responsive, glassmorphic dark-mode HTML email layouts grouped by topic alongside plaintext fallbacks.
-- 🚀 **GitHub Actions GitOps Workflow**: Runs on a daily cron schedule, automatically persisting SQLite database states across ephemeral runner VMs by committing changes back to the repository.
-- 🛡️ **Resilient Fault Tolerance**: Graceful fallback checks for placeholder configurations, macOS SSL certificate bypasses, and network failure catch blocks.
+- ⚙️ **Clean Architecture & Domain-Driven Design**: Rigid separation between the domain entities, application services (summarization, report compilation), database repositories, and delivery adapters (FastAPI controllers, SMTP).
+- 🗄️ **Persistent Report & Article Caching**: SQLite database dynamically logs processed articles using SHA-256 hashes (`link_hash`) to avoid duplicate scans. Generates and stores unified daily reports to eliminate redundant Gemini API requests on page refreshes.
+- 🤖 **Google Gemini AI Integration**: Leverages the `google-genai` SDK using structured Pydantic schemas to validate JSON classifications, priority tagging (`Strategic`, `Important`, `Insights`), estimated reading times, and developer-oriented engineering summaries.
+- ⚡ **FastAPI REST API**: Serving health states, historical article list queries, and pre-computed briefings directly to HTTP clients.
+- 💻 **Premium React SaaS Dashboard**: A stunning Vite-based TypeScript web application styled with a premium Vanilla CSS layout, glassmorphic cards, collapsible summaries, stats meters, and interactive theme/category filters.
+- 📧 **Jinja2 SMTP Delivery**: Renders responsive dark-mode HTML email briefings with personalized user name parsing and local timezone greetings (e.g. `Good Afternoon, Abhi 👋`).
 
 ---
 
@@ -23,101 +23,88 @@ The application automatically pulls updates from trusted RSS feeds, filters for 
 ai-daily-brief/
 ├── .github/
 │   └── workflows/
-│       └── daily_brief.yml  # Scheduled GitHub Actions automation
+│       └── daily_brief.yml  # Scheduled GitHub Actions automation cron
 ├── app/
 │   ├── __init__.py
-│   ├── main.py              # Application entrypoint & pipeline loop
-│   ├── config/              # Environment variable loading & topics whitelists
-│   ├── collectors/          # RSS parsing service (requests + feedparser)
-│   ├── models/              # Immutable Article domain dataclass
-│   ├── database/            # SQLite transaction helpers & schema migrations
-│   ├── summarizer/          # Pydantic-based Gemini API structured analysis
-│   ├── delivery/            # SMTP email templates (Jinja2 HTML & Plaintext)
+│   ├── main.py              # CLI entry point to run the daily cron job
+│   ├── main_api.py          # FastAPI REST API server
+│   ├── config/              # Config settings & topics whitelists
+│   ├── domain/              # DDD Entities (Article, DailyReport, TakeawayAnalysis)
+│   ├── services/            # Application services (ReportBuilder, InsightGenerator)
+│   ├── infrastructure/      # Adapters (SQLiteArticleRepository)
+│   ├── delivery/            # SMTP email templates & email dispatch services
 │   └── utils/               # Log formats and directories setups
+├── frontend/                # Vite React TS SaaS Dashboard
+│   ├── src/
+│   │   ├── components/      # Sidebar, SnapshotBar, Takeaways, ArticleFeed, Preferences
+│   │   ├── services/        # Fetch API clients (endpoints fetchers)
+│   │   ├── App.tsx          # React dashboard layout & loading frames
+│   │   ├── index.css        # Premium Vanilla CSS design system styles
+│   │   └── main.tsx
+│   ├── package.json
+│   └── vite.config.ts
 ├── logs/                    # Application debug execution logs
 ├── .env.example             # Configuration variables blueprint
-├── .gitignore               # Ignored local structures (logs, env, packages)
-├── requirements.txt         # Package dependencies
+├── requirements.txt         # Python package dependencies
 └── README.md                # System documentation
 ```
 
 ---
 
-## Getting Started (Local Setup)
+## Local Setup & Quick Start
 
-### 1. Prerequisities
-Make sure you have Python 3.10+ installed on your system.
+### 1. Prerequisites
+- Python 3.10+
+- Node.js (v18+) & npm
 
-### 2. Installation
-Clone the repository and navigate into the folder:
+### 2. Backend Installation & Configurations
+Clone the repository and install the Python dependencies:
 ```bash
 git clone <your-repo-url>
 cd ai-daily-brief
-```
 
-Set up a virtual environment and install the dependencies:
-```bash
+# Create and activate virtualenv
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Environment Setup
-Copy the template configuration file:
+Configure your environment variables:
 ```bash
 cp .env.example .env
 ```
+Open `.env` and configure:
+- **GEMINI_API_KEY**: Create a free tier key from [Google AI Studio](https://aistudio.google.com/).
+- **TIMEZONE**: (Optional, defaults to `"Asia/Kolkata"`).
+- **SMTP Configurations**: Username and app password credentials for email dispatch.
 
-Open the `.env` file and replace the parameters with your details:
-- **Gemini API Key**: Obtain a free tier key from [Google AI Studio](https://aistudio.google.com/).
-- **SMTP Configuration**: Configure standard SMTP credentials (such as a Gmail address combined with a [Google App Password](https://support.google.com/accounts/answer/185833)).
-
-### 4. Running the Pipeline
-Run the entrypoint script:
+### 3. Run the CLI Ingestion Cron
+To manually run the RSS collector, AI summarizer, and dispatch the emails:
 ```bash
 python -m app.main
 ```
 
-Check the generated log files at `logs/app.log` or view the local `daily_brief.db` SQLite file to inspect stored metadata.
-
----
-
-## CI/CD Automation via GitHub Actions
-
-This pipeline is fully configured for automated scheduling in the cloud.
-
-### 1. Push to GitHub
-Commit all tracked files and push your repository to GitHub:
+### 4. Run the FastAPI REST Server
+Start the API on port 8000:
 ```bash
-git add .
-git commit -m "feat: initial commit of AI Daily Brief pipeline"
-git push origin main
+uvicorn app.main_api:app --reload --port 8000
 ```
+Visit `http://localhost:8000/docs` to test endpoints on Swagger.
 
-### 2. Configure GitHub Settings
-To allow the GitHub Actions runner to commit database updates back to your repository branch and inject credentials, set up the following:
-
-#### A. Workflow Permissions (Required for state persistence)
-1. Go to your repository **Settings** -> **Actions** -> **General**.
-2. Scroll to the bottom to **Workflow permissions**.
-3. Select **Read and write permissions**.
-4. Click **Save**.
-
-#### B. Repository Secrets
-Go to **Settings** -> **Secrets and variables** -> **Actions** and create the following **Repository Secrets**:
-- `GEMINI_API_KEY`: Your Gemini API key.
-- `SMTP_HOST`: e.g., `smtp.gmail.com`.
-- `SMTP_PORT`: e.g., `587`.
-- `SMTP_USERNAME`: Sender email address.
-- `SMTP_PASSWORD`: App password for mail delivery.
-- `EMAIL_FROM`: Sender email address.
-- `EMAIL_TO`: Recipient email address.
+### 5. Frontend Dashboard Installation & Setup
+In a new terminal window:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Open `http://localhost:5173` to load your interactive web dashboard.
 
 ---
 
-## Topics whitelisted
-By default, the daily brief filters out unrelated news and only categorizes articles matching these topics:
-* Artificial Intelligence / OpenAI / Anthropic / Google AI / Gemini / Microsoft AI / Meta AI
-* Open Source AI / LLMs / AI Agents / Hugging Face / NVIDIA AI
-* Kubernetes / Docker / DevOps / Platform Engineering / Cloud Engineering / AWS / Azure / Terraform / GitHub Actions / ArgoCD / Helm
-* MCP (Model Context Protocol) / LangGraph / CrewAI / Python
+## Production Deployment & CI/CD
+
+### GitHub Actions Scheduled Jobs
+The pipeline runs automatically inside GitHub Actions runners daily:
+- **Actions Permissions**: Ensure the repository has `Read and write permissions` enabled under **Settings** -> **Actions** -> **General** to allow runner machines to commit SQLite updates back to the master branch.
+- **Secrets**: Add all required credentials (`GEMINI_API_KEY`, `SMTP_USERNAME`, `EMAIL_TO`, etc.) under **Settings** -> **Secrets and variables** -> **Actions**.

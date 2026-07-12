@@ -1,12 +1,11 @@
 import logging
-import time
 import dataclasses
-from typing import List, Dict
+from typing import List
 from google import genai
 from google.genai import types
 from pydantic import BaseModel, Field
 from app.config.config import config
-from app.models.article import Article
+from app.domain.entities import Article, TakeawayAnalysis
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +33,15 @@ class ArticleAnalysis(BaseModel):
 class BatchArticleAnalysis(BaseModel):
     results: List[ArticleAnalysis] = Field(description="List of analysis results matching the input articles list.")
 
-class TakeawayAnalysis(BaseModel):
+class TakeawayResponseSchema(BaseModel):
     biggest_announcement: str = Field(description="The single most important technical or product announcement from today's brief.")
     biggest_trend: str = Field(description="The primary trend or direction observed across these updates.")
     one_thing_to_know: str = Field(description="One critical thing every AI engineer or developer should know from today's brief.")
     reading_time_saved_minutes: int = Field(description="Estimated reading time saved in minutes for the reader (e.g. 18).")
 
-class GeminiSummarizer:
+class InsightGeneratorService:
     def __init__(self) -> None:
         self.api_key = config.GEMINI_API_KEY
-        # If the API key is not set, is empty, or is the default placeholder value, skip init.
         if not self.api_key or self.api_key in ("", "your_gemini_api_key"):
             logger.warning("GEMINI_API_KEY is not set or is the template placeholder. Summarization will fallback to skip.")
             self.client = None
@@ -57,10 +55,8 @@ class GeminiSummarizer:
             
         if not self.client:
             logger.warning("Gemini client not initialized. Skipping batch analysis.")
-            # Set default fallback priority for all
             return [dataclasses.replace(art, priority="Insights") for art in articles]
             
-        # Define batch size (10 articles per batch to ensure high-quality JSON schemas)
         batch_size = 10
         analyzed_articles = []
         
@@ -73,7 +69,6 @@ class GeminiSummarizer:
                 analyzed_articles.extend(analyzed_batch)
             except Exception as e:
                 logger.error(f"Error processing batch {i // batch_size + 1}: {e}", exc_info=True)
-                # Fallback: process individual articles in this batch if batch fails
                 logger.info("Retrying batch articles individually...")
                 for art in batch:
                     analyzed_articles.append(self._analyze_single_fallback(art))
@@ -118,10 +113,7 @@ class GeminiSummarizer:
             ),
         )
         
-        # Parse structured batch response
         batch_result = BatchArticleAnalysis.model_validate_json(response.text)
-        
-        # Map results back to articles
         analyzed_batch = []
         result_map = {res.id: res for res in batch_result.results}
         
@@ -151,7 +143,6 @@ class GeminiSummarizer:
                     reading_time=result.reading_time
                 ))
             else:
-                # Not relevant or missing result
                 analyzed_batch.append(dataclasses.replace(
                     article,
                     is_relevant=False,
@@ -184,7 +175,6 @@ class GeminiSummarizer:
         6. If relevant, estimate the reading time for the full article (reading_time) e.g., '2 min read' or '5 min read'.
         """
         try:
-            # We reuse the single analysis schema by passing a list structure of 1 item
             class SingleArticleAnalysis(BaseModel):
                 is_relevant: bool
                 category: str
@@ -263,11 +253,17 @@ class GeminiSummarizer:
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
-                    response_schema=TakeawayAnalysis,
+                    response_schema=TakeawayResponseSchema,
                     temperature=0.2,
                 ),
             )
-            return TakeawayAnalysis.model_validate_json(response.text)
+            data = TakeawayResponseSchema.model_validate_json(response.text)
+            return TakeawayAnalysis(
+                biggest_announcement=data.biggest_announcement,
+                biggest_trend=data.biggest_trend,
+                one_thing_to_know=data.one_thing_to_know,
+                reading_time_saved_minutes=data.reading_time_saved_minutes
+            )
         except Exception as e:
             logger.error(f"Error generating takeaways: {e}", exc_info=True)
             return TakeawayAnalysis(

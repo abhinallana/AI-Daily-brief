@@ -4,7 +4,7 @@ import feedparser
 import requests
 from datetime import datetime, timezone, timedelta
 from typing import List
-from app.models.article import Article
+from app.domain.entities import Article
 
 logger = logging.getLogger(__name__)
 
