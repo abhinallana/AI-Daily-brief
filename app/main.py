@@ -1,7 +1,7 @@
 import logging
 from app.config.config import config
 from app.utils.logging import setup_logging
-from app.infrastructure.database.repository import SQLiteArticleRepository
+from app.infrastructure.database.repository import get_repository
 from app.services.report_builder import ReportBuilderService
 from app.delivery.email import EmailService
 
@@ -13,7 +13,7 @@ def main() -> None:
     logger.info("Starting AI Daily Briefing clean architecture pipeline...")
     
     # 1. Initialize Infrastructure Database Repository
-    repo = SQLiteArticleRepository(config.DATABASE_PATH)
+    repo = get_repository()
     
     # 2. Initialize Application Report Builder Service
     builder = ReportBuilderService(repo)

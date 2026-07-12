@@ -3,16 +3,16 @@ from datetime import date
 from typing import List, Optional
 from app.config.config import config
 from app.domain.entities import Article, DailyReport
-from app.infrastructure.database.repository import SQLiteArticleRepository
+from app.infrastructure.database.repository import get_repository
 from app.services.report_builder import ReportBuilderService
 
 router = APIRouter()
 
-def get_repo() -> SQLiteArticleRepository:
-    return SQLiteArticleRepository(config.DATABASE_PATH)
+def get_repo():
+    return get_repository()
 
 @router.get("/health")
-def health_check(repo: SQLiteArticleRepository = Depends(get_repo)):
+def health_check(repo=Depends(get_repo)):
     """API health status checking database responsiveness."""
     try:
         # Check simple DB query to confirm responsiveness
@@ -28,7 +28,7 @@ def health_check(repo: SQLiteArticleRepository = Depends(get_repo)):
         )
 
 @router.get("/reports/today")
-def get_todays_report(repo: SQLiteArticleRepository = Depends(get_repo)):
+def get_todays_report(repo=Depends(get_repo)):
     """Fetches today's daily briefing report, computing it if not yet generated."""
     today = date.today()
     report = repo.get_daily_report(today)
@@ -71,7 +71,7 @@ def get_todays_report(repo: SQLiteArticleRepository = Depends(get_repo)):
 
 @router.get("/articles")
 def get_articles(
-    repo: SQLiteArticleRepository = Depends(get_repo),
+    repo=Depends(get_repo),
     limit: int = Query(50, ge=1, le=100),
     category: Optional[str] = Query(None),
     priority: Optional[str] = Query(None)
