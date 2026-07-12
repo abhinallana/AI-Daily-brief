@@ -1,4 +1,4 @@
-# OpsiAI - AI Intelligence Platform & Briefing Pipeline
+# OpsiAI - AI Updates Intelligence Platform 
 
 OpsiAI is a modern, clean-architecture AI intelligence platform designed to aggregate, analyze, categorize, and deliver high-value technical briefings for DevOps Engineers, Platform Architects, and Software Developers.
 
