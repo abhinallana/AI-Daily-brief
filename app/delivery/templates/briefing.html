@@ -5,28 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Today's Latest AI Updates - OpsiAI</title>
     <style>
-        :root {
-            --bg-color: #0d0e12;
-            --container-bg: #121318;
-            --card-bg: #1a1b23;
-            --text-color: #f3f4f6;
-            --text-muted: #9ca3af;
-            --border: #272935;
-            
-            --heading-strategic: #f87171;
-            --heading-important: #fbbf24;
-            --heading-insights: #22d3ee;
-            --heading-takeaway: #818cf8;
-            
-            --primary: #818cf8;
-            --accent: #22d3ee;
-            --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #0d0e12;
+            color: #f3f4f6;
             margin: 0;
             padding: 0;
             line-height: 1.6;
@@ -35,8 +17,8 @@
         .container {
             max-width: 650px;
             margin: 40px auto;
-            background-color: var(--container-bg);
-            border: 1px solid var(--border);
+            background-color: #121318;
+            border: 1px solid #272935;
             border-radius: 16px;
             padding: 40px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
@@ -45,7 +27,7 @@
         header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 2px solid #272935;
             padding-bottom: 20px;
         }
 
@@ -53,20 +35,20 @@
             font-size: 28px;
             font-weight: 800;
             letter-spacing: -0.05em;
-            color: var(--primary);
+            color: #818cf8;
             margin-bottom: 8px;
         }
 
         .main-title {
             font-size: 22px;
             font-weight: 700;
-            color: var(--text-color);
+            color: #f3f4f6;
             margin: 0 0 8px 0;
         }
 
         .date {
             font-size: 14px;
-            color: var(--text-muted);
+            color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             font-weight: 600;
@@ -79,30 +61,24 @@
 
         /* Snapshot styles */
         .snapshot-container {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
+            background-color: #1a1b23;
+            border: 1px solid #272935;
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 35px;
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         .snapshot-title {
             font-size: 15px;
             font-weight: 800;
-            color: var(--primary);
+            color: #818cf8;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             margin-top: 0;
             margin-bottom: 16px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #272935;
             padding-bottom: 8px;
-        }
-
-        .snapshot-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 16px;
         }
 
         .snapshot-stats {
@@ -120,15 +96,14 @@
         }
 
         .snapshot-divider {
-            grid-column: span 2;
-            border-top: 1px dashed var(--border);
-            margin: 10px 0;
+            border-top: 1px dashed #272935;
+            margin: 16px 0;
         }
 
         .snapshot-section-title {
             font-size: 12px;
             font-weight: 700;
-            color: var(--text-muted);
+            color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 8px;
@@ -142,30 +117,27 @@
 
         .snapshot-topic-item {
             font-size: 14px;
-            color: var(--text-color);
+            color: #f3f4f6;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .snapshot-topic-bullet {
-            color: var(--primary);
+            color: #818cf8;
             font-size: 16px;
             line-height: 1;
         }
 
         .snapshot-reading-time {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border-left: 1px solid var(--border);
-            padding-left: 20px;
+            border-left: 1px solid #272935;
+            padding-left: 24px;
         }
 
         .snapshot-reading-label {
             font-size: 12px;
             font-weight: 700;
-            color: var(--text-muted);
+            color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 4px;
@@ -174,7 +146,7 @@
         .snapshot-reading-value {
             font-size: 22px;
             font-weight: 800;
-            color: var(--accent);
+            color: #22d3ee;
         }
 
         h2.category-title {
@@ -188,29 +160,29 @@
         }
 
         .title-strategic {
-            color: var(--heading-strategic) !important;
+            color: #f87171 !important;
             border-bottom: 2px solid rgba(248, 113, 113, 0.2);
         }
         .title-important {
-            color: var(--heading-important) !important;
+            color: #fbbf24 !important;
             border-bottom: 2px solid rgba(251, 191, 36, 0.2);
         }
         .title-insights {
-            color: var(--heading-insights) !important;
+            color: #22d3ee !important;
             border-bottom: 2px solid rgba(34, 211, 238, 0.2);
         }
         .title-takeaway {
-            color: var(--heading-takeaway) !important;
+            color: #818cf8 !important;
             border-bottom: 2px solid rgba(129, 140, 248, 0.2);
         }
 
         .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
+            background-color: #1a1b23;
+            border: 1px solid #272935;
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 24px;
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         .card-header-line {
@@ -231,25 +203,25 @@
 
         .badge-strategic {
             background-color: rgba(248, 113, 113, 0.15);
-            color: var(--heading-strategic);
+            color: #f87171;
             border: 1px solid rgba(248, 113, 113, 0.3);
         }
 
         .badge-important {
             background-color: rgba(251, 191, 36, 0.15);
-            color: var(--heading-important);
+            color: #fbbf24;
             border: 1px solid rgba(251, 191, 36, 0.3);
         }
 
         .badge-insights {
             background-color: rgba(34, 211, 238, 0.15);
-            color: var(--heading-insights);
+            color: #22d3ee;
             border: 1px solid rgba(34, 211, 238, 0.3);
         }
 
         .badge-category {
             background-color: rgba(129, 140, 248, 0.15);
-            color: var(--primary);
+            color: #818cf8;
             border: 1px solid rgba(129, 140, 248, 0.3);
         }
 
@@ -262,15 +234,15 @@
         }
 
         .card-title a {
-            color: var(--text-color);
+            color: #f3f4f6;
             text-decoration: none;
             border-bottom: 1px solid transparent;
             transition: all 0.2s ease;
         }
 
         .card-title a:hover {
-            color: var(--primary);
-            border-bottom: 1px solid var(--primary);
+            color: #818cf8;
+            border-bottom: 1px solid #818cf8;
         }
 
         .card-section {
@@ -284,7 +256,7 @@
         .section-label {
             font-size: 12px;
             font-weight: 700;
-            color: var(--text-muted);
+            color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             margin-bottom: 4px;
@@ -292,7 +264,7 @@
 
         .section-content {
             font-size: 14px;
-            color: var(--text-color);
+            color: #f3f4f6;
             line-height: 1.5;
         }
 
@@ -333,7 +305,7 @@
         }
 
         .highlight-accent {
-            color: var(--accent);
+            color: #22d3ee;
             font-weight: 700;
             font-size: 16px;
         }
@@ -342,9 +314,9 @@
             text-align: center;
             margin-top: 60px;
             padding-top: 30px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid #272935;
             font-size: 12px;
-            color: var(--text-muted);
+            color: #9ca3af;
         }
     </style>
 </head>
@@ -363,30 +335,33 @@
         {# Today's AI Snapshot Dashboard #}
         <div class="snapshot-container">
             <div class="snapshot-title">Today's AI Snapshot</div>
-            <div class="snapshot-grid">
-                <div class="snapshot-stats">
-                    <div class="snapshot-stat-item">
-                        <span>🚨</span>
-                        <span>Strategic : {{ strategic_count }}</span>
-                    </div>
-                    <div class="snapshot-stat-item">
-                        <span>📌</span>
-                        <span>Important : {{ important_count }}</span>
-                    </div>
-                    <div class="snapshot-stat-item">
-                        <span>ℹ️</span>
-                        <span>Insights : {{ insights_count }}</span>
-                    </div>
-                </div>
-                
-                <div class="snapshot-reading-time">
-                    <div class="snapshot-reading-label">Estimated Reading Time</div>
-                    <div class="snapshot-reading-value">{{ total_reading_time }} minutes</div>
-                </div>
-                
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td width="55%" valign="top">
+                        <div class="snapshot-stats">
+                            <div class="snapshot-stat-item">
+                                <span>🚨</span>
+                                <span>Strategic : {{ strategic_count }}</span>
+                            </div>
+                            <div class="snapshot-stat-item">
+                                <span>📌</span>
+                                <span>Important : {{ important_count }}</span>
+                            </div>
+                            <div class="snapshot-stat-item">
+                                <span>ℹ️</span>
+                                <span>Insights : {{ insights_count }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td width="45%" valign="middle" class="snapshot-reading-time">
+                        <div class="snapshot-reading-label">Estimated Reading Time</div>
+                        <div class="snapshot-reading-value">{{ total_reading_time }} minutes</div>
+                    </td>
+                </tr>
                 {% if top_topics %}
-                    <div class="snapshot-divider"></div>
-                    <div style="grid-column: span 2;">
+                <tr>
+                    <td colspan="2">
+                        <div class="snapshot-divider"></div>
                         <div class="snapshot-section-title">Top Topics</div>
                         <div class="snapshot-topics">
                             {% for topic in top_topics %}
@@ -396,9 +371,10 @@
                                 </div>
                             {% endfor %}
                         </div>
-                    </div>
+                    </td>
+                </tr>
                 {% endif %}
-            </div>
+            </table>
         </div>
 
         {# 1. Section for Strategic articles #}
@@ -432,7 +408,11 @@
                     <div class="card-section">
                         <div class="section-label">Why it matters</div>
                         <div class="section-content">
-                            {{ article.why_it_matters }}
+                            {% if article.why_it_matters and article.why_it_matters != 'None' %}
+                                {{ article.why_it_matters }}
+                            {% else %}
+                                Important technical updates and architectural implications for developers.
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -470,7 +450,11 @@
                     <div class="card-section">
                         <div class="section-label">Why it matters</div>
                         <div class="section-content">
-                            {{ article.why_it_matters }}
+                            {% if article.why_it_matters and article.why_it_matters != 'None' %}
+                                {{ article.why_it_matters }}
+                            {% else %}
+                                Key service updates and architectural shifts relevant to engineering pipelines.
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -508,7 +492,11 @@
                     <div class="card-section">
                         <div class="section-label">Why it matters</div>
                         <div class="section-content">
-                            {{ article.why_it_matters }}
+                            {% if article.why_it_matters and article.why_it_matters != 'None' %}
+                                {{ article.why_it_matters }}
+                            {% else %}
+                                Important incremental updates and news indices for developers.
+                            {% endif %}
                         </div>
                     </div>
                 </div>

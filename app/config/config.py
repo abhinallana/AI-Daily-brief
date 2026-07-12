@@ -11,6 +11,7 @@ class Config:
     # Gemini API settings
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    TIMEZONE: str = os.getenv("TIMEZONE", "Asia/Kolkata")
     
     # SMTP Configuration
     SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")

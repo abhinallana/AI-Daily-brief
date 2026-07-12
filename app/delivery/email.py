@@ -60,7 +60,15 @@ class EmailService:
 
         # Compute Greeting Info
         first_name = extract_first_name(self.email_to)
-        current_hour = datetime.now().hour
+        
+        import zoneinfo
+        try:
+            tz = zoneinfo.ZoneInfo(config.TIMEZONE)
+            local_now = datetime.now(tz)
+        except Exception:
+            local_now = datetime.now()
+            
+        current_hour = local_now.hour
         if current_hour < 12:
             greeting_time = "Good Morning"
         elif current_hour < 17:
@@ -68,7 +76,7 @@ class EmailService:
         else:
             greeting_time = "Good Evening"
         
-        greeting_date = datetime.now().strftime("%d-%m-%Y")
+        greeting_date = local_now.strftime("%d-%m-%Y")
 
         # Compute Snapshot Info
         strategic_count = len(grouped_articles.get("Strategic", []))
