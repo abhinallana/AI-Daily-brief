@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+import hashlib
 from typing import List
 from app.models.article import Article
 
@@ -22,6 +23,7 @@ class DatabaseManager:
         schema = """
         CREATE TABLE IF NOT EXISTS articles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            link_hash TEXT UNIQUE,
             title TEXT NOT NULL,
             link TEXT UNIQUE NOT NULL,
             published_at TEXT,
@@ -31,6 +33,7 @@ class DatabaseManager:
             category TEXT,
             priority TEXT,
             why_it_matters TEXT,
+            reading_time TEXT,
             is_relevant INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -55,6 +58,20 @@ class DatabaseManager:
                 if "why_it_matters" not in columns:
                     logger.info("Migrating database: adding 'why_it_matters' column.")
                     conn.execute("ALTER TABLE articles ADD COLUMN why_it_matters TEXT")
+                if "reading_time" not in columns:
+                    logger.info("Migrating database: adding 'reading_time' column.")
+                    conn.execute("ALTER TABLE articles ADD COLUMN reading_time TEXT")
+                if "link_hash" not in columns:
+                    logger.info("Migrating database: adding 'link_hash' column.")
+                    conn.execute("ALTER TABLE articles ADD COLUMN link_hash TEXT")
+                    # Update existing rows
+                    cursor = conn.execute("SELECT id, link FROM articles")
+                    rows = cursor.fetchall()
+                    for r in rows:
+                        l_hash = hashlib.sha256(r["link"].encode('utf-8')).hexdigest()
+                        conn.execute("UPDATE articles SET link_hash = ? WHERE id = ?", (l_hash, r["id"]))
+                    # Create unique index
+                    conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_link_hash ON articles(link_hash)")
                 if "is_relevant" not in columns:
                     logger.info("Migrating database: adding 'is_relevant' column.")
                     conn.execute("ALTER TABLE articles ADD COLUMN is_relevant INTEGER DEFAULT 1")
@@ -71,8 +88,8 @@ class DatabaseManager:
         Returns the number of new articles inserted.
         """
         query = """
-        INSERT OR IGNORE INTO articles (title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, is_relevant)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO articles (link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         inserted_count = 0
         try:
@@ -80,6 +97,7 @@ class DatabaseManager:
                 # Prepare arguments
                 data = [
                     (
+                        art.link_hash,
                         art.title, 
                         art.link, 
                         art.published_at, 
@@ -89,6 +107,7 @@ class DatabaseManager:
                         art.category,
                         art.priority,
                         art.why_it_matters,
+                        art.reading_time,
                         1 if art.is_relevant else 0
                     )
                     for art in articles
@@ -104,10 +123,11 @@ class DatabaseManager:
 
     def is_duplicate(self, link: str) -> bool:
         """Checks if a given article link already exists in the database."""
-        query = "SELECT 1 FROM articles WHERE link = ? LIMIT 1"
+        link_hash = hashlib.sha256(link.encode('utf-8')).hexdigest()
+        query = "SELECT 1 FROM articles WHERE link_hash = ? OR link = ? LIMIT 1"
         try:
             with self._get_connection() as conn:
-                cursor = conn.execute(query, (link,))
+                cursor = conn.execute(query, (link_hash, link))
                 return cursor.fetchone() is not None
         except sqlite3.Error as e:
             logger.error(f"Error checking duplicate link {link}: {e}", exc_info=True)
@@ -117,7 +137,7 @@ class DatabaseManager:
         """Fetches the most recently inserted articles from the database."""
         if only_relevant:
             query = """
-            SELECT title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, is_relevant
+            SELECT link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant
             FROM articles
             WHERE is_relevant = 1
             ORDER BY id DESC
@@ -125,7 +145,7 @@ class DatabaseManager:
             """
         else:
             query = """
-            SELECT title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, is_relevant
+            SELECT link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant
             FROM articles
             ORDER BY id DESC
             LIMIT ?
@@ -145,7 +165,9 @@ class DatabaseManager:
                         category=row["category"],
                         priority=row["priority"],
                         why_it_matters=row["why_it_matters"],
-                        is_relevant=bool(row["is_relevant"])
+                        is_relevant=bool(row["is_relevant"]),
+                        reading_time=row["reading_time"],
+                        link_hash=row["link_hash"]
                     )
                     for row in rows
                 ]

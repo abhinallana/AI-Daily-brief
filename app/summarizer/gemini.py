@@ -22,10 +22,13 @@ class ArticleAnalysis(BaseModel):
         description="A clear, professional, 1-2 sentence summary of the main points in the article. Must be empty if is_relevant is false."
     )
     priority: str = Field(
-        description="Priority rating for the article based on tech impact. Must be exactly 'Strategic', 'Important', or 'Informational'. Must be empty if is_relevant is false."
+        description="Priority rating for the article based on tech impact. Must be exactly 'Strategic', 'Important', or 'Insights'. Must be empty if is_relevant is false."
     )
     why_it_matters: str = Field(
-        description="A concise explanation of why this article/news matters to developers or AI engineers. Must be empty if is_relevant is false."
+        description="A concise explanation of why this article/news matters to developers or AI engineers. Must be empty if is_relevant is false. You must ALWAYS generate a useful explanation tailored to engineers/developers. Never output 'N/A' or empty strings."
+    )
+    reading_time: str = Field(
+        description="Estimated reading time for the full article, formatted like '3 min read' or '5 min read'. Must be empty if is_relevant is false."
     )
 
 class BatchArticleAnalysis(BaseModel):
@@ -55,7 +58,7 @@ class GeminiSummarizer:
         if not self.client:
             logger.warning("Gemini client not initialized. Skipping batch analysis.")
             # Set default fallback priority for all
-            return [dataclasses.replace(art, priority="Informational") for art in articles]
+            return [dataclasses.replace(art, priority="Insights") for art in articles]
             
         # Define batch size (10 articles per batch to ensure high-quality JSON schemas)
         batch_size = 10
@@ -90,11 +93,12 @@ class GeminiSummarizer:
         1. Determine if the article is relevant to any of the Whitelisted Topics. If it is about general news, lifestyle, politics, or other tech topics not listed, set is_relevant to false.
         2. If relevant, select the single most accurate category from the Whitelisted Topics list. It MUST match one of the items exactly.
         3. If relevant, generate a professional, concise 1-2 sentence executive summary (ai_summary).
-        4. If relevant, rate the importance of this news as either 'Strategic', 'Important', or 'Informational' (priority):
+        4. If relevant, rate the importance of this news as either 'Strategic', 'Important', or 'Insights' (priority):
            - 'Strategic': Critical architectural shifts, major framework/language releases, core security patches, or breakthrough AI model announcements.
            - 'Important': Weekly roundups, standard service updates, plugin announcements, or standard releases.
-           - 'Informational': Minor patches, documentation updates, or small incremental improvements.
-        5. If relevant, generate a concise explanation of why this news/article matters to developers or AI engineers (why_it_matters).
+           - 'Insights': Minor patches, documentation updates, or small incremental improvements.
+        5. If relevant, generate a concise explanation of why this news/article matters to developers or AI engineers (why_it_matters). You must always generate a useful explanation tailored to engineers/developers (do not return 'N/A' or empty string).
+        6. If relevant, estimate the reading time for the full article (reading_time) e.g., '2 min read' or '5 min read'.
         
         Input Articles List:
         """
@@ -133,8 +137,8 @@ class GeminiSummarizer:
                 if not matched_category:
                     matched_category = config.TOPICS[0]
                     
-                matched_priority = "Informational"
-                if result.priority in ("Strategic", "Important", "Informational"):
+                matched_priority = "Insights"
+                if result.priority in ("Strategic", "Important", "Insights"):
                     matched_priority = result.priority
                     
                 analyzed_batch.append(dataclasses.replace(
@@ -143,7 +147,8 @@ class GeminiSummarizer:
                     category=matched_category,
                     ai_summary=result.ai_summary,
                     priority=matched_priority,
-                    why_it_matters=result.why_it_matters
+                    why_it_matters=result.why_it_matters,
+                    reading_time=result.reading_time
                 ))
             else:
                 # Not relevant or missing result
@@ -152,7 +157,7 @@ class GeminiSummarizer:
                     is_relevant=False,
                     category=None,
                     ai_summary=None,
-                    priority="Informational"
+                    priority="Insights"
                 ))
                 
         return analyzed_batch
@@ -174,8 +179,9 @@ class GeminiSummarizer:
         1. Determine if the article is relevant to the Whitelisted Topics (set is_relevant).
         2. If relevant, select category from the whitelist.
         3. If relevant, write a 1-2 sentence summary (ai_summary).
-        4. If relevant, rate priority as 'Strategic', 'Important', or 'Informational' (priority).
-        5. If relevant, generate a concise explanation of why this news/article matters to developers or AI engineers (why_it_matters).
+        4. If relevant, rate priority as 'Strategic', 'Important', or 'Insights' (priority).
+        5. If relevant, generate a concise explanation of why this news/article matters to developers or AI engineers (why_it_matters). You must always generate a useful explanation tailored to engineers/developers (do not return 'N/A' or empty string).
+        6. If relevant, estimate the reading time for the full article (reading_time) e.g., '2 min read' or '5 min read'.
         """
         try:
             # We reuse the single analysis schema by passing a list structure of 1 item
@@ -185,6 +191,7 @@ class GeminiSummarizer:
                 ai_summary: str
                 priority: str
                 why_it_matters: str
+                reading_time: str
 
             response = self.client.models.generate_content(
                 model=config.GEMINI_MODEL,
@@ -207,8 +214,8 @@ class GeminiSummarizer:
                 if not matched_category:
                     matched_category = config.TOPICS[0]
                     
-                matched_priority = "Informational"
-                if result.priority in ("Strategic", "Important", "Informational"):
+                matched_priority = "Insights"
+                if result.priority in ("Strategic", "Important", "Insights"):
                     matched_priority = result.priority
 
                 return dataclasses.replace(
@@ -217,13 +224,14 @@ class GeminiSummarizer:
                     category=matched_category,
                     ai_summary=result.ai_summary,
                     priority=matched_priority,
-                    why_it_matters=result.why_it_matters
+                    why_it_matters=result.why_it_matters,
+                    reading_time=result.reading_time
                 )
             else:
-                return dataclasses.replace(article, is_relevant=False, priority="Informational")
+                return dataclasses.replace(article, is_relevant=False, priority="Insights")
         except Exception as e:
             logger.error(f"Fallback single analysis failed for '{article.title}': {e}")
-            return dataclasses.replace(article, priority="Informational")
+            return dataclasses.replace(article, priority="Insights")
 
     def generate_takeaways(self, articles: List[Article]) -> TakeawayAnalysis:
         """Generates Today's Takeaway summary from the list of briefing articles."""

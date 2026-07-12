@@ -3,40 +3,60 @@ OPSIAI - TODAY'S LATEST AI UPDATES
 ==================================================
 Date: {{ date_str }}
 
+{{ greeting_time }}, {{ greeting_name }} 👋
+Here's the latest AI Updates for the date - {{ greeting_date }}.
+
+==================================================
+TODAY'S AI SNAPSHOT
+==================================================
+🚨 Strategic : {{ strategic_count }}
+📌 Important : {{ important_count }}
+ℹ️ Insights : {{ insights_count }}
+
+━━━━━━━━━━━━━━
+
+Top Topics:
+{% for topic in top_topics %}
+• {{ topic }}
+{% endfor %}
+
+Estimated Reading Time:
+{{ total_reading_time }} minutes
+
 {% if grouped_articles.Strategic %}
 [🚨 STRATEGIC]
 --------------------------------------------------
 {% for article in grouped_articles.Strategic %}
 * {{ article.title }}
-  Source: {{ article.source or 'Unknown' }}
-  Summary: {{ article.ai_summary or 'N/A' }}
-  Why it matters: {{ article.why_it_matters or 'N/A' }}
+  Source: {{ article.icon }} {{ article.source or 'Unknown' }}
+  Reading Time: {{ article.reading_time or '2 min read' }}
+  Why it matters: {{ article.why_it_matters }}
   Link: {{ article.link }}
 
 {% endfor %}
 {% endif %}
 
 {% if grouped_articles.Important %}
-[⚠️ IMPORTANT]
+[📌 IMPORTANT]
 --------------------------------------------------
 {% for article in grouped_articles.Important %}
 * {{ article.title }}
-  Source: {{ article.source or 'Unknown' }}
-  Summary: {{ article.ai_summary or 'N/A' }}
-  Why it matters: {{ article.why_it_matters or 'N/A' }}
+  Source: {{ article.icon }} {{ article.source or 'Unknown' }}
+  Reading Time: {{ article.reading_time or '2 min read' }}
+  Why it matters: {{ article.why_it_matters }}
   Link: {{ article.link }}
 
 {% endfor %}
 {% endif %}
 
-{% if grouped_articles.Informational %}
-[ℹ️ INFORMATIONAL]
+{% if grouped_articles.Insights %}
+[ℹ️ INSIGHTS]
 --------------------------------------------------
-{% for article in grouped_articles.Informational %}
+{% for article in grouped_articles.Insights %}
 * {{ article.title }}
-  Source: {{ article.source or 'Unknown' }}
-  Summary: {{ article.ai_summary or 'N/A' }}
-  Why it matters: {{ article.why_it_matters or 'N/A' }}
+  Source: {{ article.icon }} {{ article.source or 'Unknown' }}
+  Reading Time: {{ article.reading_time or '2 min read' }}
+  Why it matters: {{ article.why_it_matters }}
   Link: {{ article.link }}
 
 {% endfor %}
@@ -46,16 +66,16 @@ Date: {{ date_str }}
 ==================================================
 🎯 TODAY'S TAKEAWAY
 ==================================================
-* Biggest announcement:
+🚀 Biggest Announcement:
   {{ takeaways.biggest_announcement }}
 
-* Biggest trend:
+📈 Biggest Trend:
   {{ takeaways.biggest_trend }}
 
-* One thing every AI engineer should know:
+💡 Key Insight:
   {{ takeaways.one_thing_to_know }}
 
-* Estimated reading time saved:
+⏳ Time Saved:
   {{ takeaways.reading_time_saved_minutes }} minutes
 
 {% endif %}

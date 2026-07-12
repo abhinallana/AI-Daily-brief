@@ -1,15 +1,37 @@
 import os
 import logging
 import smtplib
+import re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
 from typing import Dict, List
+from collections import Counter
 from jinja2 import Environment, FileSystemLoader
 from app.config.config import config
 from app.models.article import Article
 
 logger = logging.getLogger(__name__)
+
+def extract_first_name(email: str) -> str:
+    if not email:
+        return "Reader"
+    # Take username part before @
+    local_part = email.split('@')[0]
+    # Replace dots, underscores, hyphens with spaces
+    normalized = local_part.replace('.', ' ').replace('_', ' ').replace('-', ' ')
+    first_word = normalized.split()[0]
+    
+    # Strip common tech suffixes from the username to extract the first name
+    for suffix in ["devops", "engineer", "admin", "tech", "cloud", "developer", "brief"]:
+        if suffix in first_word.lower():
+            idx = first_word.lower().find(suffix)
+            if idx > 0:
+                first_word = first_word[:idx]
+                
+    # Strip digits
+    first_word = ''.join([c for c in first_word if c.isalpha()])
+    return first_word.capitalize() if first_word else "Reader"
 
 class EmailService:
     def __init__(self) -> None:
@@ -36,11 +58,51 @@ class EmailService:
         html_template = self.jinja_env.get_template("briefing.html")
         txt_template = self.jinja_env.get_template("briefing.txt")
 
+        # Compute Greeting Info
+        first_name = extract_first_name(self.email_to)
+        current_hour = datetime.now().hour
+        if current_hour < 12:
+            greeting_time = "Good Morning"
+        elif current_hour < 17:
+            greeting_time = "Good Afternoon"
+        else:
+            greeting_time = "Good Evening"
+        
+        greeting_date = datetime.now().strftime("%d-%m-%Y")
+
+        # Compute Snapshot Info
+        strategic_count = len(grouped_articles.get("Strategic", []))
+        important_count = len(grouped_articles.get("Important", []))
+        insights_count = len(grouped_articles.get("Insights", []))
+
+        # Categories
+        categories = [art.category for art in all_articles if art.category]
+        top_topics = [item[0] for item in Counter(categories).most_common(4)]
+
+        # Sum reading times
+        total_reading_time = 0
+        for art in all_articles:
+            if art.reading_time:
+                match = re.search(r'\d+', art.reading_time)
+                if match:
+                    total_reading_time += int(match.group())
+        if total_reading_time == 0:
+            # Fallback if no reading times were generated
+            total_reading_time = len(all_articles) * 2
+
         context = {
             "date_str": date_str,
             "grouped_articles": grouped_articles,
             "all_articles": all_articles,
-            "takeaways": takeaways
+            "takeaways": takeaways,
+            "greeting_name": first_name,
+            "greeting_time": greeting_time,
+            "greeting_date": greeting_date,
+            "strategic_count": strategic_count,
+            "important_count": important_count,
+            "insights_count": insights_count,
+            "top_topics": top_topics,
+            "total_reading_time": total_reading_time
         }
 
         html_content = html_template.render(context)

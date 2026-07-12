@@ -82,16 +82,16 @@ def main() -> None:
             if not added_in_round:
                 break
                 
-        # Sort the final 12 articles by priority: Strategic -> Important -> Informational
-        priority_order = {"Strategic": 1, "Important": 2, "Informational": 3}
-        balanced_articles.sort(key=lambda art: priority_order.get(art.priority or "Informational", 3))
+        # Sort the final 12 articles by priority: Strategic -> Important -> Insights
+        priority_order = {"Strategic": 1, "Important": 2, "Insights": 3}
+        balanced_articles.sort(key=lambda art: priority_order.get(art.priority or "Insights", 3))
         
         logger.info(f"Generating OpsiAI briefing containing {len(balanced_articles)} balanced articles...")
         
         # Group articles by priority for templates
         grouped = defaultdict(list)
         for article in balanced_articles:
-            priority = article.priority or "Informational"
+            priority = article.priority or "Insights"
             grouped[priority].append(article)
             
         # Generate Today's Takeaway summary

@@ -15,7 +15,7 @@
             
             --heading-strategic: #f87171;
             --heading-important: #fbbf24;
-            --heading-informational: #34d399;
+            --heading-insights: #22d3ee;
             --heading-takeaway: #818cf8;
             
             --primary: #818cf8;
@@ -44,9 +44,9 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             border-bottom: 2px solid var(--border);
-            padding-bottom: 30px;
+            padding-bottom: 20px;
         }
 
         .logo {
@@ -72,6 +72,111 @@
             font-weight: 600;
         }
 
+        .greeting-banner {
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+
+        /* Snapshot styles */
+        .snapshot-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 35px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .snapshot-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .snapshot-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 16px;
+        }
+
+        .snapshot-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .snapshot-stat-item {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .snapshot-divider {
+            grid-column: span 2;
+            border-top: 1px dashed var(--border);
+            margin: 10px 0;
+        }
+
+        .snapshot-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .snapshot-topics {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .snapshot-topic-item {
+            font-size: 14px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .snapshot-topic-bullet {
+            color: var(--primary);
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .snapshot-reading-time {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-left: 1px solid var(--border);
+            padding-left: 20px;
+        }
+
+        .snapshot-reading-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .snapshot-reading-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
         h2.category-title {
             font-size: 18px;
             font-weight: 800;
@@ -90,9 +195,9 @@
             color: var(--heading-important) !important;
             border-bottom: 2px solid rgba(251, 191, 36, 0.2);
         }
-        .title-informational {
-            color: var(--heading-informational) !important;
-            border-bottom: 2px solid rgba(52, 211, 153, 0.2);
+        .title-insights {
+            color: var(--heading-insights) !important;
+            border-bottom: 2px solid rgba(34, 211, 238, 0.2);
         }
         .title-takeaway {
             color: var(--heading-takeaway) !important;
@@ -136,10 +241,10 @@
             border: 1px solid rgba(251, 191, 36, 0.3);
         }
 
-        .badge-informational {
-            background-color: rgba(52, 211, 153, 0.15);
-            color: var(--heading-informational);
-            border: 1px solid rgba(52, 211, 153, 0.3);
+        .badge-insights {
+            background-color: rgba(34, 211, 238, 0.15);
+            color: var(--heading-insights);
+            border: 1px solid rgba(34, 211, 238, 0.3);
         }
 
         .badge-category {
@@ -216,6 +321,9 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .takeaway-content {
@@ -248,6 +356,54 @@
             <div class="date">{{ date_str }}</div>
         </header>
 
+        <div class="greeting-banner">
+            <h2 style="margin: 0 0 6px 0; font-size: 24px; font-weight: 800;">{{ greeting_time }}, {{ greeting_name }} 👋</h2>
+            <p style="margin: 0; font-size: 14px; color: var(--text-muted); font-weight: 500;">
+                Here's the latest AI Updates for the date - {{ greeting_date }}.
+            </p>
+        </div>
+
+        {# Today's AI Snapshot Dashboard #}
+        <div class="snapshot-container">
+            <div class="snapshot-title">Today's AI Snapshot</div>
+            <div class="snapshot-grid">
+                <div class="snapshot-stats">
+                    <div class="snapshot-stat-item">
+                        <span>🚨</span>
+                        <span>Strategic : {{ strategic_count }}</span>
+                    </div>
+                    <div class="snapshot-stat-item">
+                        <span>📌</span>
+                        <span>Important : {{ important_count }}</span>
+                    </div>
+                    <div class="snapshot-stat-item">
+                        <span>ℹ️</span>
+                        <span>Insights : {{ insights_count }}</span>
+                    </div>
+                </div>
+                
+                <div class="snapshot-reading-time">
+                    <div class="snapshot-reading-label">Estimated Reading Time</div>
+                    <div class="snapshot-reading-value">{{ total_reading_time }} minutes</div>
+                </div>
+                
+                {% if top_topics %}
+                    <div class="snapshot-divider"></div>
+                    <div style="grid-column: span 2;">
+                        <div class="snapshot-section-title">Top Topics</div>
+                        <div class="snapshot-topics">
+                            {% for topic in top_topics %}
+                                <div class="snapshot-topic-item">
+                                    <span class="snapshot-topic-bullet">•</span>
+                                    <span>{{ topic }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
         {# 1. Section for Strategic articles #}
         {% if grouped_articles.Strategic %}
             <h2 class="category-title title-strategic">🚨 Strategic</h2>
@@ -266,20 +422,20 @@
                     
                     <div class="card-section">
                         <div class="section-label">Source</div>
-                        <div class="section-content">{{ article.source or 'Unknown' }}</div>
+                        <div class="section-content">{{ article.icon }} {{ article.source or 'Unknown' }}</div>
                     </div>
                     
                     <div class="card-section">
-                        <div class="section-label">Summary</div>
+                        <div class="section-label">Reading Time</div>
                         <div class="section-content">
-                            {{ article.ai_summary or article.summary | striptags | truncate(200) }}
+                            {{ article.reading_time or '2 min read' }}
                         </div>
                     </div>
                     
                     <div class="card-section">
                         <div class="section-label">Why it matters</div>
                         <div class="section-content">
-                            {{ article.why_it_matters or 'N/A' }}
+                            {{ article.why_it_matters }}
                         </div>
                     </div>
                 </div>
@@ -288,11 +444,11 @@
 
         {# 2. Section for Important articles #}
         {% if grouped_articles.Important %}
-            <h2 class="category-title title-important">⚠️ Important</h2>
+            <h2 class="category-title title-important">📌 Important</h2>
             {% for article in grouped_articles.Important %}
                 <div class="card">
                     <div class="card-header-line">
-                        <span class="badge badge-important">⚠️ Important</span>
+                        <span class="badge badge-important">📌 Important</span>
                         {% if article.category %}
                             <span class="badge badge-category">{{ article.category }}</span>
                         {% endif %}
@@ -304,33 +460,33 @@
                     
                     <div class="card-section">
                         <div class="section-label">Source</div>
-                        <div class="section-content">{{ article.source or 'Unknown' }}</div>
+                        <div class="section-content">{{ article.icon }} {{ article.source or 'Unknown' }}</div>
                     </div>
                     
                     <div class="card-section">
-                        <div class="section-label">Summary</div>
+                        <div class="section-label">Reading Time</div>
                         <div class="section-content">
-                            {{ article.ai_summary or article.summary | striptags | truncate(200) }}
+                            {{ article.reading_time or '2 min read' }}
                         </div>
                     </div>
                     
                     <div class="card-section">
                         <div class="section-label">Why it matters</div>
                         <div class="section-content">
-                            {{ article.why_it_matters or 'N/A' }}
+                            {{ article.why_it_matters }}
                         </div>
                     </div>
                 </div>
             {% endfor %}
         {% endif %}
 
-        {# 3. Section for Informational articles #}
-        {% if grouped_articles.Informational %}
-            <h2 class="category-title title-informational">ℹ️ Informational</h2>
-            {% for article in grouped_articles.Informational %}
+        {# 3. Section for Insights articles #}
+        {% if grouped_articles.Insights %}
+            <h2 class="category-title title-insights">ℹ️ Insights</h2>
+            {% for article in grouped_articles.Insights %}
                 <div class="card">
                     <div class="card-header-line">
-                        <span class="badge badge-informational">ℹ️ Informational</span>
+                        <span class="badge badge-insights">ℹ️ Insights</span>
                         {% if article.category %}
                             <span class="badge badge-category">{{ article.category }}</span>
                         {% endif %}
@@ -342,27 +498,27 @@
                     
                     <div class="card-section">
                         <div class="section-label">Source</div>
-                        <div class="section-content">{{ article.source or 'Unknown' }}</div>
+                        <div class="section-content">{{ article.icon }} {{ article.source or 'Unknown' }}</div>
                     </div>
                     
                     <div class="card-section">
-                        <div class="section-label">Summary</div>
+                        <div class="section-label">Reading Time</div>
                         <div class="section-content">
-                            {{ article.ai_summary or article.summary | striptags | truncate(200) }}
+                            {{ article.reading_time or '2 min read' }}
                         </div>
                     </div>
                     
                     <div class="card-section">
                         <div class="section-label">Why it matters</div>
                         <div class="section-content">
-                            {{ article.why_it_matters or 'N/A' }}
+                            {{ article.why_it_matters }}
                         </div>
                     </div>
                 </div>
             {% endfor %}
         {% endif %}
 
-        {% if not grouped_articles.Strategic and not grouped_articles.Important and not grouped_articles.Informational %}
+        {% if not grouped_articles.Strategic and not grouped_articles.Important and not grouped_articles.Insights %}
             <div class="card" style="text-align: center;">
                 <p class="section-content">No updates for today. You are fully caught up!</p>
             </div>
@@ -373,22 +529,22 @@
             <h2 class="category-title title-takeaway">🎯 Today's Takeaway</h2>
             <div class="card card-takeaway">
                 <div class="takeaway-section">
-                    <div class="takeaway-label">Biggest announcement</div>
+                    <div class="takeaway-label"><span>🚀</span> Biggest Announcement</div>
                     <div class="takeaway-content">{{ takeaways.biggest_announcement }}</div>
                 </div>
                 
                 <div class="takeaway-section">
-                    <div class="takeaway-label">Biggest trend</div>
+                    <div class="takeaway-label"><span>📈</span> Biggest Trend</div>
                     <div class="takeaway-content">{{ takeaways.biggest_trend }}</div>
                 </div>
                 
                 <div class="takeaway-section">
-                    <div class="takeaway-label">One thing every AI engineer should know</div>
+                    <div class="takeaway-label"><span>💡</span> Key Insight</div>
                     <div class="takeaway-content">{{ takeaways.one_thing_to_know }}</div>
                 </div>
                 
                 <div class="takeaway-section">
-                    <div class="takeaway-label">Estimated reading time saved</div>
+                    <div class="takeaway-label"><span>⏳</span> Time Saved</div>
                     <div class="takeaway-content highlight-accent">{{ takeaways.reading_time_saved_minutes }} minutes</div>
                 </div>
             </div>
