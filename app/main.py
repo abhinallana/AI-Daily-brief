@@ -35,11 +35,9 @@ def main() -> None:
             
         logger.info(f"Found {len(new_articles)} new articles from {feed_url}. Processing AI summaries...")
         
-        # Run new articles through the AI summarizer
-        analyzed_articles = []
-        for article in new_articles:
-            analyzed = summarizer.analyze_article(article)
-            analyzed_articles.append(analyzed)
+        # Run new articles through the AI summarizer in batch
+        analyzed_articles = summarizer.analyze_articles(new_articles)
+
             
         logger.info(f"Storing {len(analyzed_articles)} analyzed articles in database...")
         db.save_articles(analyzed_articles)
