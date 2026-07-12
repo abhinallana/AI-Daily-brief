@@ -1,6 +1,8 @@
 import logging
+import time
 import feedparser
 import requests
+from datetime import datetime, timezone, timedelta
 from typing import List
 from app.models.article import Article
 
@@ -32,6 +34,25 @@ class RSSCollector:
                 title = entry.get("title", "No Title")
                 link = entry.get("link", "")
                 
+                # Check for obvious garbage titles (hiring, team updates, intros)
+                title_lower = title.lower()
+                garbage_keywords = ["team update", "welcome,", "hiring", "job opening", "join openai", "welcome our new"]
+                if any(kw in title_lower for kw in garbage_keywords):
+                    logger.debug(f"Skipping non-news/garbage article: {title}")
+                    continue
+                
+                # Check age of the article to avoid historical archive dumps (skip articles > 5 days old)
+                parsed_time = entry.get("published_parsed", entry.get("updated_parsed"))
+                if parsed_time:
+                    try:
+                        published_dt = datetime.fromtimestamp(time.mktime(parsed_time), tz=timezone.utc)
+                        now = datetime.now(timezone.utc)
+                        if now - published_dt > timedelta(days=5):
+                            logger.debug(f"Skipping old article: {title} (published {published_dt})")
+                            continue
+                    except Exception as date_err:
+                        logger.debug(f"Could not check article age for '{title}': {date_err}")
+                
                 # Different feeds use different date attributes
                 published_at = entry.get("published", entry.get("updated", "Unknown Date"))
                 summary = entry.get("summary", entry.get("description", ""))
@@ -54,4 +75,5 @@ class RSSCollector:
         except Exception as e:
             logger.error(f"Error fetching RSS feed from {self.feed_url}: {e}", exc_info=True)
             return []
+
 

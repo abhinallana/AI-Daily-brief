@@ -2,8 +2,8 @@ name: AI Daily Briefing
 
 on:
   schedule:
-    # Run every day at 08:00 UTC (10:00 AM IST)
-    - cron: '30 4 * * *'
+    # Run every day at 04:37 UTC (10:07 AM IST) - off-peak to prevent scheduler delays
+    - cron: '37 4 * * *'
   workflow_dispatch: # Enable manual triggering in GitHub UI
 
 jobs:
