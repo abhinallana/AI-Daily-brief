@@ -45,6 +45,7 @@ logs/
 # Sensitive secrets (leaking prevention)
 .env
 .env.local
+.env.example
 .env.*.local
 secrets.yaml
 
