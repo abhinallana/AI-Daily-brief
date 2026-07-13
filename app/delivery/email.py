@@ -61,7 +61,16 @@ class EmailService:
             grouped[priority].append(article)
 
         # Compute Greeting Info
-        first_name = extract_first_name(self.email_to)
+        recipient_emails = [e.strip() for e in self.email_to.split(",") if e.strip()]
+        names = [extract_first_name(e) for e in recipient_emails]
+        if not names:
+            first_name = "Reader"
+        elif len(names) == 1:
+            first_name = names[0]
+        elif len(names) == 2:
+            first_name = f"{names[0]} & {names[1]}"
+        else:
+            first_name = ", ".join(names[:-1]) + f", & {names[-1]}"
         
         import zoneinfo
         try:
@@ -160,7 +169,8 @@ class EmailService:
                 server.login(self.smtp_username, self.smtp_password)
                 
                 logger.info(f"Sending daily brief email from {self.email_from} to {self.email_to}...")
-                server.sendmail(self.email_from, self.email_to, msg.as_string())
+                recipients = [e.strip() for e in self.email_to.split(",") if e.strip()]
+                server.sendmail(self.email_from, recipients, msg.as_string())
                 
             logger.info("Daily Brief email sent successfully.")
             return True
