@@ -137,7 +137,7 @@ class EmailService:
         msg = MIMEMultipart("alternative")
         date_str = report.report_date.strftime("%B %d, %Y")
         msg["Subject"] = f"OpsiAI - Today's Latest AI Updates - {date_str}"
-        msg["From"] = self.email_from
+        msg["From"] = f"OpsiAI <{self.email_from}>"
         msg["To"] = self.email_to
 
         # Attach text and html parts

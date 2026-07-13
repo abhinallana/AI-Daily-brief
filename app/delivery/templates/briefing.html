@@ -336,41 +336,60 @@
         <div class="snapshot-container">
             <div class="snapshot-title">Today's AI Snapshot</div>
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <!-- Stats Row -->
                 <tr>
-                    <td width="55%" valign="top">
-                        <div class="snapshot-stats">
-                            <div class="snapshot-stat-item">
-                                <span>🚨</span>
-                                <span>Strategic : {{ strategic_count }}</span>
-                            </div>
-                            <div class="snapshot-stat-item">
-                                <span>📌</span>
-                                <span>Important : {{ important_count }}</span>
-                            </div>
-                            <div class="snapshot-stat-item">
-                                <span>ℹ️</span>
-                                <span>Insights : {{ insights_count }}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td width="45%" valign="middle" class="snapshot-reading-time">
-                        <div class="snapshot-reading-label">Estimated Reading Time</div>
-                        <div class="snapshot-reading-value">{{ total_reading_time }} minutes</div>
+                    <td valign="top" style="padding-bottom: 16px;">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td width="33%" align="center" style="border-right: 1px solid #272935; padding: 4px;">
+                                    <span style="font-size: 18px;">🚨</span>
+                                    <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.05em;">Strategic</div>
+                                    <div style="font-size: 20px; color: #f87171; font-weight: 800; margin-top: 2px;">{{ strategic_count }}</div>
+                                </td>
+                                <td width="33%" align="center" style="border-right: 1px solid #272935; padding: 4px;">
+                                    <span style="font-size: 18px;">📌</span>
+                                    <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.05em;">Important</div>
+                                    <div style="font-size: 20px; color: #fbbf24; font-weight: 800; margin-top: 2px;">{{ important_count }}</div>
+                                </td>
+                                <td width="34%" align="center" style="padding: 4px;">
+                                    <span style="font-size: 18px;">ℹ️</span>
+                                    <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; margin-top: 4px; letter-spacing: 0.05em;">Insights</div>
+                                    <div style="font-size: 20px; color: #22d3ee; font-weight: 800; margin-top: 2px;">{{ insights_count }}</div>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
+                <!-- Divider -->
                 {% if top_topics %}
                 <tr>
-                    <td colspan="2">
-                        <div class="snapshot-divider"></div>
-                        <div class="snapshot-section-title">Top Topics</div>
-                        <div class="snapshot-topics">
-                            {% for topic in top_topics %}
-                                <div class="snapshot-topic-item">
-                                    <span class="snapshot-topic-bullet">•</span>
-                                    <span>{{ topic }}</span>
-                                </div>
-                            {% endfor %}
-                        </div>
+                    <td style="border-top: 1px dashed #272935; padding-top: 16px;">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                                <td width="55%" valign="top" style="padding-right: 10px;">
+                                    <div style="font-size: 11px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Top Topics</div>
+                                    {% for topic in top_topics %}
+                                        <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 6px;">
+                                            <tr>
+                                                <td valign="top" style="color: #818cf8; font-weight: bold; font-size: 14px; padding-right: 6px; line-height: 1.2;">•</td>
+                                                <td valign="top" style="font-size: 13px; color: #f3f4f6; font-weight: 500; line-height: 1.2;">{{ topic }}</td>
+                                            </tr>
+                                        </table>
+                                    {% endfor %}
+                                </td>
+                                <td width="45%" valign="middle" align="center" style="border-left: 1px solid #272935; padding-left: 12px; background-color: #1f2029; border-radius: 8px; padding: 12px;">
+                                    <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">Estimated Reading Time</div>
+                                    <div style="font-size: 22px; color: #38bdf8; font-weight: 800; line-height: 1.2;">{{ total_reading_time }} mins</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td style="border-top: 1px dashed #272935; padding-top: 16px; text-align: center; background-color: #1f2029; border-radius: 8px; padding: 12px;">
+                        <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">Estimated Reading Time</div>
+                        <div style="font-size: 22px; color: #38bdf8; font-weight: 800; line-height: 1.2;">{{ total_reading_time }} mins</div>
                     </td>
                 </tr>
                 {% endif %}
