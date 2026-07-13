@@ -3,7 +3,7 @@ OPSIAI - TODAY'S LATEST AI UPDATES
 ==================================================
 Date: {{ date_str }}
 
-{{ greeting_time }}, {{ greeting_name }} 👋
+{# {{ greeting_time }}, {{ greeting_name }} 👋 #}
 
 ==================================================
 TODAY'S AI SNAPSHOT
