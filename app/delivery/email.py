@@ -304,7 +304,6 @@ class EmailService:
                     
                     # Filter report copy for this user if they configured custom topics
                     if subscribed:
-                        user_report = deepcopy(report)
                         filtered_articles = []
                         for art in report.articles:
                             if not art.category:
@@ -318,7 +317,9 @@ class EmailService:
                             )
                             if match:
                                 filtered_articles.append(art)
-                        user_report.articles = filtered_articles
+                        
+                        from dataclasses import replace
+                        user_report = replace(report, articles=filtered_articles)
                     else:
                         user_report = report
 
