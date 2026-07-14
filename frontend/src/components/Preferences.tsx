@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../services/api';
+import { savePreferences } from '../services/api';
 
 interface Topic {
   id: string;
@@ -143,12 +143,8 @@ export const Preferences: React.FC<PreferencesProps> = ({
       try {
         const activeList = Object.keys(localTopics).filter(k => localTopics[k]);
         
-        // Save topics
-        await fetch(`${API_BASE_URL}/users/preferences`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, subscribed_topics: activeList }),
-        });
+        // Save topics to backend or fallback
+        await savePreferences(email, activeList);
 
         // Save delivery settings in user settings if available
         // Note: For now we save locally in database if user exists, fallback to local storage

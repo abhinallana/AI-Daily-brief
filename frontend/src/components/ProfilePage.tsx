@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../services/api';
+import { getProfile, saveProfile } from '../services/api';
 
 interface ProfileData {
   id: string;
@@ -45,11 +45,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     async function loadProfile() {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/users/profiles/${userId}`);
-        if (!response.ok) {
-          throw new Error('Profile not found in database repository.');
-        }
-        const data: ProfileData = await response.json();
+        const data = await getProfile(userId);
         setProfile(data);
         
         // Populate edit fields
@@ -108,14 +104,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/users/profiles`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) throw new Error('Failed to update DB profile');
-
-      // Update state
+      await saveProfile(payload);
       setProfile({
         ...profile!,
         first_name: firstName,

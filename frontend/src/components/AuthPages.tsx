@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
-import { API_BASE_URL } from '../services/api';
+import { saveProfile } from '../services/api';
 
 interface SignUpProps {
   onNavigateToLogin: () => void;
@@ -69,11 +69,9 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
       if (error) throw error;
       if (!data.user) throw new Error('No user data returned.');
 
-      // Save user profile to backend PostgreSQL repository
-      const response = await fetch(`${API_BASE_URL}/users/profiles`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // Save user profile to backend or Supabase direct fallback
+      try {
+        await saveProfile({
           id: data.user.id,
           first_name: firstName,
           last_name: lastName || null,
@@ -81,10 +79,8 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
           newsletter_enabled: false,
           preferred_topics: '',
           theme: 'dark'
-        })
-      });
-
-      if (!response.ok) {
+        });
+      } catch (err) {
         console.warn('Failed to sync profile with database repository.');
       }
 
