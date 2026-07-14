@@ -5,9 +5,18 @@ interface SidebarProps {
   onViewChange: (view: string) => void;
   onLogout?: () => void;
   onLogoClick?: () => void;
+  isEmailSubscribed?: boolean;
+  onEnableEmailClick?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout, onLogoClick }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  activeView, 
+  onViewChange, 
+  onLogout, 
+  onLogoClick,
+  isEmailSubscribed,
+  onEnableEmailClick
+}) => {
   return (
     <aside className="sidebar">
       <div className="logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>
@@ -21,10 +30,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLo
           <span>🏠</span> Today's Brief
         </li>
         <li 
-          className={`nav-item ${activeView === 'preferences' ? 'active' : ''}`}
-          onClick={() => onViewChange('preferences')}
+          className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
+          onClick={() => onViewChange('profile')}
         >
-          <span>⚙️</span> Preferences
+          <span>👤</span> Profile
+        </li>
+        <li 
+          className={`nav-item ${activeView === 'settings' ? 'active' : ''}`}
+          onClick={() => onViewChange('settings')}
+        >
+          <span>⚙️</span> Settings
         </li>
         <li 
           className={`nav-item ${activeView === 'about' ? 'active' : ''}`}
@@ -34,13 +49,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLo
         </li>
       </ul>
 
-      {onLogout && (
-        <ul className="nav-links" style={{ marginTop: 'auto' }}>
-          <li className="nav-item" onClick={onLogout} style={{ color: 'var(--strategic)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '16px' }}>
-            <span>🚪</span> Sign Out
-          </li>
-        </ul>
-      )}
+      <div style={{ marginTop: 'auto' }}>
+        {!isEmailSubscribed && onEnableEmailClick && (
+          <ul className="nav-links" style={{ marginBottom: '16px' }}>
+            <li className="nav-item" onClick={onEnableEmailClick} style={{ color: 'var(--primary)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '16px' }}>
+              <span>📬</span> Daily Briefs
+              <span style={{ display: 'block', fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>Enable Email Reports</span>
+            </li>
+          </ul>
+        )}
+
+        {onLogout && (
+          <ul className="nav-links">
+            <li className="nav-item" onClick={onLogout} style={{ color: 'var(--strategic)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '16px' }}>
+              <span>🚪</span> Sign Out
+            </li>
+          </ul>
+        )}
+      </div>
     </aside>
   );
 };

@@ -52,3 +52,20 @@ export async function fetchRecentArticles(
   }
   return response.json();
 }
+
+export interface OpsiMetrics {
+  articles_analyzed: number;
+  trusted_sources: number;
+  strategic_insights: number;
+  reports_generated: number;
+  time_saved_hours: number;
+}
+
+export async function fetchOpsiMetrics(): Promise<OpsiMetrics> {
+  const response = await fetch(`${API_BASE_URL}/metrics`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch metrics: ${response.statusText}`);
+  }
+  return response.json();
+}
+

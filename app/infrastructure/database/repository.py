@@ -60,11 +60,32 @@ class SQLiteArticleRepository:
             FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
         );
         """
+        prefs_schema = """
+        CREATE TABLE IF NOT EXISTS user_preferences (
+            email TEXT PRIMARY KEY,
+            subscribed_topics TEXT
+        );
+        """
+        profiles_schema = """
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            id TEXT PRIMARY KEY,
+            first_name TEXT NOT NULL,
+            last_name TEXT,
+            email TEXT NOT NULL UNIQUE,
+            avatar_url TEXT,
+            newsletter_enabled INTEGER DEFAULT 0,
+            preferred_topics TEXT,
+            theme TEXT DEFAULT 'dark',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """
         try:
             with self._get_connection() as conn:
                 conn.execute(schema)
                 conn.execute(reports_schema)
                 conn.execute(links_schema)
+                conn.execute(prefs_schema)
+                conn.execute(profiles_schema)
                 
                 # Apply column migrations dynamically if the table info is missing columns
                 cursor = conn.execute("PRAGMA table_info(articles)")
@@ -301,6 +322,151 @@ class SQLiteArticleRepository:
             logger.error(f"Error loading DailyReport for {date_str}: {e}", exc_info=True)
             return None
 
+    def get_metrics(self) -> dict:
+        """Computes real-time statistics of analyzed articles and reports."""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute("SELECT COUNT(*) FROM articles")
+                articles_analyzed = cursor.fetchone()[0] or 0
+
+                cursor = conn.execute("SELECT COUNT(DISTINCT source) FROM articles WHERE source IS NOT NULL AND source != ''")
+                trusted_sources = cursor.fetchone()[0] or 0
+
+                cursor = conn.execute("SELECT COUNT(*) FROM articles WHERE priority = 'Strategic'")
+                strategic_insights = cursor.fetchone()[0] or 0
+
+                cursor = conn.execute("SELECT COUNT(*) FROM daily_reports")
+                reports_generated = cursor.fetchone()[0] or 0
+
+                cursor = conn.execute("SELECT SUM(reading_time_saved_minutes) FROM daily_reports")
+                row = cursor.fetchone()
+                saved_minutes = row[0] if row and row[0] is not None else 0
+                time_saved_hours = int(saved_minutes / 60)
+
+                return {
+                    "articles_analyzed": articles_analyzed,
+                    "trusted_sources": trusted_sources,
+                    "strategic_insights": strategic_insights,
+                    "reports_generated": reports_generated,
+                    "time_saved_hours": time_saved_hours
+                }
+        except Exception as e:
+            logger.error(f"Error loading SQL metrics: {e}", exc_info=True)
+            return {
+                "articles_analyzed": 0,
+                "trusted_sources": 0,
+                "strategic_insights": 0,
+                "reports_generated": 0,
+                "time_saved_hours": 0
+            }
+
+    def save_user_preferences(self, email: str, topics: list[str]) -> None:
+        """Saves or updates active topic preferences for a user in SQLite."""
+        topics_str = ",".join(topics)
+        try:
+            with self._get_connection() as conn:
+                conn.execute(
+                    "INSERT INTO user_preferences (email, subscribed_topics) VALUES (?, ?) ON CONFLICT(email) DO UPDATE SET subscribed_topics=?",
+                    (email.strip().lower(), topics_str, topics_str)
+                )
+        except Exception as e:
+            logger.error(f"Failed to save user preferences: {e}", exc_info=True)
+
+    def get_user_preferences(self, email: str) -> list[str]:
+        """Gets active topic preferences for a user in SQLite. Returns empty list if not found."""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute(
+                    "SELECT subscribed_topics FROM user_preferences WHERE email = ?",
+                    (email.strip().lower(),)
+                )
+                row = cursor.fetchone()
+                if row and row["subscribed_topics"]:
+                    return [t.strip() for t in row["subscribed_topics"].split(",") if t.strip()]
+        except Exception as e:
+            logger.error(f"Failed to load user preferences: {e}", exc_info=True)
+        return []
+
+    def save_user_profile(self, profile: dict) -> None:
+        """Saves a user profile in SQLite."""
+        try:
+            with self._get_connection() as conn:
+                conn.execute(
+                    """
+                    INSERT INTO user_profiles (id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(id) DO UPDATE SET
+                        first_name = excluded.first_name,
+                        last_name = excluded.last_name,
+                        avatar_url = excluded.avatar_url,
+                        newsletter_enabled = excluded.newsletter_enabled,
+                        preferred_topics = excluded.preferred_topics,
+                        theme = excluded.theme
+                    """,
+                    (
+                        profile["id"],
+                        profile["first_name"],
+                        profile.get("last_name"),
+                        profile["email"],
+                        profile.get("avatar_url"),
+                        1 if profile.get("newsletter_enabled") else 0,
+                        profile.get("preferred_topics", ""),
+                        profile.get("theme", "dark")
+                    )
+                )
+        except Exception as e:
+            logger.error(f"Failed to save user profile in SQLite: {e}", exc_info=True)
+
+    def get_user_profile(self, profile_id: str) -> Optional[dict]:
+        """Gets a user profile from SQLite."""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute(
+                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM user_profiles WHERE id = ?",
+                    (profile_id,)
+                )
+                row = cursor.fetchone()
+                if row:
+                    return {
+                        "id": row["id"],
+                        "first_name": row["first_name"],
+                        "last_name": row["last_name"],
+                        "email": row["email"],
+                        "avatar_url": row["avatar_url"],
+                        "newsletter_enabled": bool(row["newsletter_enabled"]),
+                        "preferred_topics": [t.strip() for t in row["preferred_topics"].split(",") if t.strip()] if row["preferred_topics"] else [],
+                        "theme": row["theme"],
+                        "created_at": row["created_at"]
+                    }
+        except Exception as e:
+            logger.error(f"Failed to load user profile: {e}", exc_info=True)
+        return None
+
+    def get_profile_by_email(self, email: str) -> Optional[dict]:
+        """Gets a user profile by email address from SQLite."""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute(
+                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM user_profiles WHERE LOWER(email) = LOWER(?)",
+                    (email.strip(),)
+                )
+                row = cursor.fetchone()
+                if row:
+                    return {
+                        "id": row["id"],
+                        "first_name": row["first_name"],
+                        "last_name": row["last_name"],
+                        "email": row["email"],
+                        "avatar_url": row["avatar_url"],
+                        "newsletter_enabled": bool(row["newsletter_enabled"]),
+                        "preferred_topics": [t.strip() for t in row["preferred_topics"].split(",") if t.strip()] if row["preferred_topics"] else [],
+                        "theme": row["theme"],
+                        "created_at": row["created_at"]
+                    }
+        except Exception as e:
+            logger.error(f"Failed to load user profile by email: {e}", exc_info=True)
+        return None
+
 class PostgreSQLArticleRepository:
     def __init__(self, host, port, database, user, password):
         self.host = host
@@ -360,12 +526,33 @@ class PostgreSQLArticleRepository:
             FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
         );
         """
+        prefs_schema = """
+        CREATE TABLE IF NOT EXISTS user_preferences (
+            email VARCHAR(255) PRIMARY KEY,
+            subscribed_topics TEXT
+        );
+        """
+        profiles_schema = """
+        CREATE TABLE IF NOT EXISTS public.user_profiles (
+            id UUID PRIMARY KEY,
+            first_name VARCHAR(255) NOT NULL,
+            last_name VARCHAR(255),
+            email VARCHAR(255) NOT NULL UNIQUE,
+            avatar_url TEXT,
+            newsletter_enabled BOOLEAN DEFAULT FALSE,
+            preferred_topics TEXT,
+            theme VARCHAR(50) DEFAULT 'dark',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        """
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(schema)
                     cursor.execute(reports_schema)
                     cursor.execute(links_schema)
+                    cursor.execute(prefs_schema)
+                    cursor.execute(profiles_schema)
                     cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_link_hash ON articles(link_hash)")
                 conn.commit()
             logger.debug("PostgreSQL database initialized successfully.")
@@ -575,6 +762,168 @@ class PostgreSQLArticleRepository:
         except Exception as e:
             logger.error(f"Error loading DailyReport for {date_str} from PostgreSQL: {e}", exc_info=True)
             return None
+
+    def get_metrics(self) -> dict:
+        """Computes real-time statistics of analyzed articles and reports from PostgreSQL."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT COUNT(*) FROM articles")
+                    articles_analyzed = cursor.fetchone()[0] or 0
+
+                    cursor.execute("SELECT COUNT(DISTINCT source) FROM articles WHERE source IS NOT NULL AND source != ''")
+                    trusted_sources = cursor.fetchone()[0] or 0
+
+                    cursor.execute("SELECT COUNT(*) FROM articles WHERE priority = 'Strategic'")
+                    strategic_insights = cursor.fetchone()[0] or 0
+
+                    cursor.execute("SELECT COUNT(*) FROM daily_reports")
+                    reports_generated = cursor.fetchone()[0] or 0
+
+                    cursor.execute("SELECT SUM(reading_time_saved_minutes) FROM daily_reports")
+                    row = cursor.fetchone()
+                    saved_minutes = row[0] if row and row[0] is not None else 0
+                    time_saved_hours = int(saved_minutes / 60)
+
+                    return {
+                        "articles_analyzed": articles_analyzed,
+                        "trusted_sources": trusted_sources,
+                        "strategic_insights": strategic_insights,
+                        "reports_generated": reports_generated,
+                        "time_saved_hours": time_saved_hours
+                    }
+        except Exception as e:
+            logger.error(f"Error loading SQL metrics from PostgreSQL: {e}", exc_info=True)
+            return {
+                "articles_analyzed": 0,
+                "trusted_sources": 0,
+                "strategic_insights": 0,
+                "reports_generated": 0,
+                "time_saved_hours": 0
+            }
+
+    def save_user_preferences(self, email: str, topics: list[str]) -> None:
+        """Saves or updates active topic preferences for a user in PostgreSQL."""
+        topics_str = ",".join(topics)
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        INSERT INTO user_preferences (email, subscribed_topics) 
+                        VALUES (%s, %s) 
+                        ON CONFLICT (email) 
+                        DO UPDATE SET subscribed_topics = EXCLUDED.subscribed_topics
+                        """,
+                        (email.strip().lower(), topics_str)
+                    )
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Failed to save user preferences in PostgreSQL: {e}", exc_info=True)
+
+    def get_user_preferences(self, email: str) -> list[str]:
+        """Gets active topic preferences for a user in PostgreSQL. Returns empty list if not found."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT subscribed_topics FROM user_preferences WHERE email = %s",
+                        (email.strip().lower(),)
+                    )
+                    row = cursor.fetchone()
+                    if row and row[0]:
+                        return [t.strip() for t in row[0].split(",") if t.strip()]
+        except Exception as e:
+            logger.error(f"Failed to load user preferences from PostgreSQL: {e}", exc_info=True)
+        return []
+
+    def save_user_profile(self, profile: dict) -> None:
+        """Saves or updates a user profile in PostgreSQL."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        INSERT INTO public.user_profiles (id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT(id) DO UPDATE SET
+                            first_name = EXCLUDED.first_name,
+                            last_name = EXCLUDED.last_name,
+                            avatar_url = EXCLUDED.avatar_url,
+                            newsletter_enabled = EXCLUDED.newsletter_enabled,
+                            preferred_topics = EXCLUDED.preferred_topics,
+                            theme = EXCLUDED.theme
+                        """,
+                        (
+                            profile["id"],
+                            profile["first_name"],
+                            profile.get("last_name"),
+                            profile["email"],
+                            profile.get("avatar_url"),
+                            profile.get("newsletter_enabled") or False,
+                            profile.get("preferred_topics", ""),
+                            profile.get("theme", "dark")
+                        )
+                    )
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Failed to save user profile in PostgreSQL: {e}", exc_info=True)
+
+    def get_user_profile(self, profile_id: str) -> Optional[dict]:
+        """Gets a user profile from PostgreSQL."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM public.user_profiles WHERE id = %s",
+                        (profile_id,)
+                    )
+                    row = cursor.fetchone()
+                    if row:
+                        columns = [col[0] for col in cursor.description]
+                        pref_topics_str = row[columns.index("preferred_topics")]
+                        return {
+                            "id": str(row[columns.index("id")]),
+                            "first_name": row[columns.index("first_name")],
+                            "last_name": row[columns.index("last_name")],
+                            "email": row[columns.index("email")],
+                            "avatar_url": row[columns.index("avatar_url")],
+                            "newsletter_enabled": bool(row[columns.index("newsletter_enabled")]),
+                            "preferred_topics": [t.strip() for t in pref_topics_str.split(",") if t.strip()] if pref_topics_str else [],
+                            "theme": row[columns.index("theme")],
+                            "created_at": row[columns.index("created_at")].isoformat() if row[columns.index("created_at")] else None
+                        }
+        except Exception as e:
+            logger.error(f"Failed to load user profile from PostgreSQL: {e}", exc_info=True)
+        return None
+
+    def get_profile_by_email(self, email: str) -> Optional[dict]:
+        """Gets a user profile by email address from PostgreSQL."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM public.user_profiles WHERE LOWER(email) = LOWER(%s)",
+                        (email.strip(),)
+                    )
+                    row = cursor.fetchone()
+                    if row:
+                        columns = [col[0] for col in cursor.description]
+                        pref_topics_str = row[columns.index("preferred_topics")]
+                        return {
+                            "id": str(row[columns.index("id")]),
+                            "first_name": row[columns.index("first_name")],
+                            "last_name": row[columns.index("last_name")],
+                            "email": row[columns.index("email")],
+                            "avatar_url": row[columns.index("avatar_url")],
+                            "newsletter_enabled": bool(row[columns.index("newsletter_enabled")]),
+                            "preferred_topics": [t.strip() for t in pref_topics_str.split(",") if t.strip()] if pref_topics_str else [],
+                            "theme": row[columns.index("theme")],
+                            "created_at": row[columns.index("created_at")].isoformat() if row[columns.index("created_at")] else None
+                        }
+        except Exception as e:
+            logger.error(f"Failed to load user profile by email from PostgreSQL: {e}", exc_info=True)
+        return None
 
 def get_repository():
     """Factory function returning the configured SQLite or PostgreSQL/Supabase database repository."""

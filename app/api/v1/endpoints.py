@@ -100,3 +100,50 @@ def get_articles(
             "link_hash": art.link_hash
         })
     return filtered
+
+@router.get("/metrics")
+def get_opsi_metrics(repo=Depends(get_repo)):
+    """Fetches real-time OpsiAI metrics for the landing page."""
+    return repo.get_metrics()
+
+from pydantic import BaseModel
+
+class UserPreferencesPayload(BaseModel):
+    email: str
+    subscribed_topics: List[str]
+
+@router.post("/users/preferences")
+def save_user_preferences(payload: UserPreferencesPayload, repo=Depends(get_repo)):
+    """Saves subscriber preferences to the database repository."""
+    repo.save_user_preferences(payload.email, payload.subscribed_topics)
+    return {"status": "success", "message": "Preferences saved."}
+
+@router.get("/users/preferences")
+def get_user_preferences(email: str, repo=Depends(get_repo)):
+    """Fetches subscriber preferences from the database repository."""
+    topics = repo.get_user_preferences(email)
+    return {"email": email, "subscribed_topics": topics}
+
+class UserProfilePayload(BaseModel):
+    id: str
+    first_name: str
+    last_name: Optional[str] = None
+    email: str
+    avatar_url: Optional[str] = None
+    newsletter_enabled: Optional[bool] = False
+    preferred_topics: Optional[str] = ""
+    theme: Optional[str] = "dark"
+
+@router.post("/users/profiles")
+def save_user_profile(payload: UserProfilePayload, repo=Depends(get_repo)):
+    """Saves or updates user profiles in the database repository."""
+    repo.save_user_profile(payload.model_dump())
+    return {"status": "success", "message": "User profile saved."}
+
+@router.get("/users/profiles/{profile_id}")
+def get_user_profile(profile_id: str, repo=Depends(get_repo)):
+    """Fetches user profiles by ID from the database repository."""
+    profile = repo.get_user_profile(profile_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="User profile not found.")
+    return profile
