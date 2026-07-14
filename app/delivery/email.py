@@ -220,9 +220,60 @@ class EmailService:
             logger.error(f"Failed to fetch repository for preferences checking: {e}")
             repo = None
 
-        recipients = [e.strip() for e in self.email_to.split(",") if e.strip()]
-        if not recipients:
-            logger.warning("No email recipients whitelisted in EMAIL_TO.")
+        # Load active subscribers from Supabase/PostgreSQL database
+        db_subscribers = []
+        if repo:
+            try:
+                db_subscribers = repo.get_active_subscribers()
+                logger.info(f"Loaded {len(db_subscribers)} active newsletter subscribers from database.")
+            except Exception as e:
+                logger.error(f"Failed to query active subscribers from repository: {e}")
+
+        # Load hardcoded whitelist from environment variable/secret
+        secret_recipients = [e.strip() for e in self.email_to.split(",") if e.strip()]
+        
+        # Build comprehensive unified recipients mapping: email_address -> recipient_info
+        recipients_map = {}
+
+        # 1. Add active subscribers from DB
+        for sub in db_subscribers:
+            email_key = sub["email"].strip().lower()
+            recipients_map[email_key] = {
+                "email": sub["email"].strip(),
+                "name": sub["first_name"],
+                "subscribed_topics": sub["preferred_topics"],
+                "newsletter_enabled": sub["newsletter_enabled"]
+            }
+
+        # 2. Add secret whitelisted overrides (if not already added)
+        for email in secret_recipients:
+            email_key = email.strip().lower()
+            if email_key not in recipients_map:
+                profile = None
+                if repo:
+                    try:
+                        profile = repo.get_profile_by_email(email)
+                    except Exception as e:
+                        pass
+                
+                if profile:
+                    recipients_map[email_key] = {
+                        "email": email.strip(),
+                        "name": profile.get("first_name", "Reader"),
+                        "subscribed_topics": profile.get("preferred_topics", []),
+                        "newsletter_enabled": profile.get("newsletter_enabled", False)
+                    }
+                else:
+                    # Pure fallback guest recipient
+                    recipients_map[email_key] = {
+                        "email": email.strip(),
+                        "name": extract_first_name(email),
+                        "subscribed_topics": repo.get_user_preferences(email) if repo else [],
+                        "newsletter_enabled": True
+                    }
+
+        if not recipients_map:
+            logger.warning("No email recipients found in database or secrets.")
             return False
 
         try:
@@ -241,25 +292,16 @@ class EmailService:
                 server.login(self.smtp_username, self.smtp_password)
                 
                 # Send email separately to each recipient to allow personalized topic filters
-                for recipient in recipients:
-                    profile = None
-                    if repo:
-                        try:
-                            profile = repo.get_profile_by_email(recipient)
-                        except Exception as e:
-                            logger.error(f"Error checking user profile for email delivery to {recipient}: {e}")
-                    
-                    if profile:
-                        # Skip if they explicitly unsubscribed from email digests
-                        if not profile.get("newsletter_enabled", False):
-                            logger.info(f"Recipient {recipient} has disabled email briefings. Skipping.")
-                            continue
-                        subscribed = profile.get("preferred_topics", [])
-                        recipient_name = profile.get("first_name", "Reader")
-                    else:
-                        subscribed = repo.get_user_preferences(recipient) if repo else []
-                        recipient_name = extract_first_name(recipient)
+                for email_key, sub_info in recipients_map.items():
+                    recipient = sub_info["email"]
+                    recipient_name = sub_info["name"]
+                    subscribed = sub_info["subscribed_topics"]
+                    newsletter_enabled = sub_info["newsletter_enabled"]
 
+                    if not newsletter_enabled:
+                        logger.info(f"Recipient {recipient} has disabled email briefings in their profile. Skipping.")
+                        continue
+                    
                     # Filter report copy for this user if they configured custom topics
                     if subscribed:
                         user_report = deepcopy(report)

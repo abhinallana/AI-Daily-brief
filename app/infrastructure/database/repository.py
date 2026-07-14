@@ -467,6 +467,32 @@ class SQLiteArticleRepository:
             logger.error(f"Failed to load user profile by email: {e}", exc_info=True)
         return None
 
+    def get_active_subscribers(self) -> list[dict]:
+        """Gets all user profiles with newsletter_enabled = 1 from SQLite."""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute(
+                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM user_profiles WHERE newsletter_enabled = 1"
+                )
+                rows = cursor.fetchall()
+                subscribers = []
+                for row in rows:
+                    subscribers.append({
+                        "id": row["id"],
+                        "first_name": row["first_name"],
+                        "last_name": row["last_name"],
+                        "email": row["email"],
+                        "avatar_url": row["avatar_url"],
+                        "newsletter_enabled": True,
+                        "preferred_topics": [t.strip() for t in row["preferred_topics"].split(",") if t.strip()] if row["preferred_topics"] else [],
+                        "theme": row["theme"],
+                        "created_at": row["created_at"]
+                    })
+                return subscribers
+        except Exception as e:
+            logger.error(f"Failed to load active subscribers from SQLite: {e}", exc_info=True)
+        return []
+
 class PostgreSQLArticleRepository:
     def __init__(self, host, port, database, user, password):
         self.host = host
@@ -924,6 +950,35 @@ class PostgreSQLArticleRepository:
         except Exception as e:
             logger.error(f"Failed to load user profile by email from PostgreSQL: {e}", exc_info=True)
         return None
+
+    def get_active_subscribers(self) -> list[dict]:
+        """Gets all user profiles with newsletter_enabled = true from PostgreSQL."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM public.user_profiles WHERE newsletter_enabled = true"
+                    )
+                    rows = cursor.fetchall()
+                    subscribers = []
+                    columns = [col[0] for col in cursor.description]
+                    for row in rows:
+                        pref_topics_str = row[columns.index("preferred_topics")]
+                        subscribers.append({
+                            "id": str(row[columns.index("id")]),
+                            "first_name": row[columns.index("first_name")],
+                            "last_name": row[columns.index("last_name")],
+                            "email": row[columns.index("email")],
+                            "avatar_url": row[columns.index("avatar_url")],
+                            "newsletter_enabled": True,
+                            "preferred_topics": [t.strip() for t in pref_topics_str.split(",") if t.strip()] if pref_topics_str else [],
+                            "theme": row[columns.index("theme")],
+                            "created_at": row[columns.index("created_at")].isoformat() if row[columns.index("created_at")] else None
+                        })
+                    return subscribers
+        except Exception as e:
+            logger.error(f"Failed to load active subscribers from PostgreSQL: {e}", exc_info=True)
+        return []
 
 def get_repository():
     """Factory function returning the configured SQLite or PostgreSQL/Supabase database repository."""
