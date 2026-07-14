@@ -68,7 +68,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Editorial Navigation */}
       <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
-        <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+        <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src="/logo.jpg" alt="OpsiAI Logo" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
           Opsi<span>AI</span>
         </div>
         <ul className="nav-items">

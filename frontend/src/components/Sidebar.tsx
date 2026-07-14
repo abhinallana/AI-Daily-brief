@@ -19,7 +19,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   return (
     <aside className="sidebar">
-      <div className="logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>
+      <div className="logo" onClick={onLogoClick} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src="/logo.jpg" alt="OpsiAI Logo" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }} />
         <span>OpsiAI</span>
       </div>
       <ul className="nav-links">
