@@ -11,6 +11,7 @@ export interface Article {
   why_it_matters?: string;
   reading_time?: string;
   link_hash?: string;
+  is_relevant?: boolean;
 }
 
 export interface DailyReport {
