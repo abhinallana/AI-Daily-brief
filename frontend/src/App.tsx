@@ -188,6 +188,7 @@ const App: React.FC = () => {
         activeView={activeView} 
         onViewChange={setActiveView} 
         onLogout={handleLogout} 
+        onLogoClick={handleLogout}
       />
       
       <main className="main-content">

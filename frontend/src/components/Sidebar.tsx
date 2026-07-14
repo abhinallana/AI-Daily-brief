@@ -4,12 +4,13 @@ interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   onLogout?: () => void;
+  onLogoClick?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout, onLogoClick }) => {
   return (
     <aside className="sidebar">
-      <div className="logo">
+      <div className="logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>
         <span>OpsiAI</span>
       </div>
       <ul className="nav-links">
