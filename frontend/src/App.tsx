@@ -9,6 +9,7 @@ import { LoginPage, SignUpPage } from './components/AuthPages';
 import { WelcomeModal } from './components/WelcomeModal';
 import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
+import { Preferences } from './components/Preferences';
 import { GoogleSoonModal } from './components/GoogleSoonModal';
 import { fetchTodayReport, getProfile, saveProfile } from './services/api';
 import type { DailyReport } from './services/api';
@@ -76,7 +77,7 @@ const App: React.FC = () => {
         if (cachedToken) {
           setActiveRootView('dashboard');
           if (path === '/profile') setActiveView('profile');
-          else if (path === '/settings' || path === '/topics') setActiveView('settings');
+          else if (path === '/settings' || path === '/topics') setActiveView('preferences');
           else setActiveView('today');
         } else {
           // Unauthenticated redirect to Login
@@ -169,7 +170,7 @@ const App: React.FC = () => {
       setRedirectPath(null);
       setActiveRootView('dashboard');
       if (path === '/profile') setActiveView('profile');
-      else if (path === '/settings' || path === '/topics') setActiveView('settings');
+      else if (path === '/settings' || path === '/topics') setActiveView('preferences');
       else setActiveView('today');
       window.history.pushState(null, '', path);
     } else {
@@ -293,7 +294,7 @@ const App: React.FC = () => {
   const navigateToView = (view: string) => {
     setActiveView(view);
     if (view === 'profile') window.history.pushState(null, '', '/profile');
-    else if (view === 'settings') window.history.pushState(null, '', '/settings');
+    else if (view === 'preferences') window.history.pushState(null, '', '/settings');
     else window.history.pushState(null, '', '/dashboard');
   };
 
@@ -572,19 +573,20 @@ const App: React.FC = () => {
       
       <main className="main-content">
         {activeView === 'today' && renderTodayView()}
+        {activeView === 'preferences' && (
+          <Preferences 
+            enabledTopics={enabledTopics} 
+            onSave={setEnabledTopics} 
+            userEmail={userEmail} 
+            isEmailSubscribed={isEmailSubscribed}
+            onSetEmailSubscribed={setIsEmailSubscribed}
+          />
+        )}
         {activeView === 'profile' && userId && userEmail && (
           <ProfilePage 
             userId={userId} 
             userEmail={userEmail} 
             defaultView="profile"
-            onProfileUpdated={setUserFirstName}
-          />
-        )}
-        {activeView === 'settings' && userId && userEmail && (
-          <ProfilePage 
-            userId={userId} 
-            userEmail={userEmail} 
-            defaultView="settings"
             onProfileUpdated={setUserFirstName}
           />
         )}
