@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../services/api';
 
 interface ProfileData {
   id: string;
@@ -44,7 +45,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     async function loadProfile() {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:8000/api/v1/users/profiles/${userId}`);
+        const response = await fetch(`${API_BASE_URL}/users/profiles/${userId}`);
         if (!response.ok) {
           throw new Error('Profile not found in database repository.');
         }
@@ -107,7 +108,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     };
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/users/profiles', {
+      const response = await fetch(`${API_BASE_URL}/users/profiles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

@@ -23,7 +23,13 @@ export interface DailyReport {
   articles: Article[];
 }
 
-const API_BASE_URL = "http://localhost:8000/api/v1";
+export const API_BASE_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api/v1` 
+  : "http://localhost:8000/api/v1";
+
+export const API_ROOT_URL = import.meta.env.VITE_API_URL 
+  ? import.meta.env.VITE_API_URL 
+  : "http://localhost:8000";
 
 export async function fetchTodayReport(): Promise<DailyReport> {
   const response = await fetch(`${API_BASE_URL}/reports/today`);

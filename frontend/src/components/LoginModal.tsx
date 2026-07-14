@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_ROOT_URL } from '../services/api';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -44,7 +45,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
         ? { email, password, first_name: firstName }
         : { username: email, password }; // OAuth2 password spec handles 'username'
 
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const response = await fetch(`${API_ROOT_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

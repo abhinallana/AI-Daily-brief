@@ -10,7 +10,7 @@ import { WelcomeModal } from './components/WelcomeModal';
 import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
 import { GoogleSoonModal } from './components/GoogleSoonModal';
-import { fetchTodayReport } from './services/api';
+import { fetchTodayReport, API_BASE_URL } from './services/api';
 import type { DailyReport } from './services/api';
 import { supabase } from './services/supabaseClient';
 
@@ -116,7 +116,7 @@ const App: React.FC = () => {
     if (userId && token) {
       async function loadProfile() {
         try {
-          const response = await fetch(`http://localhost:8000/api/v1/users/profiles/${userId}`);
+          const response = await fetch(`${API_BASE_URL}/users/profiles/${userId}`);
           if (response.ok) {
             const data = await response.json();
             setUserFirstName(data.first_name);
@@ -143,7 +143,7 @@ const App: React.FC = () => {
 
     // Fetch profile first name
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/users/profiles/${newUserId}`);
+      const response = await fetch(`${API_BASE_URL}/users/profiles/${newUserId}`);
       if (response.ok) {
         const data = await response.json();
         setUserFirstName(data.first_name);
@@ -245,7 +245,7 @@ const App: React.FC = () => {
 
       // Async sync back to Postgres user profile
       if (userId && userEmail) {
-        fetch('http://localhost:8000/api/v1/users/profiles', {
+        fetch(`${API_BASE_URL}/users/profiles`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -273,7 +273,7 @@ const App: React.FC = () => {
       const topicsObj = JSON.parse(localStorage.getItem('opsiai_subscriptions') || '{}');
       const activeList = Object.keys(topicsObj).filter(k => topicsObj[k]);
       
-      fetch('http://localhost:8000/api/v1/users/profiles', {
+      fetch(`${API_BASE_URL}/users/profiles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

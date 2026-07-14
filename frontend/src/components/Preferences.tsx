@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../services/api';
 
 interface Topic {
   id: string;
@@ -143,7 +144,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
         const activeList = Object.keys(localTopics).filter(k => localTopics[k]);
         
         // Save topics
-        await fetch('http://localhost:8000/api/v1/users/preferences', {
+        await fetch(`${API_BASE_URL}/users/preferences`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, subscribed_topics: activeList }),

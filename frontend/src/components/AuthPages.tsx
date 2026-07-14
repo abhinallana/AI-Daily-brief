@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
+import { API_BASE_URL } from '../services/api';
 
 interface SignUpProps {
   onNavigateToLogin: () => void;
@@ -69,7 +70,7 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
       if (!data.user) throw new Error('No user data returned.');
 
       // Save user profile to backend PostgreSQL repository
-      const response = await fetch('http://localhost:8000/api/v1/users/profiles', {
+      const response = await fetch(`${API_BASE_URL}/users/profiles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
