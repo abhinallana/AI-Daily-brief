@@ -32,6 +32,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Edit fields state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -169,6 +177,105 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         <div className="spinner"></div>
         <p style={{ color: 'var(--text-muted)' }}>Loading profile data...</p>
       </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeIn 0.3s ease-out' }}>
+        {status && (
+          <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.05)', borderLeft: '4px solid var(--success)', padding: '12px', borderRadius: '8px' }}>
+            <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>🎉 {status}</p>
+          </div>
+        )}
+
+        {/* Group 1: Profile details */}
+        <div className="mobile-settings-group">
+          <div className="mobile-settings-group-title">Personal Details</div>
+          
+          <div className="mobile-settings-row" style={{ cursor: 'default' }}>
+            <div className="mobile-settings-left">
+              <span className="icon">👤</span>
+              <span>First Name</span>
+            </div>
+            <input 
+              type="text" 
+              value={firstName} 
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="First Name"
+              required
+              style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', textAlign: 'right', outline: 'none', fontWeight: 600 }}
+            />
+          </div>
+
+          <div className="mobile-settings-row" style={{ cursor: 'default' }}>
+            <div className="mobile-settings-left">
+              <span className="icon">👤</span>
+              <span>Last Name</span>
+            </div>
+            <input 
+              type="text" 
+              value={lastName} 
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Optional"
+              style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', textAlign: 'right', outline: 'none', fontWeight: 600 }}
+            />
+          </div>
+
+          <div className="mobile-settings-row" style={{ cursor: 'default', opacity: 0.6 }}>
+            <div className="mobile-settings-left">
+              <span className="icon">✉️</span>
+              <span>Email</span>
+            </div>
+            <span style={{ fontSize: '13px', fontWeight: 600 }}>{userEmail}</span>
+          </div>
+        </div>
+
+        {/* Group 2: Appearance settings */}
+        <div className="mobile-settings-group">
+          <div className="mobile-settings-group-title">Preferences</div>
+
+          <div className="mobile-settings-row">
+            <div className="mobile-settings-left">
+              <span className="icon">🎨</span>
+              <span>Theme</span>
+            </div>
+            <select 
+              value={themePreference} 
+              onChange={(e) => setThemePreference(e.target.value)}
+              style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 600, outline: 'none', textAlign: 'right' }}
+            >
+              <option value="dark">Dark Theme</option>
+              <option value="light">Light Theme</option>
+            </select>
+          </div>
+
+          <div className="mobile-settings-row">
+            <div className="mobile-settings-left">
+              <span className="icon">📬</span>
+              <span>Email Reports</span>
+            </div>
+            <label className="ios-switch">
+              <input 
+                type="checkbox" 
+                checked={newsletterEnabled} 
+                onChange={(e) => setNewsletterEnabled(e.target.checked)} 
+              />
+              <span className="ios-slider" />
+            </label>
+          </div>
+        </div>
+
+        {/* Save changes button */}
+        <button 
+          type="submit" 
+          className="btn-primary" 
+          disabled={saving}
+          style={{ minHeight: '48px', width: '100%', borderRadius: '12px', marginTop: '10px', fontSize: '15px', fontWeight: 700 }}
+        >
+          {saving ? 'Saving...' : 'Save Profile Changes'}
+        </button>
+      </form>
     );
   }
 

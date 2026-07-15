@@ -82,6 +82,14 @@ export const Preferences: React.FC<PreferencesProps> = ({
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     if (enabledTopics) {
       setLocalTopics(enabledTopics);
@@ -159,6 +167,111 @@ export const Preferences: React.FC<PreferencesProps> = ({
       setTimeout(() => setStatus(null), 3000);
     }, 800);
   };
+
+  if (isMobile) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeIn 0.3s ease-out' }}>
+        {status && (
+          <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.05)', borderLeft: '4px solid var(--success)', padding: '12px', borderRadius: '8px' }}>
+            <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>🎉 {status}</p>
+          </div>
+        )}
+
+        {/* Categories toggler block */}
+        <div className="mobile-topics-section">
+          {CATEGORIES.map(category => (
+            <div className="mobile-category-block" key={category.id}>
+              <h2>{category.icon} {category.title}</h2>
+              <div className="mobile-chips-grid">
+                {category.topics.map(topic => {
+                  const isEnabled = localTopics[topic.id] !== false;
+                  return (
+                    <div 
+                      key={topic.id}
+                      className={`mobile-topic-chip ${isEnabled ? 'active' : ''}`}
+                      onClick={() => handleToggleTopic(topic.id)}
+                    >
+                      <span className="icon">{topic.icon}</span>
+                      <span>{topic.name}</span>
+                      {topic.recommended && <span style={{ fontSize: '8px', color: 'var(--primary)', fontWeight: 800 }}>★</span>}
+                      <span className="metrics">{topic.countThisWeek}w</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Email Delivery Options */}
+        <div className="mobile-settings-group" style={{ marginTop: '10px' }}>
+          <div className="mobile-settings-group-title">Newsletter & Digests</div>
+          
+          <div className="mobile-settings-row">
+            <div className="mobile-settings-left">
+              <span className="icon">📬</span>
+              <span>Enable Daily Briefing</span>
+            </div>
+            <label className="ios-switch">
+              <input 
+                type="checkbox" 
+                checked={emailEnabled} 
+                onChange={() => setEmailEnabled(!emailEnabled)} 
+              />
+              <span className="ios-slider" />
+            </label>
+          </div>
+
+          {emailEnabled && (
+            <>
+              <div className="mobile-settings-row">
+                <div className="mobile-settings-left">
+                  <span className="icon">⏰</span>
+                  <span>Delivery Time</span>
+                </div>
+                <select 
+                  value={deliveryTime} 
+                  onChange={(e) => setDeliveryTime(e.target.value)}
+                  style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 600, outline: 'none', textAlign: 'right' }}
+                >
+                  <option value="06:00 AM">06:00 AM</option>
+                  <option value="08:00 AM">08:00 AM</option>
+                  <option value="10:00 AM">10:00 AM</option>
+                  <option value="12:00 PM">12:00 PM</option>
+                </select>
+              </div>
+
+              <div className="mobile-settings-row">
+                <div className="mobile-settings-left">
+                  <span className="icon">📅</span>
+                  <span>Frequency</span>
+                </div>
+                <select 
+                  value={frequency} 
+                  onChange={(e) => setFrequency(e.target.value)}
+                  style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 600, outline: 'none', textAlign: 'right' }}
+                >
+                  <option value="Daily">Daily</option>
+                  <option value="Weekdays Only">Mon-Fri</option>
+                  <option value="Weekly Digest">Weekly</option>
+                </select>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Save button */}
+        <button 
+          className="btn-primary" 
+          onClick={handleSave} 
+          disabled={saving}
+          style={{ minHeight: '48px', width: '100%', borderRadius: '12px', marginTop: '10px', fontSize: '15px', fontWeight: 700 }}
+        >
+          {saving ? 'Saving...' : 'Save Preferences'}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="preferences-panel" style={{ animation: 'fadeIn 0.3s ease-out' }}>
