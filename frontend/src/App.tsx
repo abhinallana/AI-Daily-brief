@@ -150,12 +150,15 @@ const App: React.FC = () => {
 
   const handleLogoClick = () => {
     const cachedToken = token || localStorage.getItem('opsiai_token');
+    console.log("handleLogoClick triggered. Token state:", token, "LocalStorage token:", localStorage.getItem('opsiai_token'));
     if (cachedToken) {
+      console.log("Token found. Navigating to Today's Brief...");
       setActiveRootView('dashboard');
       setActiveView('today');
       setMobileTab('dashboard');
       window.history.pushState(null, '', '/dashboard');
     } else {
+      console.log("No token found. Redirecting to landing page...");
       setActiveRootView('landing');
       window.history.pushState(null, '', '/');
     }
@@ -194,8 +197,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const syncSession = async () => {
       const cachedToken = localStorage.getItem('opsiai_token');
+      console.log("syncSession triggered. Cached token in localStorage:", cachedToken);
       if (cachedToken && cachedToken.startsWith('demo-')) {
-        // It's a demo session! Keep it active!
+        console.log("Found guest/demo session tokens. Restoring demo view.");
         setToken(cachedToken);
         setUserId(localStorage.getItem('opsiai_userid') || 'demo-guest-id');
         setUserEmail(localStorage.getItem('opsiai_email') || 'guest@opsiai.com');
@@ -225,11 +229,14 @@ const App: React.FC = () => {
         return;
       }
 
+      console.log("No demo session found. Checking Supabase active session...");
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("Supabase getSession session:", session);
       if (session && session.user) {
         const email = session.user.email || '';
         const userId = session.user.id;
         const mockToken = `supabase-jwt-auth-${userId}`;
+        console.log("Valid Supabase user session loaded for user:", email);
         
         setToken(mockToken);
         setUserId(userId);
@@ -284,9 +291,10 @@ const App: React.FC = () => {
           }
         }
       } else {
-        // No authenticated session
+        console.log("No active Supabase user session detected.");
         const path = window.location.pathname;
         if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+          console.log("Protected path visited without session. Redirecting to login path:", path);
           setRedirectPath(path);
           setActiveRootView('login');
           window.history.pushState(null, '', '/login');
