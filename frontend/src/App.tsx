@@ -149,7 +149,7 @@ const App: React.FC = () => {
   };
 
   const handleLogoClick = () => {
-    const cachedToken = localStorage.getItem('opsiai_token');
+    const cachedToken = token || localStorage.getItem('opsiai_token');
     if (cachedToken) {
       setActiveRootView('dashboard');
       setActiveView('today');
