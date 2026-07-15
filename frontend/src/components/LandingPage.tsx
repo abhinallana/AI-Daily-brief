@@ -6,12 +6,20 @@ interface LandingPageProps {
   onNavigateToLogin: () => void;
   onNavigateToSignUp: () => void;
   onViewDemo: () => void;
+  isAuthenticated?: boolean;
+  onNavigateToDashboard?: () => void;
+  onLogout?: () => void;
+  onNavigateToTab?: (tab: string) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ 
   onNavigateToLogin, 
   onNavigateToSignUp, 
-  onViewDemo 
+  onViewDemo,
+  isAuthenticated = false,
+  onNavigateToDashboard,
+  onLogout,
+  onNavigateToTab
 }) => {
   const [scrolled, setScrolled] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(
@@ -68,22 +76,49 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Editorial Navigation */}
       <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
-        <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div 
+          className="nav-logo" 
+          onClick={() => {
+            if (isAuthenticated && onNavigateToDashboard) {
+              onNavigateToDashboard();
+            } else {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }} 
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+        >
           <img src="/logo.jpg" alt="OpsiAI Logo" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
           Opsi<span>AI</span>
         </div>
-        <ul className="nav-items">
-          <li className="nav-link" onClick={() => document.getElementById('metrics')?.scrollIntoView({ behavior: 'smooth' })}>Metrics</li>
-          <li className="nav-link" onClick={() => document.getElementById('showcase')?.scrollIntoView({ behavior: 'smooth' })}>Showcase</li>
-          <li className="nav-link" onClick={() => document.getElementById('why-opsiai')?.scrollIntoView({ behavior: 'smooth' })}>Why OpsiAI</li>
-          <li className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</li>
-        </ul>
+
+        {isAuthenticated ? (
+          <ul className="nav-items">
+            <li className="nav-link" onClick={() => onNavigateToDashboard && onNavigateToDashboard()}>Dashboard</li>
+            <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('reports')}>Reports</li>
+            <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Topics</li>
+            <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('profile')}>Profile</li>
+          </ul>
+        ) : (
+          <ul className="nav-items">
+            <li className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</li>
+            <li className="nav-link" onClick={() => alert('Pricing: OpsiAI is currently in free public beta!')}>Pricing</li>
+            <li className="nav-link" onClick={() => document.getElementById('metrics')?.scrollIntoView({ behavior: 'smooth' })}>Metrics</li>
+            <li className="nav-link" onClick={() => document.getElementById('why-opsiai')?.scrollIntoView({ behavior: 'smooth' })}>Why OpsiAI</li>
+          </ul>
+        )}
+
         <div className="nav-buttons">
           <button className="theme-toggle-btn" onClick={toggleTheme} title="Toggle theme">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <button className="btn-secondary" onClick={onNavigateToLogin}>Sign In</button>
-          <button className="btn-primary" onClick={onNavigateToSignUp}>Get Started</button>
+          {isAuthenticated ? (
+            <button className="btn-secondary" style={{ borderColor: 'var(--strategic)', color: 'var(--strategic)' }} onClick={onLogout}>Sign Out</button>
+          ) : (
+            <>
+              <button className="btn-secondary" onClick={onNavigateToLogin}>Sign In</button>
+              <button className="btn-primary" onClick={onNavigateToSignUp}>Get Started</button>
+            </>
+          )}
         </div>
       </nav>
 

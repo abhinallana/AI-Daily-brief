@@ -148,6 +148,19 @@ const App: React.FC = () => {
     setMobileTab('reports');
   };
 
+  const handleLogoClick = () => {
+    const cachedToken = localStorage.getItem('opsiai_token');
+    if (cachedToken) {
+      setActiveRootView('dashboard');
+      setActiveView('today');
+      setMobileTab('dashboard');
+      window.history.pushState(null, '', '/dashboard');
+    } else {
+      setActiveRootView('landing');
+      window.history.pushState(null, '', '/');
+    }
+  };
+
   // Subscriptions & Onboarding states
   const [isEmailSubscribed, setIsEmailSubscribed] = useState<boolean>(() => {
     return localStorage.getItem('opsiai_email_subscribed') === 'true';
@@ -177,26 +190,169 @@ const App: React.FC = () => {
     };
   });
 
-  // URL listener and router
+  // Supabase Auth state listener and initial session loader (Single Source of Truth)
   useEffect(() => {
-    const handleUrlRouting = () => {
+    const syncSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user) {
+        const email = session.user.email || '';
+        const userId = session.user.id;
+        const mockToken = `supabase-jwt-auth-${userId}`;
+        
+        setToken(mockToken);
+        setUserId(userId);
+        setUserEmail(email);
+        
+        localStorage.setItem('opsiai_token', mockToken);
+        localStorage.setItem('opsiai_userid', userId);
+        localStorage.setItem('opsiai_email', email);
+
+        // Fetch profile first name
+        try {
+          const profileData = await getProfile(userId);
+          if (profileData) {
+            setUserFirstName(profileData.first_name);
+            localStorage.setItem('opsiai_firstname', profileData.first_name);
+            
+            if (profileData.preferred_topics && profileData.preferred_topics.length > 0) {
+              const loaded: Record<string, boolean> = {};
+              profileData.preferred_topics.forEach((t: string) => {
+                loaded[t] = true;
+              });
+              setEnabledTopics(loaded);
+              localStorage.setItem('opsiai_subscriptions', JSON.stringify(loaded));
+            }
+            localStorage.setItem('opsiai_email_subscribed', profileData.newsletter_enabled ? 'true' : 'false');
+            setIsEmailSubscribed(profileData.newsletter_enabled);
+          }
+        } catch (err) {
+          console.warn('API backend connection offline during session mount sync.');
+        }
+
+        // Apply path routing for authenticated user
+        const path = window.location.pathname;
+        if (['/', '', '/login', '/signup'].includes(path)) {
+          setActiveRootView('dashboard');
+          setActiveView('today');
+          window.history.pushState(null, '', '/dashboard');
+        } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+          setActiveRootView('dashboard');
+          if (path === '/profile') {
+            setActiveView('profile');
+            setMobileTab('profile');
+          } else if (path === '/settings' || path === '/topics') {
+            setActiveView('preferences');
+            setMobileTab('topics');
+          } else if (path === '/reports') {
+            setActiveView('today');
+            setMobileTab('reports');
+          } else {
+            setActiveView('today');
+            setMobileTab('dashboard');
+          }
+        }
+      } else {
+        // No authenticated session
+        const path = window.location.pathname;
+        if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+          setRedirectPath(path);
+          setActiveRootView('login');
+          window.history.pushState(null, '', '/login');
+        } else if (path === '/login') {
+          setActiveRootView('login');
+        } else if (path === '/signup') {
+          setActiveRootView('signup');
+        } else {
+          setActiveRootView('landing');
+        }
+      }
+    };
+
+    syncSession();
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session && session.user) {
+        const email = session.user.email || '';
+        const userId = session.user.id;
+        const mockToken = `supabase-jwt-auth-${userId}`;
+        
+        setToken(mockToken);
+        setUserId(userId);
+        setUserEmail(email);
+        
+        localStorage.setItem('opsiai_token', mockToken);
+        localStorage.setItem('opsiai_userid', userId);
+        localStorage.setItem('opsiai_email', email);
+      } else {
+        // Logged out
+        setToken(null);
+        setUserId(null);
+        setUserEmail(null);
+        setUserFirstName('Reader');
+        
+        localStorage.removeItem('opsiai_token');
+        localStorage.removeItem('opsiai_userid');
+        localStorage.removeItem('opsiai_email');
+        localStorage.removeItem('opsiai_firstname');
+        localStorage.removeItem('opsiai_email_subscribed');
+        localStorage.removeItem('opsiai_banner_dismissed');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Handle client-side popstate actions (Browser Back, Forward)
+  useEffect(() => {
+    const handlePopState = () => {
       const path = window.location.pathname;
       const cachedToken = localStorage.getItem('opsiai_token');
 
-      if (path === '/' || path === '') {
-        setActiveRootView('landing');
+      if (['/', '', '/landing'].includes(path)) {
+        if (cachedToken) {
+          // Never force logged in users back to landing!
+          setActiveRootView('dashboard');
+          setActiveView('today');
+          window.history.pushState(null, '', '/dashboard');
+        } else {
+          setActiveRootView('landing');
+        }
       } else if (path === '/login') {
-        setActiveRootView('login');
-      } else if (path === '/signup') {
-        setActiveRootView('signup');
-      } else if (['/dashboard', '/settings', '/profile', '/topics'].includes(path)) {
         if (cachedToken) {
           setActiveRootView('dashboard');
-          if (path === '/profile') setActiveView('profile');
-          else if (path === '/settings' || path === '/topics') setActiveView('preferences');
-          else setActiveView('today');
+          setActiveView('today');
+          window.history.pushState(null, '', '/dashboard');
         } else {
-          // Unauthenticated redirect to Login
+          setActiveRootView('login');
+        }
+      } else if (path === '/signup') {
+        if (cachedToken) {
+          setActiveRootView('dashboard');
+          setActiveView('today');
+          window.history.pushState(null, '', '/dashboard');
+        } else {
+          setActiveRootView('signup');
+        }
+      } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+        if (cachedToken) {
+          setActiveRootView('dashboard');
+          if (path === '/profile') {
+            setActiveView('profile');
+            setMobileTab('profile');
+          } else if (path === '/settings' || path === '/topics') {
+            setActiveView('preferences');
+            setMobileTab('topics');
+          } else if (path === '/reports') {
+            setActiveView('today');
+            setMobileTab('reports');
+          } else {
+            setActiveView('today');
+            setMobileTab('dashboard');
+          }
+        } else {
           setRedirectPath(path);
           setActiveRootView('login');
           window.history.pushState(null, '', '/login');
@@ -204,9 +360,8 @@ const App: React.FC = () => {
       }
     };
 
-    handleUrlRouting();
-    window.addEventListener('popstate', handleUrlRouting);
-    return () => window.removeEventListener('popstate', handleUrlRouting);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   // Fetch report when dashboard view active
@@ -670,6 +825,34 @@ const App: React.FC = () => {
             setActiveView('today');
             window.history.pushState(null, '', '/dashboard');
           }} 
+          isAuthenticated={!!token}
+          onNavigateToDashboard={handleLogoClick}
+          onLogout={handleLogout}
+          onNavigateToTab={(tab) => {
+            setActiveRootView('dashboard');
+            if (tab === 'reports') {
+              if (isMobile) {
+                setMobileTab('reports');
+              } else {
+                setActiveView('today');
+              }
+              window.history.pushState(null, '', '/dashboard');
+            } else if (tab === 'topics') {
+              if (isMobile) {
+                setMobileTab('topics');
+              } else {
+                setActiveView('preferences');
+              }
+              window.history.pushState(null, '', '/settings');
+            } else if (tab === 'profile') {
+              if (isMobile) {
+                setMobileTab('profile');
+              } else {
+                setActiveView('profile');
+              }
+              window.history.pushState(null, '', '/profile');
+            }
+          }}
         />
       </>
     );
@@ -714,7 +897,7 @@ const App: React.FC = () => {
       <div className="mobile-app-shell">
         {/* Top App Bar */}
         <header className="mobile-top-bar">
-          <div className="brand" onClick={() => handleMobileTabChange('dashboard')}>
+          <div className="brand" onClick={handleLogoClick}>
             <img src="/logo.jpg" alt="OpsiAI Logo" />
             <span>OpsiAI</span>
           </div>
@@ -1181,7 +1364,7 @@ const App: React.FC = () => {
         activeView={activeView} 
         onViewChange={navigateToView} 
         onLogout={handleLogout} 
-        onLogoClick={handleLogout}
+        onLogoClick={handleLogoClick}
         isEmailSubscribed={isEmailSubscribed}
         onEnableEmailClick={() => setShowSubscribeModal(true)}
       />
