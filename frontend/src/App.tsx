@@ -193,6 +193,38 @@ const App: React.FC = () => {
   // Supabase Auth state listener and initial session loader (Single Source of Truth)
   useEffect(() => {
     const syncSession = async () => {
+      const cachedToken = localStorage.getItem('opsiai_token');
+      if (cachedToken && cachedToken.startsWith('demo-')) {
+        // It's a demo session! Keep it active!
+        setToken(cachedToken);
+        setUserId(localStorage.getItem('opsiai_userid') || 'demo-guest-id');
+        setUserEmail(localStorage.getItem('opsiai_email') || 'guest@opsiai.com');
+        setUserFirstName(localStorage.getItem('opsiai_firstname') || 'Guest');
+        setActiveRootView('dashboard');
+        
+        // Path routing for demo user
+        const path = window.location.pathname;
+        if (['/', '', '/login', '/signup'].includes(path)) {
+          setActiveView('today');
+          window.history.pushState(null, '', '/dashboard');
+        } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+          if (path === '/profile') {
+            setActiveView('profile');
+            setMobileTab('profile');
+          } else if (path === '/settings' || path === '/topics') {
+            setActiveView('preferences');
+            setMobileTab('topics');
+          } else if (path === '/reports') {
+            setActiveView('today');
+            setMobileTab('reports');
+          } else {
+            setActiveView('today');
+            setMobileTab('dashboard');
+          }
+        }
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session && session.user) {
         const email = session.user.email || '';
@@ -272,6 +304,11 @@ const App: React.FC = () => {
 
     // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const cachedToken = localStorage.getItem('opsiai_token');
+      if (cachedToken && cachedToken.startsWith('demo-')) {
+        // It's a demo session! Skip Supabase Auth state modification.
+        return;
+      }
       if (session && session.user) {
         const email = session.user.email || '';
         const userId = session.user.id;
@@ -816,11 +853,17 @@ const App: React.FC = () => {
             window.history.pushState(null, '', '/signup');
           }} 
           onViewDemo={() => {
-            // Set dummy demo params
-            setToken('demo-token-opsiai');
+            const demoToken = 'demo-token-opsiai';
+            setToken(demoToken);
             setUserId('demo-guest-id');
             setUserEmail('guest@opsiai.com');
             setUserFirstName('Guest');
+            
+            localStorage.setItem('opsiai_token', demoToken);
+            localStorage.setItem('opsiai_userid', 'demo-guest-id');
+            localStorage.setItem('opsiai_email', 'guest@opsiai.com');
+            localStorage.setItem('opsiai_firstname', 'Guest');
+
             setActiveRootView('dashboard');
             setActiveView('today');
             window.history.pushState(null, '', '/dashboard');
