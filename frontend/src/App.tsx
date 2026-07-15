@@ -149,19 +149,9 @@ const App: React.FC = () => {
   };
 
   const handleLogoClick = () => {
-    const cachedToken = token || localStorage.getItem('opsiai_token');
-    console.log("handleLogoClick triggered. Token state:", token, "LocalStorage token:", localStorage.getItem('opsiai_token'));
-    if (cachedToken) {
-      console.log("Token found. Navigating to Today's Brief...");
-      setActiveRootView('dashboard');
-      setActiveView('today');
-      setMobileTab('dashboard');
-      window.history.pushState(null, '', '/dashboard');
-    } else {
-      console.log("No token found. Redirecting to landing page...");
-      setActiveRootView('landing');
-      window.history.pushState(null, '', '/');
-    }
+    console.log("handleLogoClick triggered. Navigating to Landing Page / Website Homepage.");
+    setActiveRootView('landing');
+    window.history.pushState(null, '', '/');
   };
 
   // Subscriptions & Onboarding states
@@ -209,8 +199,7 @@ const App: React.FC = () => {
         // Path routing for demo user
         const path = window.location.pathname;
         if (['/', '', '/login', '/signup'].includes(path)) {
-          setActiveView('today');
-          window.history.pushState(null, '', '/dashboard');
+          setActiveRootView('landing');
         } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
           if (path === '/profile') {
             setActiveView('profile');
@@ -271,9 +260,7 @@ const App: React.FC = () => {
         // Apply path routing for authenticated user
         const path = window.location.pathname;
         if (['/', '', '/login', '/signup'].includes(path)) {
-          setActiveRootView('dashboard');
-          setActiveView('today');
-          window.history.pushState(null, '', '/dashboard');
+          setActiveRootView('landing');
         } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
           setActiveRootView('dashboard');
           if (path === '/profile') {
@@ -357,14 +344,7 @@ const App: React.FC = () => {
       const cachedToken = localStorage.getItem('opsiai_token');
 
       if (['/', '', '/landing'].includes(path)) {
-        if (cachedToken) {
-          // Never force logged in users back to landing!
-          setActiveRootView('dashboard');
-          setActiveView('today');
-          window.history.pushState(null, '', '/dashboard');
-        } else {
-          setActiveRootView('landing');
-        }
+        setActiveRootView('landing');
       } else if (path === '/login') {
         if (cachedToken) {
           setActiveRootView('dashboard');
