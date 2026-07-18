@@ -114,6 +114,120 @@ export async function fetchTodayReport(): Promise<DailyReport> {
   }
 }
 
+export interface ReportSummary {
+  id: string;
+  date: string;
+  biggest_announcement: string;
+}
+
+// Fetch list of all historical report summaries
+export async function fetchReportList(): Promise<ReportSummary[]> {
+  if (import.meta.env.VITE_API_URL) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reports`);
+      if (response.ok) return response.json();
+    } catch (e) {
+      console.warn("Backend fetch failed, trying direct Supabase query.", e);
+    }
+  }
+
+  // Direct Supabase query fallback
+  try {
+    const { data: reports, error } = await supabase
+      .from('daily_reports')
+      .select('id, report_date, biggest_announcement')
+      .order('report_date', { ascending: false });
+
+    if (error || !reports) throw error || new Error('No reports found.');
+
+    return reports.map(r => ({
+      id: r.id,
+      date: r.report_date,
+      biggest_announcement: r.biggest_announcement || ''
+    }));
+  } catch (e) {
+    console.warn("Supabase fetch failed, returning mock report list.", e);
+    return [
+      {
+        id: "mock-1",
+        date: new Date().toISOString().split('T')[0],
+        biggest_announcement: "OpsiAI direct serverless connection active."
+      }
+    ];
+  }
+}
+
+// Fetch report by specific date
+export async function fetchReportByDate(dateStr: string): Promise<DailyReport> {
+  if (import.meta.env.VITE_API_URL) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/reports/${dateStr}`);
+      if (response.ok) return response.json();
+    } catch (e) {
+      console.warn("Backend fetch failed, trying direct Supabase query.", e);
+    }
+  }
+
+  // Direct Supabase query fallback
+  try {
+    const { data: report, error: rErr } = await supabase
+      .from('daily_reports')
+      .select('*')
+      .eq('report_date', dateStr)
+      .maybeSingle();
+
+    if (rErr || !report) throw new Error(`Report for ${dateStr} not found.`);
+
+    const { data: links } = await supabase
+      .from('report_articles')
+      .select('article_id')
+      .eq('report_id', report.id);
+
+    let articles: Article[] = [];
+    if (links && links.length > 0) {
+      const ids = links.map(l => l.article_id);
+      const { data: arts } = await supabase
+        .from('articles')
+        .select('*')
+        .in('id', ids);
+      articles = arts || [];
+    }
+
+    return {
+      date: report.report_date,
+      biggest_announcement: report.biggest_announcement || '',
+      biggest_trend: report.biggest_trend || '',
+      one_thing_to_know: report.one_thing_to_know || '',
+      time_saved_minutes: report.reading_time_saved_minutes || 0,
+      articles: articles
+    };
+  } catch (e) {
+    console.warn(`Supabase fetch failed for report date ${dateStr}, returning mock report.`, e);
+    return {
+      date: dateStr,
+      biggest_announcement: `Mock briefing for date ${dateStr}.`,
+      biggest_trend: "Platform orchestrators are moving toward unified APIs to bypass heavy integration wrappers.",
+      one_thing_to_know: "Connect your Supabase anon key to sync live daily report scraping runs.",
+      time_saved_minutes: 45,
+      articles: [
+        {
+          title: `Sample Article for date ${dateStr}`,
+          link: "https://supabase.com",
+          published_at: dateStr,
+          source: "OpsiAI Archives",
+          icon: "📚",
+          ai_summary: `This is a mock summary for historical data matching the requested date ${dateStr}.`,
+          category: "GitHub",
+          priority: "Important",
+          why_it_matters: "Enables users to review the layout design even when the database backend is disconnected.",
+          is_relevant: true,
+          reading_time: "3 min read"
+        }
+      ]
+    };
+  }
+}
+
 // Fetch metrics with backend + Supabase direct fallback
 export async function fetchOpsiMetrics(): Promise<OpsiMetrics> {
   if (import.meta.env.VITE_API_URL) {

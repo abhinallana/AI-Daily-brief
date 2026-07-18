@@ -318,9 +318,29 @@ class SQLiteArticleRepository:
                     reading_time_saved_minutes=rep_row["reading_time_saved_minutes"],
                     articles=articles
                 )
-        except Exception as e:
-            logger.error(f"Error loading DailyReport for {date_str}: {e}", exc_info=True)
-            return None
+    def get_all_daily_reports(self) -> list:
+        """Retrieves list of all saved DailyReports with ID, date and biggest announcement from SQLite."""
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute(
+                    """
+                    SELECT id, report_date, biggest_announcement
+                    FROM daily_reports
+                    ORDER BY report_date DESC
+                    """
+                )
+                rows = cursor.fetchall()
+                return [
+                    {
+                        "id": str(row["id"]),
+                        "date": row["report_date"],
+                        "biggest_announcement": row["biggest_announcement"] or ""
+                    }
+                    for row in rows
+                ]
+        except sqlite3.Error as e:
+            logger.error(f"Failed to retrieve all DailyReports: {e}", exc_info=True)
+            return []
 
     def get_metrics(self) -> dict:
         """Computes real-time statistics of analyzed articles and reports."""
@@ -785,9 +805,32 @@ class PostgreSQLArticleRepository:
                         reading_time_saved_minutes=rep_row[columns.index("reading_time_saved_minutes")],
                         articles=articles
                     )
+    def get_all_daily_reports(self) -> list:
+        """Retrieves list of all saved DailyReports with ID, date and biggest announcement from PostgreSQL."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT id, report_date, biggest_announcement
+                        FROM daily_reports
+                        ORDER BY report_date DESC
+                        """
+                    )
+                    rows = cursor.fetchall()
+                    if rows:
+                        columns = [col[0] for col in cursor.description]
+                        return [
+                            {
+                                "id": str(row[columns.index("id")]),
+                                "date": str(row[columns.index("report_date")]),
+                                "biggest_announcement": row[columns.index("biggest_announcement")] or ""
+                            }
+                            for row in rows
+                        ]
         except Exception as e:
-            logger.error(f"Error loading DailyReport for {date_str} from PostgreSQL: {e}", exc_info=True)
-            return None
+            logger.error(f"Failed to retrieve all DailyReports from PostgreSQL: {e}", exc_info=True)
+        return []
 
     def get_metrics(self) -> dict:
         """Computes real-time statistics of analyzed articles and reports from PostgreSQL."""

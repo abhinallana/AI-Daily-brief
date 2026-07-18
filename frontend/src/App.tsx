@@ -11,8 +11,8 @@ import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
 import { Preferences } from './components/Preferences';
 import { GoogleSoonModal } from './components/GoogleSoonModal';
-import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics } from './services/api';
-import type { DailyReport, Article } from './services/api';
+import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics, fetchReportList, fetchReportByDate } from './services/api';
+import type { DailyReport, Article, ReportSummary } from './services/api';
 import { supabase } from './services/supabaseClient';
 
 const App: React.FC = () => {
@@ -23,6 +23,9 @@ const App: React.FC = () => {
 
   // Data states
   const [report, setReport] = useState<DailyReport | null>(null);
+  const [reportList, setReportList] = useState<ReportSummary[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,9 +46,9 @@ const App: React.FC = () => {
   });
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
 
-  
+
   // Bookmarks & Metrics State
-  const [bookmarks, setBookmarks] = useState<Article[]>(() => 
+  const [bookmarks, setBookmarks] = useState<Article[]>(() =>
     JSON.parse(localStorage.getItem('opsiai_bookmarks') || '[]')
   );
   const [metrics, setMetrics] = useState<any>(null);
@@ -154,6 +157,21 @@ const App: React.FC = () => {
     window.history.pushState(null, '', '/');
   };
 
+  const handleDateChange = async (dateStr: string) => {
+    try {
+      setLoadingHistory(true);
+      setError(null);
+      setSelectedDate(dateStr);
+      const data = await fetchReportByDate(dateStr);
+      setReport(data);
+    } catch (err: any) {
+      console.error("Failed to load historical report for date:", dateStr, err);
+      setError(err.message || 'Failed to load report for the selected date.');
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   // Subscriptions & Onboarding states
   const [isEmailSubscribed, setIsEmailSubscribed] = useState<boolean>(() => {
     return localStorage.getItem('opsiai_email_subscribed') === 'true';
@@ -161,7 +179,7 @@ const App: React.FC = () => {
   const [isBannerDismissed, setIsBannerDismissed] = useState<boolean>(() => {
     return localStorage.getItem('opsiai_banner_dismissed') === 'true';
   });
-  
+
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [showGoogleSoon, setShowGoogleSoon] = useState(false);
@@ -195,7 +213,7 @@ const App: React.FC = () => {
         setUserEmail(localStorage.getItem('opsiai_email') || 'guest@opsiai.com');
         setUserFirstName(localStorage.getItem('opsiai_firstname') || 'Guest');
         setActiveRootView('dashboard');
-        
+
         // Path routing for demo user
         const path = window.location.pathname;
         if (['/', '', '/login', '/signup'].includes(path)) {
@@ -226,11 +244,11 @@ const App: React.FC = () => {
         const userId = session.user.id;
         const mockToken = `supabase-jwt-auth-${userId}`;
         console.log("Valid Supabase user session loaded for user:", email);
-        
+
         setToken(mockToken);
         setUserId(userId);
         setUserEmail(email);
-        
+
         localStorage.setItem('opsiai_token', mockToken);
         localStorage.setItem('opsiai_userid', userId);
         localStorage.setItem('opsiai_email', email);
@@ -241,7 +259,7 @@ const App: React.FC = () => {
           if (profileData) {
             setUserFirstName(profileData.first_name);
             localStorage.setItem('opsiai_firstname', profileData.first_name);
-            
+
             if (profileData.preferred_topics && profileData.preferred_topics.length > 0) {
               const loaded: Record<string, boolean> = {};
               profileData.preferred_topics.forEach((t: string) => {
@@ -308,11 +326,11 @@ const App: React.FC = () => {
         const email = session.user.email || '';
         const userId = session.user.id;
         const mockToken = `supabase-jwt-auth-${userId}`;
-        
+
         setToken(mockToken);
         setUserId(userId);
         setUserEmail(email);
-        
+
         localStorage.setItem('opsiai_token', mockToken);
         localStorage.setItem('opsiai_userid', userId);
         localStorage.setItem('opsiai_email', email);
@@ -322,7 +340,7 @@ const App: React.FC = () => {
         setUserId(null);
         setUserEmail(null);
         setUserFirstName('Reader');
-        
+
         localStorage.removeItem('opsiai_token');
         localStorage.removeItem('opsiai_userid');
         localStorage.removeItem('opsiai_email');
@@ -389,15 +407,30 @@ const App: React.FC = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Fetch report when dashboard view active
+  // Fetch report list and active briefing when dashboard view active
   useEffect(() => {
     if (activeRootView === 'dashboard' && token) {
       async function loadData() {
         try {
           setLoading(true);
           setError(null);
-          const data = await fetchTodayReport();
-          setReport(data);
+          
+          const list = await fetchReportList();
+          setReportList(list);
+          
+          if (list && list.length > 0) {
+            const latestDate = list[0].date;
+            setSelectedDate(latestDate);
+            const data = await fetchReportByDate(latestDate);
+            setReport(data);
+          } else {
+            const data = await fetchTodayReport();
+            setReport(data);
+            if (data) {
+              setReportList([{ id: 'fallback', date: data.date, biggest_announcement: data.biggest_announcement }]);
+              setSelectedDate(data.date);
+            }
+          }
         } catch (err: any) {
           setError(err.message || 'Failed to load report from OpsiAI API.');
         } finally {
@@ -432,7 +465,7 @@ const App: React.FC = () => {
     setToken(mockToken);
     setUserId(newUserId);
     setUserEmail(email);
-    
+
     localStorage.setItem('opsiai_token', mockToken);
     localStorage.setItem('opsiai_userid', newUserId);
     localStorage.setItem('opsiai_email', email);
@@ -443,7 +476,7 @@ const App: React.FC = () => {
       if (data) {
         setUserFirstName(data.first_name);
         localStorage.setItem('opsiai_firstname', data.first_name);
-        
+
         // Populate local subscriptions from profile
         if (data.preferred_topics && data.preferred_topics.length > 0) {
           const loaded: Record<string, boolean> = {};
@@ -483,7 +516,7 @@ const App: React.FC = () => {
     setUserId(newUserId);
     setUserEmail(email);
     setUserFirstName(firstName);
-    
+
     localStorage.setItem('opsiai_token', mockToken);
     localStorage.setItem('opsiai_userid', newUserId);
     localStorage.setItem('opsiai_email', email);
@@ -504,7 +537,7 @@ const App: React.FC = () => {
     setUserId(null);
     setUserEmail(null);
     setUserFirstName('Reader');
-    
+
     localStorage.removeItem('opsiai_token');
     localStorage.removeItem('opsiai_userid');
     localStorage.removeItem('opsiai_email');
@@ -563,7 +596,7 @@ const App: React.FC = () => {
       // Fetch current enabled topics from localStorage
       const topicsObj = JSON.parse(localStorage.getItem('opsiai_subscriptions') || '{}');
       const activeList = Object.keys(topicsObj).filter(k => topicsObj[k]);
-      
+
       saveProfile({
         id: userId,
         first_name: userFirstName,
@@ -602,11 +635,13 @@ const App: React.FC = () => {
   };
 
   const renderTodayView = () => {
-    if (loading) {
+    if (loading || loadingHistory) {
       return (
         <div className="loader-container">
           <div className="spinner"></div>
-          <p style={{ color: 'var(--text-muted)' }}>Fetching today's AI updates...</p>
+          <p style={{ color: 'var(--text-muted)' }}>
+            {loadingHistory ? "Loading historical briefing..." : "Fetching today's AI updates..."}
+          </p>
         </div>
       );
     }
@@ -617,7 +652,7 @@ const App: React.FC = () => {
           <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--strategic)', marginBottom: '8px' }}>API Connection Offline</h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>{error}</p>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button 
+            <button
               className="btn-primary"
               style={{ fontSize: '13px', padding: '10px 18px' }}
               onClick={async () => {
@@ -689,12 +724,12 @@ const App: React.FC = () => {
     // Filter articles based on enabled subscriptions
     const filteredArticles = report.articles.filter(article => {
       if (!article.category) return true;
-      
+
       const matchKey = Object.keys(enabledTopics).find(
-        key => key.toLowerCase().includes(article.category!.toLowerCase()) || 
-               article.category!.toLowerCase().includes(key.toLowerCase())
+        key => key.toLowerCase().includes(article.category!.toLowerCase()) ||
+          article.category!.toLowerCase().includes(key.toLowerCase())
       );
-      
+
       if (matchKey !== undefined) {
         return enabledTopics[matchKey] !== false;
       }
@@ -710,12 +745,12 @@ const App: React.FC = () => {
       <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
         {/* Dismissible top subscription banner */}
         {!isEmailSubscribed && !isBannerDismissed && (
-          <div 
-            className="article-card" 
-            style={{ 
-              borderLeft: '4px solid var(--primary)', 
-              padding: '12px 18px', 
-              marginBottom: '24px', 
+          <div
+            className="article-card"
+            style={{
+              borderLeft: '4px solid var(--primary)',
+              padding: '12px 18px',
+              marginBottom: '24px',
               background: 'rgba(228, 185, 91, 0.04)',
               display: 'flex',
               justifyContent: 'space-between',
@@ -726,15 +761,15 @@ const App: React.FC = () => {
               💡 You're reading today's report online. Get tomorrow's report delivered automatically.
             </p>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                className="btn-primary" 
+              <button
+                className="btn-primary"
                 onClick={() => setShowSubscribeModal(true)}
                 style={{ padding: '6px 12px', fontSize: '11px' }}
               >
                 Enable
               </button>
-              <button 
-                className="btn-outline" 
+              <button
+                className="btn-outline"
                 onClick={handleDismissBanner}
                 style={{ padding: '6px 12px', fontSize: '11px', borderColor: 'transparent' }}
               >
@@ -744,9 +779,48 @@ const App: React.FC = () => {
           </div>
         )}
 
-        <div className="header-banner">
-          <h1>{getGreeting(userFirstName)}</h1>
-          <p>Here are today's latest AI updates and briefings computed by OpsiAI.</p>
+        <div className="header-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '30px' }}>
+          <div>
+            <h1 style={{ marginBottom: '4px' }}>{getGreeting(userFirstName)}</h1>
+            <p style={{ margin: 0 }}>Here are the AI updates and briefings computed by OpsiAI.</p>
+          </div>
+          {reportList.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--panel-bg)', padding: '8px 16px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                📅 Briefing Date:
+              </span>
+              <select
+                value={selectedDate}
+                onChange={(e) => handleDateChange(e.target.value)}
+                disabled={loadingHistory}
+                style={{
+                  background: 'transparent',
+                  color: 'var(--text-color)',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  outline: 'none',
+                  cursor: 'pointer',
+                  paddingRight: '10px'
+                }}
+              >
+                {reportList.map((r) => {
+                  let label = r.date;
+                  try {
+                    const parsed = new Date(r.date);
+                    if (!isNaN(parsed.getTime())) {
+                      label = parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    }
+                  } catch (e) {}
+                  return (
+                    <option key={r.date} value={r.date} style={{ background: 'var(--panel-bg)', color: 'var(--text-color)' }}>
+                      {label} {r.date === reportList[0].date ? '(Latest)' : ''}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
         </div>
 
         <Takeaways report={filteredReport} />
@@ -755,11 +829,11 @@ const App: React.FC = () => {
 
         {/* Bottom Premium CTA Card if not subscribed */}
         {!isEmailSubscribed && (
-          <div 
-            className="cta-container" 
-            style={{ 
-              marginTop: '40px', 
-              padding: '40px 30px', 
+          <div
+            className="cta-container"
+            style={{
+              marginTop: '40px',
+              padding: '40px 30px',
               background: 'linear-gradient(180deg, rgba(228, 185, 91, 0.02) 0%, rgba(0,0,0,0) 100%)',
               textAlign: 'center',
               border: '1px solid var(--border)',
@@ -783,19 +857,19 @@ const App: React.FC = () => {
   if (activeRootView === 'signup') {
     return (
       <>
-        <SignUpPage 
+        <SignUpPage
           onNavigateToLogin={() => {
             setActiveRootView('login');
             window.history.pushState(null, '', '/login');
-          }} 
-          onSignUpSuccess={handleSignUpSuccess} 
+          }}
+          onSignUpSuccess={handleSignUpSuccess}
           onClose={() => {
             setActiveRootView('landing');
             window.history.pushState(null, '', '/');
           }}
           onGoogleClick={() => setShowGoogleSoon(true)}
         />
-        <GoogleSoonModal 
+        <GoogleSoonModal
           isOpen={showGoogleSoon}
           onClose={() => setShowGoogleSoon(false)}
         />
@@ -807,19 +881,19 @@ const App: React.FC = () => {
   if (activeRootView === 'login') {
     return (
       <>
-        <LoginPage 
+        <LoginPage
           onNavigateToSignUp={() => {
             setActiveRootView('signup');
             window.history.pushState(null, '', '/signup');
-          }} 
-          onLoginSuccess={handleLoginSuccess} 
+          }}
+          onLoginSuccess={handleLoginSuccess}
           onClose={() => {
             setActiveRootView('landing');
             window.history.pushState(null, '', '/');
           }}
           onGoogleClick={() => setShowGoogleSoon(true)}
         />
-        <GoogleSoonModal 
+        <GoogleSoonModal
           isOpen={showGoogleSoon}
           onClose={() => setShowGoogleSoon(false)}
         />
@@ -831,7 +905,7 @@ const App: React.FC = () => {
   if (activeRootView === 'landing') {
     return (
       <>
-        <LandingPage 
+        <LandingPage
           onNavigateToLogin={() => {
             setActiveRootView('login');
             window.history.pushState(null, '', '/login');
@@ -839,14 +913,14 @@ const App: React.FC = () => {
           onNavigateToSignUp={() => {
             setActiveRootView('signup');
             window.history.pushState(null, '', '/signup');
-          }} 
+          }}
           onViewDemo={() => {
             const demoToken = 'demo-token-opsiai';
             setToken(demoToken);
             setUserId('demo-guest-id');
             setUserEmail('guest@opsiai.com');
             setUserFirstName('Guest');
-            
+
             localStorage.setItem('opsiai_token', demoToken);
             localStorage.setItem('opsiai_userid', 'demo-guest-id');
             localStorage.setItem('opsiai_email', 'guest@opsiai.com');
@@ -855,7 +929,7 @@ const App: React.FC = () => {
             setActiveRootView('dashboard');
             setActiveView('today');
             window.history.pushState(null, '', '/dashboard');
-          }} 
+          }}
           isAuthenticated={!!token}
           onNavigateToDashboard={handleLogoClick}
           onLogout={handleLogout}
@@ -896,17 +970,17 @@ const App: React.FC = () => {
     const filteredArticles = allArticles.filter(art => {
       // Whitelist filter
       if (art.category && enabledTopics) {
-        const hasTopic = Object.keys(enabledTopics).some(topic => 
-          enabledTopics[topic] && 
-          (art.category!.toLowerCase().includes(topic.toLowerCase()) || 
-           topic.toLowerCase().includes(art.category!.toLowerCase()))
+        const hasTopic = Object.keys(enabledTopics).some(topic =>
+          enabledTopics[topic] &&
+          (art.category!.toLowerCase().includes(topic.toLowerCase()) ||
+            topic.toLowerCase().includes(art.category!.toLowerCase()))
         );
         if (!hasTopic) return false;
       }
-      
+
       // Search query filter
       if (searchQuery) {
-        const matchesSearch = 
+        const matchesSearch =
           art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (art.ai_summary && art.ai_summary.toLowerCase().includes(searchQuery.toLowerCase())) ||
           (art.category && art.category.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -938,11 +1012,11 @@ const App: React.FC = () => {
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             <div className="mobile-avatar-btn" onClick={() => handleMobileTabChange('profile')}>
-              <img 
-                src={userFirstName === 'Abhi' 
-                  ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80' 
-                  : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'} 
-                alt="Avatar" 
+              <img
+                src={userFirstName === 'Abhi'
+                  ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'
+                  : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'}
+                alt="Avatar"
               />
             </div>
           </div>
@@ -997,7 +1071,7 @@ const App: React.FC = () => {
               {!isEmailSubscribed && !isBannerDismissed && (
                 <div className="mobile-article-card" style={{ borderLeft: '4px solid var(--primary)', background: 'linear-gradient(135deg, rgba(228, 185, 91, 0.05) 0%, rgba(0,0,0,0) 100%)' }}>
                   <h3 style={{ fontSize: '14px', fontWeight: 700 }}>📬 Get Daily AI Intelligence</h3>
-                  <p className="summary-text">Receive one concise AI Intelligence Report in your inbox every morning. Strategic insights, why it matters explanations, reading time saved.</p>
+                  <p className="summary-text">Receive one concise AI Intelligence Report in your inbox every day. Strategic insights, why it matters explanations, reading time saved.</p>
                   <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
                     <button className="btn-primary" onClick={() => setShowSubscribeModal(true)} style={{ padding: '8px 16px', fontSize: '12px', minHeight: '36px' }}>Subscribe</button>
                     <button className="btn-outline" onClick={handleDismissBanner} style={{ padding: '8px 16px', fontSize: '12px', borderColor: 'transparent', minHeight: '36px' }}>Dismiss</button>
@@ -1015,7 +1089,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="mobile-swipe-card">
                     <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=400&q=80" alt="Concise Briefings" />
-                    <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>2. Get concise reports every morning</p>
+                    <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>2. Get concise reports every day</p>
                   </div>
                   <div className="mobile-swipe-card">
                     <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80" alt="Privacy First" />
@@ -1028,7 +1102,7 @@ const App: React.FC = () => {
 
           {!loading && mobileTab === 'reports' && (
             <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Today's AI Feed</h2>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {searchQuery && (
@@ -1039,6 +1113,45 @@ const App: React.FC = () => {
                   <button className="mobile-icon-btn" style={{ width: '38px', height: '38px' }} onClick={() => setShowFilterDrawer(true)}>⚙️</button>
                 </div>
               </div>
+
+              {/* Mobile Date Selector */}
+              {reportList.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--panel-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                    📅 Date:
+                  </span>
+                  <select
+                    value={selectedDate}
+                    onChange={(e) => handleDateChange(e.target.value)}
+                    disabled={loadingHistory}
+                    style={{
+                      background: 'transparent',
+                      color: 'var(--text-color)',
+                      border: 'none',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      outline: 'none',
+                      cursor: 'pointer',
+                      flex: 1
+                    }}
+                  >
+                    {reportList.map((r) => {
+                      let label = r.date;
+                      try {
+                        const parsed = new Date(r.date);
+                        if (!isNaN(parsed.getTime())) {
+                          label = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        }
+                      } catch (e) {}
+                      return (
+                        <option key={r.date} value={r.date} style={{ background: 'var(--panel-bg)', color: 'var(--text-color)' }}>
+                          {label} {r.date === reportList[0].date ? '(Latest)' : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
 
               {filteredArticles.length === 0 ? (
                 <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -1074,19 +1187,19 @@ const App: React.FC = () => {
                             Read Article ↗
                           </a>
                           <div className="mobile-action-buttons">
-                            <button 
-                              className="mobile-icon-btn" 
-                              style={{ width: '36px', height: '36px', backgroundColor: isBookmarked ? 'var(--primary-glow)' : '' }} 
+                            <button
+                              className="mobile-icon-btn"
+                              style={{ width: '36px', height: '36px', backgroundColor: isBookmarked ? 'var(--primary-glow)' : '' }}
                               onClick={() => toggleBookmark(article)}
                             >
                               {isBookmarked ? '🔖' : '🗂️'}
                             </button>
-                            <button 
-                              className="mobile-icon-btn" 
-                              style={{ width: '36px', height: '36px' }} 
+                            <button
+                              className="mobile-icon-btn"
+                              style={{ width: '36px', height: '36px' }}
                               onClick={() => {
                                 if (navigator.share) {
-                                  navigator.share({ title: article.title, url: article.link }).catch(() => {});
+                                  navigator.share({ title: article.title, url: article.link }).catch(() => { });
                                 } else {
                                   navigator.clipboard.writeText(article.link);
                                   alert('Article link copied to clipboard!');
@@ -1111,10 +1224,10 @@ const App: React.FC = () => {
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Configure Intelligence Feed</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Your selections directly filter your dashboard reports and daily email updates.</p>
               </div>
-              <Preferences 
-                enabledTopics={enabledTopics} 
-                onSave={setEnabledTopics} 
-                userEmail={userEmail} 
+              <Preferences
+                enabledTopics={enabledTopics}
+                onSave={setEnabledTopics}
+                userEmail={userEmail}
                 isEmailSubscribed={isEmailSubscribed}
                 onSetEmailSubscribed={setIsEmailSubscribed}
               />
@@ -1161,19 +1274,19 @@ const App: React.FC = () => {
                             Read Article ↗
                           </a>
                           <div className="mobile-action-buttons">
-                            <button 
-                              className="mobile-icon-btn" 
-                              style={{ width: '36px', height: '36px', backgroundColor: 'var(--primary-glow)' }} 
+                            <button
+                              className="mobile-icon-btn"
+                              style={{ width: '36px', height: '36px', backgroundColor: 'var(--primary-glow)' }}
                               onClick={() => toggleBookmark(article)}
                             >
                               🔖
                             </button>
-                            <button 
-                              className="mobile-icon-btn" 
-                              style={{ width: '36px', height: '36px' }} 
+                            <button
+                              className="mobile-icon-btn"
+                              style={{ width: '36px', height: '36px' }}
                               onClick={() => {
                                 if (navigator.share) {
-                                  navigator.share({ title: article.title, url: article.link }).catch(() => {});
+                                  navigator.share({ title: article.title, url: article.link }).catch(() => { });
                                 } else {
                                   navigator.clipboard.writeText(article.link);
                                   alert('Article link copied to clipboard!');
@@ -1198,22 +1311,22 @@ const App: React.FC = () => {
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Account Settings</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Configure your identity, appearance theme, and subscriptions.</p>
               </div>
-              <ProfilePage 
-                userId={userId} 
-                userEmail={userEmail} 
+              <ProfilePage
+                userId={userId}
+                userEmail={userEmail}
                 defaultView="profile"
                 onProfileUpdated={setUserFirstName}
               />
-              <button 
-                className="btn-outline" 
-                onClick={handleLogout} 
-                style={{ 
-                  marginTop: '10px', 
-                  borderColor: 'var(--strategic)', 
-                  color: 'var(--strategic)', 
-                  minHeight: '48px', 
+              <button
+                className="btn-outline"
+                onClick={handleLogout}
+                style={{
+                  marginTop: '10px',
+                  borderColor: 'var(--strategic)',
+                  color: 'var(--strategic)',
+                  minHeight: '48px',
                   borderRadius: '12px',
-                  fontWeight: 700 
+                  fontWeight: 700
                 }}
               >
                 Log Out
@@ -1251,10 +1364,10 @@ const App: React.FC = () => {
           <div className="mobile-search-overlay">
             <div className="mobile-search-header">
               <div className="mobile-search-input-wrap">
-                <input 
-                  type="text" 
-                  placeholder="Search articles or categories..." 
-                  autoFocus 
+                <input
+                  type="text"
+                  placeholder="Search articles or categories..."
+                  autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSearchSubmit(e.currentTarget.value);
                   }}
@@ -1302,12 +1415,12 @@ const App: React.FC = () => {
             <div className="bottom-drawer">
               <div className="drawer-drag-handle" />
               <h3 className="drawer-title">Filter Feed</h3>
-              
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Category</label>
-                  <select 
-                    value={filterCategory} 
+                  <select
+                    value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
                     style={{ width: '100%', height: '44px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', padding: '0 12px' }}
                   >
@@ -1315,11 +1428,11 @@ const App: React.FC = () => {
                     {uniqueCategories.map(cat => <option value={cat} key={cat}>{cat}</option>)}
                   </select>
                 </div>
-                
+
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Priority</label>
-                  <select 
-                    value={filterPriority} 
+                  <select
+                    value={filterPriority}
                     onChange={(e) => setFilterPriority(e.target.value)}
                     style={{ width: '100%', height: '44px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', padding: '0 12px' }}
                   >
@@ -1332,8 +1445,8 @@ const App: React.FC = () => {
 
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>Source</label>
-                  <select 
-                    value={filterSource} 
+                  <select
+                    value={filterSource}
                     onChange={(e) => setFilterSource(e.target.value)}
                     style={{ width: '100%', height: '44px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', padding: '0 12px' }}
                   >
@@ -1341,10 +1454,10 @@ const App: React.FC = () => {
                     {uniqueSources.map(src => <option value={src} key={src}>{src}</option>)}
                   </select>
                 </div>
-                
+
                 <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                  <button 
-                    className="btn-outline" 
+                  <button
+                    className="btn-outline"
                     onClick={() => {
                       setFilterCategory('All');
                       setFilterPriority('All');
@@ -1355,8 +1468,8 @@ const App: React.FC = () => {
                   >
                     Reset
                   </button>
-                  <button 
-                    className="btn-primary" 
+                  <button
+                    className="btn-primary"
                     onClick={() => setShowFilterDrawer(false)}
                     style={{ flex: 1, minHeight: '44px', borderRadius: '8px' }}
                   >
@@ -1369,18 +1482,18 @@ const App: React.FC = () => {
         )}
 
         {/* Global Overlays */}
-        <WelcomeModal 
+        <WelcomeModal
           isOpen={showWelcomeModal}
           onClose={() => setShowWelcomeModal(false)}
           onNext={handleWelcomeNext}
           firstName={userFirstName}
         />
-        <SubscribeModal 
+        <SubscribeModal
           isOpen={showSubscribeModal}
           onClose={handleSubscribeLater}
           onSubscribe={handleSubscribeConfirm}
         />
-        <GoogleSoonModal 
+        <GoogleSoonModal
           isOpen={showGoogleSoon}
           onClose={() => setShowGoogleSoon(false)}
         />
@@ -1391,30 +1504,30 @@ const App: React.FC = () => {
   // 4. Render Authenticated Dashboard Shell
   return (
     <div className="app-container">
-      <Sidebar 
-        activeView={activeView} 
-        onViewChange={navigateToView} 
-        onLogout={handleLogout} 
+      <Sidebar
+        activeView={activeView}
+        onViewChange={navigateToView}
+        onLogout={handleLogout}
         onLogoClick={handleLogoClick}
         isEmailSubscribed={isEmailSubscribed}
         onEnableEmailClick={() => setShowSubscribeModal(true)}
       />
-      
+
       <main className="main-content">
         {activeView === 'today' && renderTodayView()}
         {activeView === 'preferences' && (
-          <Preferences 
-            enabledTopics={enabledTopics} 
-            onSave={setEnabledTopics} 
-            userEmail={userEmail} 
+          <Preferences
+            enabledTopics={enabledTopics}
+            onSave={setEnabledTopics}
+            userEmail={userEmail}
             isEmailSubscribed={isEmailSubscribed}
             onSetEmailSubscribed={setIsEmailSubscribed}
           />
         )}
         {activeView === 'profile' && userId && userEmail && (
-          <ProfilePage 
-            userId={userId} 
-            userEmail={userEmail} 
+          <ProfilePage
+            userId={userId}
+            userEmail={userEmail}
             defaultView="profile"
             onProfileUpdated={setUserFirstName}
           />
@@ -1423,20 +1536,20 @@ const App: React.FC = () => {
       </main>
 
       {/* Global Welcome & Onboarding Overlays */}
-      <WelcomeModal 
+      <WelcomeModal
         isOpen={showWelcomeModal}
         onClose={() => setShowWelcomeModal(false)}
         onNext={handleWelcomeNext}
         firstName={userFirstName}
       />
 
-      <SubscribeModal 
+      <SubscribeModal
         isOpen={showSubscribeModal}
         onClose={handleSubscribeLater}
         onSubscribe={handleSubscribeConfirm}
       />
 
-      <GoogleSoonModal 
+      <GoogleSoonModal
         isOpen={showGoogleSoon}
         onClose={() => setShowGoogleSoon(false)}
       />

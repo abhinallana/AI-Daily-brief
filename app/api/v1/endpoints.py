@@ -69,6 +69,54 @@ def get_todays_report(repo=Depends(get_repo)):
         ]
     }
 
+@router.get("/reports")
+def get_all_reports(repo=Depends(get_repo)):
+    """Fetches list of all generated daily reports (dates, announcements)."""
+    return repo.get_all_daily_reports()
+
+@router.get("/reports/{report_date}")
+def get_report_by_date(report_date: str, repo=Depends(get_repo)):
+    """Fetches a specific daily report briefing by date."""
+    try:
+        query_date = date.fromisoformat(report_date)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid date format. Expected YYYY-MM-DD."
+        )
+    
+    report = repo.get_daily_report(query_date)
+    if not report:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Report for date {report_date} not found."
+        )
+        
+    return {
+        "date": report.report_date.isoformat(),
+        "biggest_announcement": report.biggest_announcement,
+        "biggest_trend": report.biggest_trend,
+        "one_thing_to_know": report.one_thing_to_know,
+        "time_saved_minutes": report.reading_time_saved_minutes,
+        "articles": [
+            {
+                "title": art.title,
+                "link": art.link,
+                "published_at": art.published_at,
+                "summary": art.summary,
+                "source": art.source,
+                "icon": art.icon,
+                "ai_summary": art.ai_summary,
+                "category": art.category,
+                "priority": art.priority,
+                "why_it_matters": art.why_it_matters,
+                "reading_time": art.reading_time,
+                "link_hash": art.link_hash
+            }
+            for art in report.articles
+        ]
+    }
+
 @router.get("/articles")
 def get_articles(
     repo=Depends(get_repo),
