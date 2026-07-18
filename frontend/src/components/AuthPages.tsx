@@ -71,11 +71,13 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
 
       // Save user profile to backend or Supabase direct fallback
       try {
+        const avatarUrl = `https://robohash.org/${encodeURIComponent(email)}?set=set1&bgset=bg1`;
         await saveProfile({
           id: data.user.id,
           first_name: firstName,
           last_name: lastName || null,
           email: email,
+          avatar_url: avatarUrl,
           newsletter_enabled: false,
           preferred_topics: '',
           theme: 'dark'

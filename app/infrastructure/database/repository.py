@@ -218,28 +218,30 @@ class SQLiteArticleRepository:
 
     def search_articles(self, query: str = None, from_date: str = None, to_date: str = None, limit: int = 100) -> List[Article]:
         """Searches all articles dynamically with keyword and date range filters in SQLite."""
-        conditions = ["is_relevant = 1"]
+        conditions = ["a.is_relevant = 1"]
         params = []
         
         if query:
-            conditions.append("(title LIKE ? OR summary LIKE ? OR ai_summary LIKE ?)")
+            conditions.append("(a.title LIKE ? OR a.summary LIKE ? OR a.ai_summary LIKE ?)")
             q_param = f"%{query}%"
             params.extend([q_param, q_param, q_param])
             
         if from_date:
-            conditions.append("published_at >= ?")
+            conditions.append("r.report_date >= ?")
             params.append(from_date)
             
         if to_date:
-            conditions.append("published_at <= ?")
+            conditions.append("r.report_date <= ?")
             params.append(to_date)
             
         where_clause = " AND ".join(conditions)
         sql = f"""
-        SELECT link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant
-        FROM articles
+        SELECT DISTINCT a.link_hash, a.title, a.link, a.published_at, a.summary, a.source, a.ai_summary, a.category, a.priority, a.why_it_matters, a.reading_time, a.is_relevant
+        FROM articles a
+        JOIN report_articles ra ON a.id = ra.article_id
+        JOIN daily_reports r ON ra.report_id = r.id
         WHERE {where_clause}
-        ORDER BY published_at DESC, id DESC
+        ORDER BY r.report_date DESC, a.id DESC
         LIMIT ?
         """
         params.append(limit)
@@ -760,28 +762,30 @@ class PostgreSQLArticleRepository:
 
     def search_articles(self, query: str = None, from_date: str = None, to_date: str = None, limit: int = 100) -> List[Article]:
         """Searches all articles dynamically with keyword and date range filters in PostgreSQL."""
-        conditions = ["is_relevant = true"]
+        conditions = ["a.is_relevant = true"]
         params = []
         
         if query:
-            conditions.append("(title ILIKE %s OR summary ILIKE %s OR ai_summary ILIKE %s)")
+            conditions.append("(a.title ILIKE %s OR a.summary ILIKE %s OR a.ai_summary ILIKE %s)")
             q_param = f"%{query}%"
             params.extend([q_param, q_param, q_param])
             
         if from_date:
-            conditions.append("published_at >= %s")
+            conditions.append("r.report_date >= %s")
             params.append(from_date)
             
         if to_date:
-            conditions.append("published_at <= %s")
+            conditions.append("r.report_date <= %s")
             params.append(to_date)
             
         where_clause = " AND ".join(conditions)
         sql = f"""
-        SELECT link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant
-        FROM articles
+        SELECT DISTINCT a.link_hash, a.title, a.link, a.published_at, a.summary, a.source, a.ai_summary, a.category, a.priority, a.why_it_matters, a.reading_time, a.is_relevant
+        FROM articles a
+        JOIN report_articles ra ON a.id = ra.article_id
+        JOIN daily_reports r ON ra.report_id = r.id
         WHERE {where_clause}
-        ORDER BY published_at DESC, id DESC
+        ORDER BY r.report_date DESC, a.id DESC
         LIMIT %s
         """
         params.append(limit)

@@ -70,7 +70,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           first_name: 'Abhi',
           last_name: 'Nallana',
           email: userEmail,
-          avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
+          avatar_url: `https://robohash.org/${encodeURIComponent(userEmail || 'abhi')}?set=set1&bgset=bg1`,
           newsletter_enabled: localStorage.getItem('opsiai_email_subscribed') === 'true',
           preferred_topics: Object.keys(JSON.parse(localStorage.getItem('opsiai_subscriptions') || '{}')).filter(k => JSON.parse(localStorage.getItem('opsiai_subscriptions') || '{}')[k]),
           theme: localStorage.getItem('opsiai_theme') || 'dark',
@@ -344,7 +344,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 boxShadow: 'var(--shadow)'
               }}
             >
-              {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : profile?.first_name[0].toUpperCase()}
+              {profile?.avatar_url || profile?.email ? (
+                <img src={profile.avatar_url || `https://robohash.org/${encodeURIComponent(profile.email)}?set=set1&bgset=bg1`} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                profile?.first_name ? profile.first_name[0].toUpperCase() : 'U'
+              )}
             </div>
             <div>
               <h2 style={{ fontSize: '22px', fontWeight: 800 }}>{profile?.first_name} {profile?.last_name}</h2>

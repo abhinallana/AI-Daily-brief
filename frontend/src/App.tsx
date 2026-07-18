@@ -38,6 +38,7 @@ const App: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(localStorage.getItem('opsiai_userid'));
   const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem('opsiai_email'));
   const [userFirstName, setUserFirstName] = useState<string>(localStorage.getItem('opsiai_firstname') || 'Reader');
+  const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('opsiai_avatar'));
 
   // Mobile Native Shell States
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -277,6 +278,10 @@ const App: React.FC = () => {
           if (profileData) {
             setUserFirstName(profileData.first_name);
             localStorage.setItem('opsiai_firstname', profileData.first_name);
+            
+            const avatar = profileData.avatar_url || `https://robohash.org/${encodeURIComponent(email)}?set=set1&bgset=bg1`;
+            setUserAvatar(avatar);
+            localStorage.setItem('opsiai_avatar', avatar);
 
             if (profileData.preferred_topics && profileData.preferred_topics.length > 0) {
               const loaded: Record<string, boolean> = {};
@@ -468,6 +473,10 @@ const App: React.FC = () => {
           if (data) {
             setUserFirstName(data.first_name);
             localStorage.setItem('opsiai_firstname', data.first_name);
+            
+            const avatar = data.avatar_url || `https://robohash.org/${encodeURIComponent(userEmail || 'default')}?set=set1&bgset=bg1`;
+            setUserAvatar(avatar);
+            localStorage.setItem('opsiai_avatar', avatar);
           }
         } catch (err) {
           console.warn('API connection offline. Using locally cached greeting.');
@@ -517,6 +526,10 @@ const App: React.FC = () => {
       if (data) {
         setUserFirstName(data.first_name);
         localStorage.setItem('opsiai_firstname', data.first_name);
+        
+        const avatar = data.avatar_url || `https://robohash.org/${encodeURIComponent(email)}?set=set1&bgset=bg1`;
+        setUserAvatar(avatar);
+        localStorage.setItem('opsiai_avatar', avatar);
 
         // Populate local subscriptions from profile
         if (data.preferred_topics && data.preferred_topics.length > 0) {
@@ -553,15 +566,18 @@ const App: React.FC = () => {
   const handleSignUpSuccess = (newUserId: string, email: string, firstName: string, _lastName: string) => {
     // Save state
     const mockToken = `supabase-jwt-auth-${newUserId}`;
+    const avatarUrl = `https://robohash.org/${encodeURIComponent(email)}?set=set1&bgset=bg1`;
     setToken(mockToken);
     setUserId(newUserId);
     setUserEmail(email);
     setUserFirstName(firstName);
+    setUserAvatar(avatarUrl);
 
     localStorage.setItem('opsiai_token', mockToken);
     localStorage.setItem('opsiai_userid', newUserId);
     localStorage.setItem('opsiai_email', email);
     localStorage.setItem('opsiai_firstname', firstName);
+    localStorage.setItem('opsiai_avatar', avatarUrl);
 
     // Navigate to dashboard
     setActiveRootView('dashboard');
@@ -578,11 +594,13 @@ const App: React.FC = () => {
     setUserId(null);
     setUserEmail(null);
     setUserFirstName('Reader');
+    setUserAvatar(null);
 
     localStorage.removeItem('opsiai_token');
     localStorage.removeItem('opsiai_userid');
     localStorage.removeItem('opsiai_email');
     localStorage.removeItem('opsiai_firstname');
+    localStorage.removeItem('opsiai_avatar');
     localStorage.removeItem('opsiai_email_subscribed');
     localStorage.removeItem('opsiai_banner_dismissed');
 
@@ -1129,9 +1147,7 @@ const App: React.FC = () => {
             </button>
             <div className="mobile-avatar-btn" onClick={() => handleMobileTabChange('profile')}>
               <img
-                src={userFirstName === 'Abhi'
-                  ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'
-                  : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80'}
+                src={userAvatar || `https://robohash.org/${encodeURIComponent(userEmail || 'default')}?set=set1&bgset=bg1`}
                 alt="Avatar"
               />
             </div>

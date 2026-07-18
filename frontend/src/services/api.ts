@@ -381,30 +381,40 @@ export async function searchArticles(query: string, fromDate?: string, toDate?: 
     }
   }
 
-  // Direct Supabase query fallback
+  // Direct Supabase query fallback via report_articles table join
   try {
     let dbQuery = supabase
-      .from('articles')
-      .select('*')
-      .eq('is_relevant', true);
+      .from('report_articles')
+      .select(`
+        article:articles!inner (
+          link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant
+        ),
+        report:daily_reports!inner (
+          report_date
+        )
+      `);
 
     if (query) {
-      // Case-insensitive search on title, summary, or ai_summary
-      dbQuery = dbQuery.or(`title.ilike.%${query}%,summary.ilike.%${query}%,ai_summary.ilike.%${query}%`);
+      dbQuery = dbQuery.or(`title.ilike.%${query}%,summary.ilike.%${query}%,ai_summary.ilike.%${query}%`, { foreignTable: 'articles' });
     }
 
     if (fromDate) {
-      dbQuery = dbQuery.gte('published_at', fromDate);
+      dbQuery = dbQuery.gte('report.report_date', fromDate);
     }
     if (toDate) {
-      dbQuery = dbQuery.lte('published_at', toDate);
+      dbQuery = dbQuery.lte('report.report_date', toDate);
     }
 
-    dbQuery = dbQuery.order('published_at', { ascending: false }).limit(100);
+    dbQuery = dbQuery.order('report_id', { ascending: false }).limit(100);
 
     const { data, error } = await dbQuery;
     if (error) throw error;
-    return data || [];
+
+    const articles: Article[] = (data || [])
+      .map((item: any) => item.article)
+      .filter((art: any) => art && art.is_relevant);
+
+    return articles;
   } catch (e) {
     console.error("Supabase searchArticles query failed:", e);
     return [];
