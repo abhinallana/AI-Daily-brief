@@ -377,6 +377,75 @@ export const Preferences: React.FC<PreferencesProps> = ({
         <p>Build your personalized technical intelligence feed. Selected topics filter your dashboards and daily briefings.</p>
       </div>
 
+      <div 
+        style={{ 
+          background: 'rgba(255, 255, 255, 0.02)', 
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          padding: '20px',
+          marginBottom: '30px',
+          textAlign: 'left'
+        }}
+      >
+        <h3 style={{ fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)', marginBottom: '12px' }}>
+          ⚡ Quick-Select Presets
+        </h3>
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.4' }}>
+          Select a pre-configured pack to instantly toggle interest checkboxes below.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          {[
+            { id: 'ai-engineer', name: 'AI Engineer', icon: '🧠', topics: ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 'MCP', 'GitHub', 'Hugging Face'] },
+            { id: 'devops', name: 'DevOps Specialist', icon: '⚓', topics: ['Kubernetes', 'CNCF', 'GitHub', 'AWS', 'Google Cloud', 'Azure', 'Cloudflare'] },
+            { id: 'cloud', name: 'Cloud Architect', icon: '☁️', topics: ['AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'Kubernetes', 'CNCF'] },
+            { id: 'founder', name: 'Founder & Investor', icon: '📈', topics: ['TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding', 'OpenAI', 'Anthropic', 'xAI', 'Perplexity AI', 'LangChain', 'CrewAI'] },
+            { id: 'general', name: 'General Reader', icon: '🌐', topics: ['OpenAI', 'Anthropic', 'Google Gemini', 'Kubernetes', 'AWS', 'TechCrunch AI', 'YC Blog', 'AI Startup Funding', 'Hugging Face', 'GitHub'] },
+            { id: 'all', name: 'Select All', icon: '✨', topics: ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face', 'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'] }
+          ].map(pack => (
+            <button
+              key={pack.id}
+              onClick={() => {
+                const loaded: Record<string, boolean> = {};
+                const defaultTopics = [
+                  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
+                  'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
+                  'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
+                  'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
+                  'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+                  'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
+                  'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
+                ];
+                defaultTopics.forEach(topicId => {
+                  loaded[topicId] = pack.topics.includes(topicId);
+                });
+                setLocalTopics(loaded);
+                if (onSave) onSave(loaded);
+                setStatus(`${pack.name} preset applied! Click Save Preferences below to persist.`);
+                setTimeout(() => setStatus(null), 4000);
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                color: 'var(--text-color)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 600,
+                transition: 'var(--transition)'
+              }}
+              className="preset-chip"
+            >
+              <span>{pack.icon}</span>
+              {pack.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {status && (
         <div className="article-card" style={{ borderLeft: '3px solid var(--success)', padding: '12px 16px', marginBottom: '24px', background: 'rgba(34, 197, 94, 0.05)' }}>
           <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>🎉 {status}</p>

@@ -7,93 +7,264 @@ interface WelcomeModalProps {
   firstName?: string;
 }
 
-const AVAILABLE_TOPICS = [
-  { id: 'OpenAI', name: 'OpenAI', icon: '🤖' },
-  { id: 'Anthropic', name: 'Anthropic', icon: '🧠' },
-  { id: 'Kubernetes', name: 'Kubernetes', icon: '⚓' },
-  { id: 'AWS', name: 'AWS', icon: '☁️' },
-  { id: 'DevOps', name: 'DevOps', icon: '⚡' },
-  { id: 'AI Agents', name: 'AI Agents', icon: '🦾' },
-  { id: 'Python', name: 'Python', icon: '🐍' },
-  { id: 'Research Papers', name: 'Research Papers', icon: '📄' }
+interface Pack {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  glowColor: string;
+  topics: string[];
+}
+
+const INTELLIGENCE_PACKS: Pack[] = [
+  {
+    id: 'ai-engineer',
+    name: 'AI Engineer Pack',
+    icon: '🧠',
+    description: 'LLMs, AI agents, reasoning models, and orchestration frameworks.',
+    glowColor: 'rgba(139, 92, 246, 0.4)', // Purple
+    topics: [
+      'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
+      'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
+      'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
+      'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
+      'MCP', 'GitHub', 'Hugging Face'
+    ]
+  },
+  {
+    id: 'devops',
+    name: 'DevOps Specialist Pack',
+    icon: '⚓',
+    description: 'Kubernetes, CNCF pipelines, GitHub Actions, and GitOps tools.',
+    glowColor: 'rgba(20, 184, 166, 0.4)', // Teal
+    topics: ['Kubernetes', 'CNCF', 'GitHub', 'AWS', 'Google Cloud', 'Azure', 'Cloudflare']
+  },
+  {
+    id: 'cloud',
+    name: 'Cloud Architect Pack',
+    icon: '☁️',
+    description: 'AWS, GCP, Azure, OCI bare metal, and serverless hosting edges.',
+    glowColor: 'rgba(59, 130, 246, 0.4)', // Blue
+    topics: ['AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'Kubernetes', 'CNCF']
+  },
+  {
+    id: 'founder',
+    name: 'Founder & Investor Pack',
+    icon: '📈',
+    description: 'AI venture investments, YC launches, seed rounds, and tech strategy.',
+    glowColor: 'rgba(245, 158, 11, 0.4)', // Amber/Gold
+    topics: [
+      'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding', 
+      'OpenAI', 'Anthropic', 'xAI', 'Perplexity AI', 'LangChain', 'CrewAI'
+    ]
+  },
+  {
+    id: 'general',
+    name: 'General Reader Pack',
+    icon: '🌐',
+    description: 'A curated mix of the most popular AI, DevOps, and cloud platform news.',
+    glowColor: 'rgba(16, 185, 129, 0.4)', // Emerald Green
+    topics: ['OpenAI', 'Anthropic', 'Google Gemini', 'Kubernetes', 'AWS', 'TechCrunch AI', 'YC Blog', 'AI Startup Funding', 'Hugging Face', 'GitHub']
+  },
+  {
+    id: 'all',
+    name: 'Full Access Pack',
+    icon: '✨',
+    description: 'Enable all 34 tracked topics for comprehensive cloud and AI news coverage.',
+    glowColor: 'rgba(236, 72, 153, 0.4)', // Pink
+    topics: [
+      'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
+      'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
+      'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
+      'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
+      'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+      'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
+      'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
+    ]
+  }
 ];
 
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onNext, firstName }) => {
-  const [selected, setSelected] = useState<string[]>(['OpenAI', 'Kubernetes']);
+  const [selectedPacks, setSelectedPacks] = useState<string[]>(['general']);
 
   if (!isOpen) return null;
 
-  const toggleTopic = (id: string) => {
-    setSelected(prev => 
-      prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]
-    );
+  const togglePack = (packId: string) => {
+    setSelectedPacks(prev => {
+      // If selecting 'all', deselect others. If selecting others, deselect 'all'.
+      if (packId === 'all') {
+        return prev.includes('all') ? [] : ['all'];
+      }
+      
+      let updated = prev.filter(id => id !== 'all');
+      if (updated.includes(packId)) {
+        updated = updated.filter(id => id !== packId);
+      } else {
+        updated = [...updated, packId];
+      }
+      
+      // Default to empty if nothing is selected
+      return updated;
+    });
   };
 
   const handleNext = () => {
-    onNext(selected);
+    // Combine all unique topics from selected packs
+    const combinedTopicsSet = new Set<string>();
+    selectedPacks.forEach(packId => {
+      const pack = INTELLIGENCE_PACKS.find(p => p.id === packId);
+      if (pack) {
+        pack.topics.forEach(t => combinedTopicsSet.add(t));
+      }
+    });
+
+    onNext(Array.from(combinedTopicsSet));
   };
 
   const handleSkip = () => {
-    onNext([]);
+    // Pre-select 'general' topics as a fallback instead of empty list
+    const generalPack = INTELLIGENCE_PACKS.find(p => p.id === 'general');
+    onNext(generalPack ? generalPack.topics : []);
   };
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 1100 }}>
-      <div className="modal-content" style={{ maxWidth: '500px', padding: '30px' }}>
-        <button className="modal-close" onClick={onClose}>&times;</button>
+    <div className="modal-overlay" style={{ zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div 
+        className="modal-content" 
+        style={{ 
+          maxWidth: '850px', 
+          width: '95%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          padding: '40px',
+          background: 'rgba(18, 19, 24, 0.9)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          borderRadius: '16px',
+          position: 'relative'
+        }}
+      >
+        <button 
+          className="modal-close" 
+          onClick={onClose} 
+          style={{ 
+            position: 'absolute', 
+            top: '20px', 
+            right: '20px',
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            color: 'var(--text-muted)',
+            cursor: 'pointer'
+          }}
+        >
+          &times;
+        </button>
         
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px' }}>Welcome, {firstName || 'Reader'} 👋</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Let's personalize your AI Intelligence experience.</p>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '10px', background: 'linear-gradient(135deg, #ffffff 0%, var(--text-muted) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Welcome, {firstName || 'Reader'} 👋
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '15px', maxWidth: '550px', margin: '0 auto', lineHeight: '1.5' }}>
+            Choose one or more **Intelligence Packs** to personalize your AI, DevOps, and cloud news digest feed instantly.
+          </p>
         </div>
 
-        <div style={{ margin: '20px 0' }}>
-          <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.05em' }}>Choose topics of interest</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {AVAILABLE_TOPICS.map(topic => {
-              const isSelected = selected.includes(topic.id);
+        <div style={{ margin: '24px 0' }}>
+          <div 
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', 
+              gap: '20px' 
+            }}
+          >
+            {INTELLIGENCE_PACKS.map(pack => {
+              const isSelected = selectedPacks.includes(pack.id);
               return (
-                <button
-                  key={topic.id}
-                  onClick={() => toggleTopic(topic.id)}
+                <div
+                  key={pack.id}
+                  onClick={() => togglePack(pack.id)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '10px 16px',
-                    borderRadius: '30px',
+                    padding: '24px',
+                    borderRadius: '12px',
                     border: '1px solid',
-                    borderColor: isSelected ? 'var(--primary)' : 'var(--border)',
-                    backgroundColor: isSelected ? 'var(--primary-glow)' : 'transparent',
-                    color: isSelected ? 'var(--primary)' : 'var(--text-color)',
+                    borderColor: isSelected ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
+                    backgroundColor: isSelected ? 'rgba(129, 140, 248, 0.08)' : 'rgba(255, 255, 255, 0.02)',
                     cursor: 'pointer',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    transition: 'var(--transition)'
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: isSelected ? `0 0 20px ${pack.glowColor}` : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '140px',
+                    transform: isSelected ? 'translateY(-2px)' : 'none'
                   }}
+                  className="onboarding-card"
                 >
-                  <span>{topic.icon}</span>
-                  {topic.name}
-                </button>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '32px' }}>{pack.icon}</span>
+                      <div 
+                        style={{ 
+                          width: '18px', 
+                          height: '18px', 
+                          borderRadius: '50%', 
+                          border: '2px solid',
+                          borderColor: isSelected ? 'var(--primary)' : 'var(--border)',
+                          backgroundColor: isSelected ? 'var(--primary)' : 'transparent',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'var(--transition)'
+                        }}
+                      >
+                        {isSelected && (
+                          <span style={{ fontSize: '10px', color: '#000', fontWeight: 900 }}>✓</span>
+                        )}
+                      </div>
+                    </div>
+                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: isSelected ? 'var(--primary)' : 'var(--text-color)', marginBottom: '8px' }}>
+                      {pack.name}
+                    </h3>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                      {pack.description}
+                    </p>
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            marginTop: '35px', 
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)', 
+            paddingTop: '25px',
+            alignItems: 'center'
+          }}
+        >
           <button 
             className="btn-secondary" 
             onClick={handleSkip}
-            style={{ padding: '10px 20px' }}
+            style={{ padding: '12px 28px', fontSize: '13px' }}
           >
-            Skip
+            Use Defaults
           </button>
+          
           <button 
             className="btn-primary" 
             onClick={handleNext}
-            style={{ padding: '10px 24px' }}
+            style={{ 
+              padding: '14px 36px', 
+              fontSize: '13px', 
+              boxShadow: '0 0 15px rgba(129, 140, 248, 0.3)'
+            }}
           >
-            Next
+            Start Reading
           </button>
         </div>
       </div>

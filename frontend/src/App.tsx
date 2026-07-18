@@ -666,18 +666,19 @@ const App: React.FC = () => {
     setShowWelcomeModal(false);
 
     if (selectedTopics.length > 0) {
-      const updatedTopics: Record<string, boolean> = {
-        'OpenAI': false,
-        'Anthropic': false,
-        'Meta AI': false,
-        'Google Gemini': false,
-        'Kubernetes': false,
-        'AWS': false,
-        'Google Cloud': false,
-        'GitHub': false,
-        'Hugging Face': false,
-        'Vercel': false
-      };
+      const defaultTopics = [
+        'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
+        'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
+        'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
+        'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
+        'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+        'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
+        'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
+      ];
+      const updatedTopics: Record<string, boolean> = {};
+      defaultTopics.forEach(topicId => {
+        updatedTopics[topicId] = false;
+      });
       selectedTopics.forEach(topic => {
         updatedTopics[topic] = true;
       });
