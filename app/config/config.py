@@ -34,13 +34,17 @@ class Config:
         "Microsoft AI", "Meta AI", "Hugging Face", "NVIDIA AI", "Kubernetes", 
         "Docker", "DevOps", "AWS", "Azure", "Terraform", "GitHub Actions", 
         "ArgoCD", "Helm", "Platform Engineering", "AI Agents", "MCP", 
-        "LangGraph", "CrewAI", "LLMs", "Open Source AI", "Python", "Cloud Engineering"
+        "LangGraph", "CrewAI", "LLMs", "Open Source AI", "Python", "Cloud Engineering",
+        "Mistral AI", "xAI", "Cohere", "DeepSeek", "Perplexity AI", "Stability AI",
+        "Together AI", "Fireworks AI", "LangChain", "LlamaIndex", "AutoGen", "DSPy",
+        "Haystack", "OpenRouter", "Ollama", "Oracle Cloud", "Cloudflare", "DigitalOcean",
+        "Netlify", "CNCF"
     ]
     
     # Comma-separated list of feeds from environment variables
     _RSS_FEEDS_RAW: str = os.getenv(
         "RSS_FEEDS", 
-        "https://kubernetes.io/feed.xml,https://aws.amazon.com/blogs/aws/feed/,https://www.cncf.io/blog/feed/,https://github.blog/feed/,https://openai.com/blog/rss.xml,https://www.anthropic.com/index.xml,https://research.google/blog/rss/,https://ai.meta.com/blog/rss/,https://huggingface.co/blog/feed.xml,https://blogs.nvidia.com/feed/,https://blog.langchain.dev/rss/,https://blog.llamaindex.ai/feed,https://cloud.google.com/blog/rss/,https://www.hashicorp.com/blog/feed.xml,https://azure.microsoft.com/en-us/blog/feed/,https://feed.infoq.com/devops/news"
+        "https://kubernetes.io/feed.xml,https://aws.amazon.com/blogs/aws/feed/,https://www.cncf.io/blog/feed/,https://github.blog/feed/,https://openai.com/blog/rss.xml,https://www.anthropic.com/index.xml,https://research.google/blog/rss/,https://ai.meta.com/blog/rss/,https://huggingface.co/blog/feed.xml,https://blogs.nvidia.com/feed/,https://blog.langchain.dev/rss/,https://blog.llamaindex.ai/feed,https://cloud.google.com/blog/rss/,https://www.hashicorp.com/blog/feed.xml,https://azure.microsoft.com/en-us/blog/feed/,https://feed.infoq.com/devops/news,https://www.crewai.com/blog/rss,https://openrouter.ai/blog/rss.xml,https://github.com/ollama/ollama/releases.atom,https://blogs.oracle.com/cloud-infrastructure/rss,https://blog.cloudflare.com/rss,https://www.digitalocean.com/blog/rss,https://www.netlify.com/blog/rss.xml"
     )
     
     @property

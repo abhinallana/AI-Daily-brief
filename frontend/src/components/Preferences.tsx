@@ -23,10 +23,36 @@ const CATEGORIES: Category[] = [
     title: 'AI Models & Reasoning Systems',
     icon: '🧠',
     topics: [
-      { id: 'OpenAI', name: 'OpenAI', icon: '🤖', description: 'ChatGPT releases, live audio streaming & Orchestrator APIs.', countThisWeek: 14, recommended: true },
-      { id: 'Anthropic', name: 'Anthropic', icon: '🧠', description: 'Claude models, Reasoning parameters & Model Context Protocol.', countThisWeek: 8, recommended: true },
-      { id: 'Meta AI', name: 'Meta AI', icon: '🦙', description: 'Llama architectures, open-weights releases & PyTorch tools.', countThisWeek: 12 },
-      { id: 'Google Gemini', name: 'Google Gemini', icon: '⚡', description: 'Gemini context expansions, Flash fine-tunes & Vertex platforms.', countThisWeek: 11 }
+      { id: 'OpenAI', name: 'OpenAI', icon: '🤖', description: 'ChatGPT releases, live audio streaming & Orchestrator APIs.', countThisWeek: 0, recommended: true },
+      { id: 'Anthropic', name: 'Anthropic', icon: '🧠', description: 'Claude models, Reasoning parameters & Model Context Protocol.', countThisWeek: 0, recommended: true },
+      { id: 'Meta AI', name: 'Meta AI', icon: '🦙', description: 'Llama architectures, open-weights releases & PyTorch tools.', countThisWeek: 0 },
+      { id: 'Google Gemini', name: 'Google Gemini', icon: '⚡', description: 'Gemini context expansions, Flash fine-tunes & Vertex platforms.', countThisWeek: 0 },
+      { id: 'Mistral AI', name: 'Mistral AI', icon: '🆕', description: 'Mixture of Experts models, codegen weights, and French AI news.', countThisWeek: 0 },
+      { id: 'xAI', name: 'xAI (Grok)', icon: '🆕', description: 'Grok models, real-time X news queries, and reasoning upgrades.', countThisWeek: 0 },
+      { id: 'Cohere', name: 'Cohere', icon: '🆕', description: 'Enterprise RAG, Command models, embed APIs, and custom agent weights.', countThisWeek: 0 },
+      { id: 'DeepSeek', name: 'DeepSeek', icon: '🆕', description: 'DeepSeek models, codegen benchmarks, and open-weights math releases.', countThisWeek: 0 },
+      { id: 'Perplexity AI', name: 'Perplexity AI', icon: '🆕', description: 'Perplexity Pro search agents, Sonar models, and citation news.', countThisWeek: 0 },
+      { id: 'Stability AI', name: 'Stability AI', icon: '🆕', description: 'Stable Diffusion, image/video model updates, and open weights releases.', countThisWeek: 0 },
+      { id: 'Hugging Face Blog', name: 'Hugging Face Blog', icon: '🆕', description: 'Transformers announcements, Space demos, and new datasets.', countThisWeek: 0 },
+      { id: 'Together AI', name: 'Together AI', icon: '🆕', description: 'Fast serverless model hosting, custom fine-tunes, and API status.', countThisWeek: 0 },
+      { id: 'Fireworks AI', name: 'Fireworks AI', icon: '🆕', description: 'Serverless inference APIs, function calling, and structured output speed.', countThisWeek: 0 }
+    ]
+  },
+  {
+    id: 'ai-engineering',
+    title: 'AI Engineering & Agents',
+    icon: '🤖',
+    topics: [
+      { id: 'LangChain', name: 'LangChain', icon: '🦜', description: 'LLM application framework, chains, and prompt templates.', countThisWeek: 0 },
+      { id: 'LangGraph', name: 'LangGraph', icon: '🕸️', description: 'Stateful, multi-agent orchestrator graphs.', countThisWeek: 0 },
+      { id: 'CrewAI', name: 'CrewAI', icon: '👥', description: 'Role-playing autonomous AI agent squads.', countThisWeek: 0 },
+      { id: 'LlamaIndex', name: 'LlamaIndex', icon: '🦙', description: 'Data framework for LLM indexing and RAG integrations.', countThisWeek: 0 },
+      { id: 'AutoGen', name: 'AutoGen', icon: '🤖', description: 'Multi-agent conversation frameworks from Microsoft.', countThisWeek: 0 },
+      { id: 'DSPy', name: 'DSPy', icon: '🧪', description: 'Declarative programming framework for LLMs.', countThisWeek: 0 },
+      { id: 'Haystack', name: 'Haystack', icon: '🌾', description: 'Modular orchestration for semantic search and QA.', countThisWeek: 0 },
+      { id: 'OpenRouter', name: 'OpenRouter', icon: '🔌', description: 'Unified API routing across leading open LLMs.', countThisWeek: 0 },
+      { id: 'Ollama', name: 'Ollama', icon: '🦙', description: 'Run LLMs locally on desktop and server hardware.', countThisWeek: 0 },
+      { id: 'MCP', name: 'MCP (Model Context Protocol)', icon: '🔌', description: 'Standardized context integrations for AI systems.', countThisWeek: 0 }
     ]
   },
   {
@@ -34,9 +60,22 @@ const CATEGORIES: Category[] = [
     title: 'Orchestration & DevOps Stack',
     icon: '⚓',
     topics: [
-      { id: 'Kubernetes', name: 'Kubernetes', icon: '⚓', description: 'Kubelet schedulers, pod autoscalers & cluster control planes.', countThisWeek: 9, recommended: true },
-      { id: 'AWS', name: 'AWS', icon: '☁️', description: 'Bedrock configurations, cloud serverless TPUs & IAM security.', countThisWeek: 15 },
-      { id: 'Google Cloud', name: 'Google Cloud', icon: '☁️', description: 'GCP container engines, TPU clusters & Vertex endpoints.', countThisWeek: 6 }
+      { id: 'Kubernetes', name: 'Kubernetes', icon: '⚓', description: 'Kubelet schedulers, pod autoscalers & cluster control planes.', countThisWeek: 0, recommended: true },
+      { id: 'CNCF', name: 'CNCF', icon: '⚓', description: 'Cloud Native Computing Foundation updates, KubeCon releases, and project status.', countThisWeek: 0 }
+    ]
+  },
+  {
+    id: 'cloud-platforms',
+    title: 'Cloud & CDN Platforms',
+    icon: '☁️',
+    topics: [
+      { id: 'AWS', name: 'AWS', icon: '☁️', description: 'Bedrock configurations, cloud serverless TPUs & IAM security.', countThisWeek: 0 },
+      { id: 'Google Cloud', name: 'Google Cloud', icon: '☁️', description: 'GCP container engines, TPU clusters & Vertex endpoints.', countThisWeek: 0 },
+      { id: 'Azure', name: 'Azure', icon: '☁️', description: 'Azure Kubernetes Service (AKS), AI integrations, and serverless hosts.', countThisWeek: 0 },
+      { id: 'Oracle Cloud', name: 'Oracle Cloud', icon: '☁️', description: 'OCI bare metal GPU shapes, database clusters, and cloud infra.', countThisWeek: 0 },
+      { id: 'Cloudflare', name: 'Cloudflare', icon: '☁️', description: 'Cloudflare Workers, Pages deployments, and security edge runs.', countThisWeek: 0 },
+      { id: 'DigitalOcean', name: 'DigitalOcean', icon: '☁️', description: 'App Platform, droplets configs, and developer-friendly hosting.', countThisWeek: 0 },
+      { id: 'Netlify', name: 'Netlify', icon: '☁️', description: 'JAMstack deployments, Netlify functions, and web hosting integrations.', countThisWeek: 0 }
     ]
   },
   {
@@ -44,8 +83,8 @@ const CATEGORIES: Category[] = [
     title: 'Developer Platforms & Deployment',
     icon: '💻',
     topics: [
-      { id: 'GitHub', name: 'GitHub', icon: '💻', description: 'GitHub Copilot upgrades, Actions pipelines & workspace automation.', countThisWeek: 7, recommended: true },
-      { id: 'Hugging Face', name: 'Hugging Face', icon: '🤗', description: 'Community Transformer libraries, Space hosting & weights downloads.', countThisWeek: 18 }
+      { id: 'GitHub', name: 'GitHub', icon: '💻', description: 'GitHub Copilot upgrades, Actions pipelines & workspace automation.', countThisWeek: 0, recommended: true },
+      { id: 'Hugging Face', name: 'Hugging Face', icon: '🤗', description: 'Community Transformer libraries, Space hosting & weights downloads.', countThisWeek: 0 }
     ]
   }
 ];
@@ -111,8 +150,12 @@ export const Preferences: React.FC<PreferencesProps> = ({
           if (prefs && prefs.length > 0) {
             const loaded: Record<string, boolean> = {};
             const defaultTopics = [
-              'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 
-              'Kubernetes', 'AWS', 'Google Cloud', 'GitHub', 'Hugging Face'
+              'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
+              'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
+              'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
+              'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
+              'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+              'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face'
             ];
             defaultTopics.forEach((topicId: string) => {
               loaded[topicId] = false;

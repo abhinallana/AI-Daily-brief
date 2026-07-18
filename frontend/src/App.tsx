@@ -197,9 +197,34 @@ const App: React.FC = () => {
       'Anthropic': true,
       'Meta AI': true,
       'Google Gemini': true,
+      'Mistral AI': true,
+      'xAI': true,
+      'Cohere': true,
+      'DeepSeek': true,
+      'Perplexity AI': true,
+      'Stability AI': true,
+      'Hugging Face Blog': true,
+      'Together AI': true,
+      'Fireworks AI': true,
+      'LangChain': true,
+      'LangGraph': true,
+      'CrewAI': true,
+      'LlamaIndex': true,
+      'AutoGen': true,
+      'DSPy': true,
+      'Haystack': true,
+      'OpenRouter': true,
+      'Ollama': true,
+      'MCP': true,
       'Kubernetes': true,
+      'CNCF': true,
       'AWS': true,
       'Google Cloud': true,
+      'Azure': true,
+      'Oracle Cloud': true,
+      'Cloudflare': true,
+      'DigitalOcean': true,
+      'Netlify': true,
       'GitHub': true,
       'Hugging Face': true
     };
@@ -287,8 +312,12 @@ const App: React.FC = () => {
               const prefs = await fetchPreferences(email);
               if (prefs && prefs.length > 0) {
                 const defaultTopics = [
-                  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 
-                  'Kubernetes', 'AWS', 'Google Cloud', 'GitHub', 'Hugging Face'
+                  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
+                  'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
+                  'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
+                  'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
+                  'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+                  'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face'
                 ];
                 const loaded: Record<string, boolean> = {};
                 defaultTopics.forEach(topicId => {
