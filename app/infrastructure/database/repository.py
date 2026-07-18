@@ -216,6 +216,59 @@ class SQLiteArticleRepository:
             logger.error(f"Error retrieving recent articles: {e}", exc_info=True)
             return []
 
+    def search_articles(self, query: str = None, from_date: str = None, to_date: str = None, limit: int = 100) -> List[Article]:
+        """Searches all articles dynamically with keyword and date range filters in SQLite."""
+        conditions = ["is_relevant = 1"]
+        params = []
+        
+        if query:
+            conditions.append("(title LIKE ? OR summary LIKE ? OR ai_summary LIKE ?)")
+            q_param = f"%{query}%"
+            params.extend([q_param, q_param, q_param])
+            
+        if from_date:
+            conditions.append("published_at >= ?")
+            params.append(from_date)
+            
+        if to_date:
+            conditions.append("published_at <= ?")
+            params.append(to_date)
+            
+        where_clause = " AND ".join(conditions)
+        sql = f"""
+        SELECT link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant
+        FROM articles
+        WHERE {where_clause}
+        ORDER BY published_at DESC, id DESC
+        LIMIT ?
+        """
+        params.append(limit)
+        
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.execute(sql, tuple(params))
+                rows = cursor.fetchall()
+                return [
+                    Article(
+                        title=row["title"],
+                        link=row["link"],
+                        published_at=row["published_at"],
+                        summary=row["summary"],
+                        source=row["source"],
+                        ai_summary=row["ai_summary"],
+                        category=row["category"],
+                        priority=row["priority"],
+                        why_it_matters=row["why_it_matters"],
+                        is_relevant=bool(row["is_relevant"]),
+                        reading_time=row["reading_time"],
+                        link_hash=row["link_hash"]
+                    )
+                    for row in rows
+                ]
+        except sqlite3.Error as e:
+            logger.error(f"SQLite search_articles failed: {e}", exc_info=True)
+            return []
+
     def save_daily_report(self, report: DailyReport) -> None:
         """Saves a pre-computed DailyReport and its associated articles to the database."""
         date_str = report.report_date.isoformat()
@@ -318,6 +371,10 @@ class SQLiteArticleRepository:
                     reading_time_saved_minutes=rep_row["reading_time_saved_minutes"],
                     articles=articles
                 )
+        except Exception as e:
+            logger.error(f"Error loading DailyReport for {date_str}: {e}", exc_info=True)
+            return None
+
     def get_all_daily_reports(self) -> list:
         """Retrieves list of all saved DailyReports with ID, date and biggest announcement from SQLite."""
         try:
@@ -701,6 +758,62 @@ class PostgreSQLArticleRepository:
             logger.error(f"Error retrieving recent articles from PostgreSQL: {e}", exc_info=True)
             return []
 
+    def search_articles(self, query: str = None, from_date: str = None, to_date: str = None, limit: int = 100) -> List[Article]:
+        """Searches all articles dynamically with keyword and date range filters in PostgreSQL."""
+        conditions = ["is_relevant = true"]
+        params = []
+        
+        if query:
+            conditions.append("(title ILIKE %s OR summary ILIKE %s OR ai_summary ILIKE %s)")
+            q_param = f"%{query}%"
+            params.extend([q_param, q_param, q_param])
+            
+        if from_date:
+            conditions.append("published_at >= %s")
+            params.append(from_date)
+            
+        if to_date:
+            conditions.append("published_at <= %s")
+            params.append(to_date)
+            
+        where_clause = " AND ".join(conditions)
+        sql = f"""
+        SELECT link_hash, title, link, published_at, summary, source, ai_summary, category, priority, why_it_matters, reading_time, is_relevant
+        FROM articles
+        WHERE {where_clause}
+        ORDER BY published_at DESC, id DESC
+        LIMIT %s
+        """
+        params.append(limit)
+        
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(sql, tuple(params))
+                    rows = cursor.fetchall()
+                    if rows:
+                        columns = [col[0] for col in cursor.description]
+                        return [
+                            Article(
+                                title=row[columns.index("title")],
+                                link=row[columns.index("link")],
+                                published_at=str(row[columns.index("published_at")]),
+                                summary=row[columns.index("summary")],
+                                source=row[columns.index("source")],
+                                ai_summary=row[columns.index("ai_summary")],
+                                category=row[columns.index("category")],
+                                priority=row[columns.index("priority")],
+                                why_it_matters=row[columns.index("why_it_matters")],
+                                is_relevant=bool(row[columns.index("is_relevant")]),
+                                reading_time=row[columns.index("reading_time")],
+                                link_hash=row[columns.index("link_hash")]
+                            )
+                            for row in rows
+                        ]
+        except Exception as e:
+            logger.error(f"PostgreSQL search_articles failed: {e}", exc_info=True)
+        return []
+
     def save_daily_report(self, report: DailyReport) -> None:
         """Saves a DailyReport and links articles inside PostgreSQL."""
         date_str = report.report_date.isoformat()
@@ -805,6 +918,10 @@ class PostgreSQLArticleRepository:
                         reading_time_saved_minutes=rep_row[columns.index("reading_time_saved_minutes")],
                         articles=articles
                     )
+        except Exception as e:
+            logger.error(f"Error loading DailyReport for {date_str} from PostgreSQL: {e}", exc_info=True)
+            return None
+
     def get_all_daily_reports(self) -> list:
         """Retrieves list of all saved DailyReports with ID, date and biggest announcement from PostgreSQL."""
         try:

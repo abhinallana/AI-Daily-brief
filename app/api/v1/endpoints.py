@@ -120,12 +120,18 @@ def get_report_by_date(report_date: str, repo=Depends(get_repo)):
 @router.get("/articles")
 def get_articles(
     repo=Depends(get_repo),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=200),
     category: Optional[str] = Query(None),
-    priority: Optional[str] = Query(None)
+    priority: Optional[str] = Query(None),
+    q: Optional[str] = Query(None),
+    from_date: Optional[str] = Query(None),
+    to_date: Optional[str] = Query(None)
 ):
-    """Fetches paginated and filtered historical articles."""
-    articles = repo.get_recent_articles(limit=limit, only_relevant=True)
+    """Fetches paginated, filtered, and searched historical articles."""
+    if q or from_date or to_date:
+        articles = repo.search_articles(query=q, from_date=from_date, to_date=to_date, limit=limit)
+    else:
+        articles = repo.get_recent_articles(limit=limit, only_relevant=True)
     
     filtered = []
     for art in articles:

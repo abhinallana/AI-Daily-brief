@@ -11,7 +11,7 @@ import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
 import { Preferences } from './components/Preferences';
 import { GoogleSoonModal } from './components/GoogleSoonModal';
-import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics, fetchReportList, fetchReportByDate } from './services/api';
+import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics, fetchReportList, fetchReportByDate, searchArticles } from './services/api';
 import type { DailyReport, Article, ReportSummary } from './services/api';
 import { supabase } from './services/supabaseClient';
 
@@ -26,6 +26,10 @@ const App: React.FC = () => {
   const [reportList, setReportList] = useState<ReportSummary[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<Article[]>([]);
+  const [searching, setSearching] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -199,6 +203,20 @@ const App: React.FC = () => {
       'Hugging Face': true,
       'Vercel': true
     };
+  });
+
+  const isSearchActive = !!(searchQuery || fromDate || toDate);
+
+  const filteredSearchArticles = searchResults.filter(article => {
+    if (!article.category) return true;
+    const matchKey = Object.keys(enabledTopics || {}).find(
+      key => key.toLowerCase().includes(article.category!.toLowerCase()) || 
+             article.category!.toLowerCase().includes(key.toLowerCase())
+    );
+    if (matchKey !== undefined) {
+      return enabledTopics[matchKey] !== false;
+    }
+    return true;
   });
 
   // Supabase Auth state listener and initial session loader (Single Source of Truth)
@@ -458,6 +476,29 @@ const App: React.FC = () => {
       loadProfile();
     }
   }, [userId, token]);
+
+  // Dynamic global search and date range filtering synchronization
+  useEffect(() => {
+    const runGlobalQuery = async () => {
+      if (searchQuery || fromDate || toDate) {
+        try {
+          setSearching(true);
+          setError(null);
+          const results = await searchArticles(searchQuery, fromDate, toDate);
+          setSearchResults(results);
+        } catch (err: any) {
+          setError(err.message || 'Failed to search historical briefings database.');
+        } finally {
+          setSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    const timer = setTimeout(runGlobalQuery, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery, fromDate, toDate]);
 
   const handleLoginSuccess = async (newUserId: string, email: string) => {
     // Generate mock token for supabase session compatibility
@@ -779,37 +820,44 @@ const App: React.FC = () => {
           </div>
         )}
 
-        <div className="header-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '30px' }}>
+        {/* Header Greeting Banner */}
+        <div className="header-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '24px' }}>
           <div>
             <h1 style={{ marginBottom: '4px' }}>{getGreeting(userFirstName)}</h1>
-            <p style={{ margin: 0 }}>Here are the AI updates and briefings computed by OpsiAI.</p>
+            <p style={{ margin: 0 }}>Filter, search and personalize your Daily Briefings.</p>
           </div>
-          {reportList.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--panel-bg)', padding: '8px 16px', borderRadius: '10px', border: '1px solid var(--border)' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                📅 Briefing Date:
-              </span>
+        </div>
+
+        {/* Unified Premium Filter & Search Bar */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', background: 'var(--panel-bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '24px' }}>
+          {/* Keyword Search Input */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', flex: '1 1 250px' }}>
+            <span style={{ fontSize: '13px' }}>🔍</span>
+            <input 
+              type="text" 
+              placeholder="Search all historical articles by keyword..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '13px', width: '100%', outline: 'none' }}
+            />
+          </div>
+
+          {/* Date Selector Dropdown (only visible when From/To range is NOT set) */}
+          {!fromDate && !toDate && reportList.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>📅 Date:</span>
               <select
                 value={selectedDate}
                 onChange={(e) => handleDateChange(e.target.value)}
                 disabled={loadingHistory}
-                style={{
-                  background: 'transparent',
-                  color: 'var(--text-color)',
-                  border: 'none',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  outline: 'none',
-                  cursor: 'pointer',
-                  paddingRight: '10px'
-                }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 700, outline: 'none', cursor: 'pointer' }}
               >
                 {reportList.map((r) => {
                   let label = r.date;
                   try {
                     const parsed = new Date(r.date);
                     if (!isNaN(parsed.getTime())) {
-                      label = parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                      label = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     }
                   } catch (e) {}
                   return (
@@ -821,11 +869,79 @@ const App: React.FC = () => {
               </select>
             </div>
           )}
+
+          {/* From Date Input */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>From:</span>
+            <input 
+              type="date" 
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+            />
+          </div>
+
+          {/* To Date Input */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>To:</span>
+            <input 
+              type="date" 
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
+            />
+          </div>
+
+          {/* Clear Filters Button */}
+          {(searchQuery || fromDate || toDate) && (
+            <button 
+              className="btn-outline"
+              onClick={() => {
+                setSearchQuery('');
+                setFromDate('');
+                setToDate('');
+              }}
+              style={{ padding: '8px 16px', fontSize: '12px', borderColor: 'var(--border)' }}
+            >
+              Clear Search ✕
+            </button>
+          )}
         </div>
 
-        <Takeaways report={filteredReport} />
-        <SnapshotBar articles={filteredArticles} />
-        <ArticleFeed articles={filteredArticles} />
+        {/* Main Feed Content (Standard Daily vs Global Search Results) */}
+        {isSearchActive ? (
+          <div>
+            <div className="article-card" style={{ borderLeft: '4px solid var(--primary)', padding: '16px 20px', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '4px', color: 'var(--primary)' }}>
+                🔍 Search Results ({filteredSearchArticles.length} matching articles found)
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
+                Showing matching articles across all historical daily updates.
+              </p>
+            </div>
+            
+            {searching ? (
+              <div className="loader-container">
+                <div className="spinner"></div>
+                <p style={{ color: 'var(--text-muted)' }}>Searching historical briefings...</p>
+              </div>
+            ) : filteredSearchArticles.length === 0 ? (
+              <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--panel-bg)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📰</div>
+                <h3 style={{ fontSize: '16px', fontWeight: 700 }}>No articles match your query or filters</h3>
+                <p style={{ fontSize: '13px', marginTop: '6px' }}>Try adjusting your keywords, category settings, or change the From/To date range.</p>
+              </div>
+            ) : (
+              <ArticleFeed articles={filteredSearchArticles} />
+            )}
+          </div>
+        ) : (
+          <>
+            <Takeaways report={filteredReport} />
+            <SnapshotBar articles={filteredArticles} />
+            <ArticleFeed articles={filteredArticles} />
+          </>
+        )}
 
         {/* Bottom Premium CTA Card if not subscribed */}
         {!isEmailSubscribed && (
@@ -1116,44 +1232,141 @@ const App: React.FC = () => {
 
               {/* Mobile Date Selector */}
               {reportList.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--panel-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '16px' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                    📅 Date:
-                  </span>
-                  <select
-                    value={selectedDate}
-                    onChange={(e) => handleDateChange(e.target.value)}
-                    disabled={loadingHistory}
-                    style={{
-                      background: 'transparent',
-                      color: 'var(--text-color)',
-                      border: 'none',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      outline: 'none',
-                      cursor: 'pointer',
-                      flex: 1
-                    }}
-                  >
-                    {reportList.map((r) => {
-                      let label = r.date;
-                      try {
-                        const parsed = new Date(r.date);
-                        if (!isNaN(parsed.getTime())) {
-                          label = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                        }
-                      } catch (e) {}
-                      return (
-                        <option key={r.date} value={r.date} style={{ background: 'var(--panel-bg)', color: 'var(--text-color)' }}>
-                          {label} {r.date === reportList[0].date ? '(Latest)' : ''}
-                        </option>
-                      );
-                    })}
-                  </select>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'var(--panel-bg)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '16px' }}>
+                  {!fromDate && !toDate && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>📅 Date:</span>
+                      <select
+                        value={selectedDate}
+                        onChange={(e) => handleDateChange(e.target.value)}
+                        disabled={loadingHistory}
+                        style={{ background: 'transparent', color: 'var(--text-color)', border: 'none', fontSize: '12px', fontWeight: 700, outline: 'none', cursor: 'pointer', flex: 1 }}
+                      >
+                        {reportList.map((r) => {
+                          let label = r.date;
+                          try {
+                            const parsed = new Date(r.date);
+                            if (!isNaN(parsed.getTime())) {
+                              label = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            }
+                          } catch (e) {}
+                          return (
+                            <option key={r.date} value={r.date} style={{ background: 'var(--panel-bg)', color: 'var(--text-color)' }}>
+                              {label} {r.date === reportList[0].date ? '(Latest)' : ''}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>From:</span>
+                      <input 
+                        type="date" 
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        style={{ background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-color)', fontSize: '11px', padding: '4px 6px', width: '100%', outline: 'none' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>To:</span>
+                      <input 
+                        type="date" 
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        style={{ background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-color)', fontSize: '11px', padding: '4px 6px', width: '100%', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+                  {(searchQuery || fromDate || toDate) && (
+                    <button 
+                      className="btn-outline"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setFromDate('');
+                        setToDate('');
+                      }}
+                      style={{ padding: '6px 12px', fontSize: '11px', width: '100%', marginTop: '4px', minHeight: '32px' }}
+                    >
+                      Clear Filters ✕
+                    </button>
+                  )}
                 </div>
               )}
 
-              {filteredArticles.length === 0 ? (
+              {isSearchActive ? (
+                searching ? (
+                  <div className="loader-container">
+                    <div className="spinner"></div>
+                    <p style={{ color: 'var(--text-muted)' }}>Searching historical briefings...</p>
+                  </div>
+                ) : filteredSearchArticles.length === 0 ? (
+                  <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📰</div>
+                    <h3>No articles match your query</h3>
+                    <p style={{ fontSize: '13px', marginTop: '6px' }}>Try modifying your filters or search keywords.</p>
+                  </div>
+                ) : (
+                  <div className="mobile-feed-container">
+                    {filteredSearchArticles.map(article => {
+                      const isBookmarked = bookmarks.some(b => b.link === article.link);
+                      return (
+                        <div className="mobile-article-card" key={article.link}>
+                          <div className="meta-badges">
+                            {article.category && <span className="mobile-badge category">{article.category}</span>}
+                            {article.priority && (
+                              <span className={`mobile-badge priority-${article.priority.toLowerCase()}`}>
+                                {article.priority}
+                              </span>
+                            )}
+                            {article.reading_time && <span className="mobile-badge category">{article.reading_time}</span>}
+                          </div>
+                          <h3>{article.title}</h3>
+                          {article.ai_summary && <p className="summary-text">{article.ai_summary}</p>}
+                          {article.why_it_matters && (
+                            <div className="why-matters-box">
+                              <strong>Why It Matters</strong>
+                              <p>{article.why_it_matters}</p>
+                            </div>
+                          )}
+                          <div className="mobile-card-actions">
+                            <a href={article.link} target="_blank" rel="noopener noreferrer" className="mobile-read-link">
+                              Read Article ↗
+                            </a>
+                            <div className="mobile-action-buttons">
+                              <button
+                                className="mobile-icon-btn"
+                                style={{ width: '36px', height: '36px', backgroundColor: isBookmarked ? 'var(--primary-glow)' : '' }}
+                                onClick={() => toggleBookmark(article)}
+                              >
+                                {isBookmarked ? '🔖' : '🗂️'}
+                              </button>
+                              <button
+                                className="mobile-icon-btn"
+                                style={{ width: '36px', height: '36px' }}
+                                onClick={() => {
+                                  if (navigator.share) {
+                                    navigator.share({
+                                      title: article.title,
+                                      url: article.link
+                                    }).catch(() => {});
+                                  } else {
+                                    navigator.clipboard.writeText(article.link);
+                                    alert('Link copied to clipboard!');
+                                  }
+                                }}
+                              >
+                                📤
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : filteredArticles.length === 0 ? (
                 <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>📰</div>
                   <h3>No matching articles</h3>

@@ -363,3 +363,50 @@ export async function savePreferences(email: string, topics: string[]): Promise<
     }
   }
 }
+
+// Search all historical articles globally with range filters
+export async function searchArticles(query: string, fromDate?: string, toDate?: string): Promise<Article[]> {
+  if (import.meta.env.VITE_API_URL) {
+    try {
+      const url = new URL(`${API_BASE_URL}/articles`);
+      if (query) url.searchParams.append('q', query);
+      if (fromDate) url.searchParams.append('from_date', fromDate);
+      if (toDate) url.searchParams.append('to_date', toDate);
+      url.searchParams.append('limit', '100');
+      
+      const response = await fetch(url.toString());
+      if (response.ok) return response.json();
+    } catch (e) {
+      console.warn("Backend articles search failed, trying direct Supabase query.", e);
+    }
+  }
+
+  // Direct Supabase query fallback
+  try {
+    let dbQuery = supabase
+      .from('articles')
+      .select('*')
+      .eq('is_relevant', true);
+
+    if (query) {
+      // Case-insensitive search on title, summary, or ai_summary
+      dbQuery = dbQuery.or(`title.ilike.%${query}%,summary.ilike.%${query}%,ai_summary.ilike.%${query}%`);
+    }
+
+    if (fromDate) {
+      dbQuery = dbQuery.gte('published_at', fromDate);
+    }
+    if (toDate) {
+      dbQuery = dbQuery.lte('published_at', toDate);
+    }
+
+    dbQuery = dbQuery.order('published_at', { ascending: false }).limit(100);
+
+    const { data, error } = await dbQuery;
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Supabase searchArticles query failed:", e);
+    return [];
+  }
+}
