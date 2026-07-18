@@ -359,8 +359,55 @@ export async function savePreferences(email: string, topics: string[]): Promise<
       });
       if (response.ok) return;
     } catch (e) {
-      console.warn("Backend preferences save failed, falling back to local.", e);
+      console.warn("Backend preferences save failed, falling back to direct Supabase.", e);
     }
+  }
+
+  // Direct Supabase query fallback
+  try {
+    const { error } = await supabase
+      .from('user_preferences')
+      .upsert({ 
+        email: email.trim().toLowerCase(), 
+        subscribed_topics: topics.join(',')
+      }, { onConflict: 'email' });
+
+    if (error) throw error;
+  } catch (e) {
+    console.error("Supabase savePreferences failed:", e);
+  }
+}
+
+// Fetch preferences with backend + Supabase direct fallback
+export async function fetchPreferences(email: string): Promise<string[]> {
+  if (import.meta.env.VITE_API_URL) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/preferences?email=${encodeURIComponent(email)}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.subscribed_topics || [];
+      }
+    } catch (e) {
+      console.warn("Backend preferences fetch failed, falling back to direct Supabase.", e);
+    }
+  }
+
+  // Direct Supabase query fallback
+  try {
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .select('subscribed_topics')
+      .eq('email', email.trim().toLowerCase())
+      .maybeSingle();
+
+    if (error) throw error;
+    if (data && data.subscribed_topics) {
+      return data.subscribed_topics.split(',').map((t: string) => t.trim()).filter(Boolean);
+    }
+    return [];
+  } catch (e) {
+    console.error("Supabase fetchPreferences failed:", e);
+    return [];
   }
 }
 

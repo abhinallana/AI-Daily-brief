@@ -11,7 +11,7 @@ import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
 import { Preferences } from './components/Preferences';
 import { GoogleSoonModal } from './components/GoogleSoonModal';
-import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics, fetchReportList, fetchReportByDate, searchArticles } from './services/api';
+import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics, fetchReportList, fetchReportByDate, searchArticles, fetchPreferences } from './services/api';
 import type { DailyReport, Article, ReportSummary } from './services/api';
 import { supabase } from './services/supabaseClient';
 
@@ -201,8 +201,7 @@ const App: React.FC = () => {
       'AWS': true,
       'Google Cloud': true,
       'GitHub': true,
-      'Hugging Face': true,
-      'Vercel': true
+      'Hugging Face': true
     };
   });
 
@@ -283,13 +282,33 @@ const App: React.FC = () => {
             setUserAvatar(avatar);
             localStorage.setItem('opsiai_avatar', avatar);
 
-            if (profileData.preferred_topics && profileData.preferred_topics.length > 0) {
-              const loaded: Record<string, boolean> = {};
-              profileData.preferred_topics.forEach((t: string) => {
-                loaded[t] = true;
-              });
-              setEnabledTopics(loaded);
-              localStorage.setItem('opsiai_subscriptions', JSON.stringify(loaded));
+            // Fetch preferences from user_preferences table
+            try {
+              const prefs = await fetchPreferences(email);
+              if (prefs && prefs.length > 0) {
+                const defaultTopics = [
+                  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 
+                  'Kubernetes', 'AWS', 'Google Cloud', 'GitHub', 'Hugging Face'
+                ];
+                const loaded: Record<string, boolean> = {};
+                defaultTopics.forEach(topicId => {
+                  loaded[topicId] = false;
+                });
+                prefs.forEach(topicId => {
+                  loaded[topicId] = true;
+                });
+                setEnabledTopics(loaded);
+                localStorage.setItem('opsiai_subscriptions', JSON.stringify(loaded));
+              } else if (profileData.preferred_topics && profileData.preferred_topics.length > 0) {
+                const loaded: Record<string, boolean> = {};
+                profileData.preferred_topics.forEach((t: string) => {
+                  loaded[t] = true;
+                });
+                setEnabledTopics(loaded);
+                localStorage.setItem('opsiai_subscriptions', JSON.stringify(loaded));
+              }
+            } catch (prefsErr) {
+              console.warn('Failed to load user preferences on session sync:', prefsErr);
             }
             localStorage.setItem('opsiai_email_subscribed', profileData.newsletter_enabled ? 'true' : 'false');
             setIsEmailSubscribed(profileData.newsletter_enabled);

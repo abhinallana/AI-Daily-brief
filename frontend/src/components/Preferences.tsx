@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { savePreferences, fetchTopicCounts } from '../services/api';
+import { savePreferences, fetchTopicCounts, fetchPreferences } from '../services/api';
 
 interface Topic {
   id: string;
@@ -45,8 +45,7 @@ const CATEGORIES: Category[] = [
     icon: '💻',
     topics: [
       { id: 'GitHub', name: 'GitHub', icon: '💻', description: 'GitHub Copilot upgrades, Actions pipelines & workspace automation.', countThisWeek: 7, recommended: true },
-      { id: 'Hugging Face', name: 'Hugging Face', icon: '🤗', description: 'Community Transformer libraries, Space hosting & weights downloads.', countThisWeek: 18 },
-      { id: 'Vercel', name: 'Vercel', icon: '▲', description: 'Edge function runtimes, NextJS optimization & site deployments.', countThisWeek: 5 }
+      { id: 'Hugging Face', name: 'Hugging Face', icon: '🤗', description: 'Community Transformer libraries, Space hosting & weights downloads.', countThisWeek: 18 }
     ]
   }
 ];
@@ -102,6 +101,35 @@ export const Preferences: React.FC<PreferencesProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    async function syncDBPrefs() {
+      const email = userEmail || localStorage.getItem('opsiai_email');
+      if (email) {
+        try {
+          const prefs = await fetchPreferences(email);
+          if (prefs && prefs.length > 0) {
+            const loaded: Record<string, boolean> = {};
+            const defaultTopics = [
+              'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 
+              'Kubernetes', 'AWS', 'Google Cloud', 'GitHub', 'Hugging Face'
+            ];
+            defaultTopics.forEach((topicId: string) => {
+              loaded[topicId] = false;
+            });
+            prefs.forEach((topicId: string) => {
+              loaded[topicId] = true;
+            });
+            setLocalTopics(loaded);
+            if (onSave) onSave(loaded);
+          }
+        } catch (err) {
+          console.warn('Failed to sync DB preferences on Preferences mount:', err);
+        }
+      }
+    }
+    syncDBPrefs();
+  }, [userEmail]);
 
   useEffect(() => {
     if (enabledTopics) {
