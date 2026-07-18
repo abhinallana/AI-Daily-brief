@@ -86,6 +86,18 @@ const CATEGORIES: Category[] = [
       { id: 'GitHub', name: 'GitHub', icon: '💻', description: 'GitHub Copilot upgrades, Actions pipelines & workspace automation.', countThisWeek: 0, recommended: true },
       { id: 'Hugging Face', name: 'Hugging Face', icon: '🤗', description: 'Community Transformer libraries, Space hosting & weights downloads.', countThisWeek: 0 }
     ]
+  },
+  {
+    id: 'startups-funding',
+    title: 'Startups & Funding',
+    icon: '📈',
+    topics: [
+      { id: 'TechCrunch AI', name: 'TechCrunch AI', icon: '🗞️', description: 'Latest AI venture deals and startup announcements.', countThisWeek: 0 },
+      { id: 'YC Blog', name: 'YC Blog', icon: '🍊', description: 'Y Combinator startup launches, batches, and guides.', countThisWeek: 0 },
+      { id: 'Andreessen Horowitz', name: 'Andreessen Horowitz', icon: '🅰️', description: 'a16z tech investing thesis, AI startup guides, and general briefs.', countThisWeek: 0 },
+      { id: 'Sequoia', name: 'Sequoia', icon: '🌲', description: 'Sequoia Capital portfolio fundings, builder profiles, and AI strategies.', countThisWeek: 0 },
+      { id: 'AI Startup Funding', name: 'AI Startup Funding', icon: '💰', description: 'General venture capital fundings, seed rounds, and M&A deals in AI.', countThisWeek: 0 }
+    ]
   }
 ];
 
@@ -155,7 +167,8 @@ export const Preferences: React.FC<PreferencesProps> = ({
               'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
               'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
               'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
-              'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face'
+              'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
+              'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
             ];
             defaultTopics.forEach((topicId: string) => {
               loaded[topicId] = false;

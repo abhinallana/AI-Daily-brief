@@ -226,7 +226,12 @@ const App: React.FC = () => {
       'DigitalOcean': true,
       'Netlify': true,
       'GitHub': true,
-      'Hugging Face': true
+      'Hugging Face': true,
+      'TechCrunch AI': true,
+      'YC Blog': true,
+      'Andreessen Horowitz': true,
+      'Sequoia': true,
+      'AI Startup Funding': true
     };
   });
 
@@ -317,7 +322,8 @@ const App: React.FC = () => {
                   'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
                   'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
                   'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
-                  'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face'
+                  'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
+                  'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
                 ];
                 const loaded: Record<string, boolean> = {};
                 defaultTopics.forEach(topicId => {

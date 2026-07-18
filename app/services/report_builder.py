@@ -80,7 +80,7 @@ class ReportBuilderService:
         sources = list(articles_by_source.keys())
         indices = {source: 0 for source in sources}
         
-        while len(balanced_articles) < 12:
+        while len(balanced_articles) < 15:
             added_in_round = False
             for source in sources:
                 idx = indices[source]
@@ -88,7 +88,7 @@ class ReportBuilderService:
                     balanced_articles.append(articles_by_source[source][idx])
                     indices[source] += 1
                     added_in_round = True
-                    if len(balanced_articles) == 12:
+                    if len(balanced_articles) == 15:
                         break
             if not added_in_round:
                 break
