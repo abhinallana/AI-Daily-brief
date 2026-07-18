@@ -26,6 +26,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     (localStorage.getItem('opsiai_theme') as 'dark' | 'light') || 'dark'
   );
   const [metrics, setMetrics] = useState<OpsiMetrics | null>(null);
+  const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
+  const [policyType, setPolicyType] = useState<'privacy' | 'terms' | 'doc' | 'release_notes' | 'api_status' | 'about' | 'pricing'>('privacy');
+
+  const handleOpenPolicy = (type: 'privacy' | 'terms' | 'doc' | 'release_notes' | 'api_status' | 'about' | 'pricing') => {
+    setPolicyType(type);
+    setShowPolicyModal(true);
+  };
 
   useEffect(() => {
     async function loadMetrics() {
@@ -333,8 +340,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Editorial Feature Cards */}
       <section className="landing-section" id="features">
         <div className="section-intro">
-          <h2>Engineered for Technical Teams</h2>
-          <p>Editorial metrics built for developers, architects, and product leads.</p>
+          <h2>Engineered for Curious Minds</h2>
+          <p>Editorial metrics built for anyone wanting to stay ahead in AI, tech, and DevOps.</p>
         </div>
         <div className="features-grid">
           <div className="metric-card" style={{ textAlign: 'left' }}>
@@ -392,49 +399,153 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="footer-grid">
           <div className="footer-brand">
             <h3 style={{ color: 'var(--primary)' }}>OpsiAI</h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.6' }}>Technical intelligence parsed and curated daily for cloud teams.</p>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.6' }}>AI and DevOps intelligence parsed and curated daily for everyone.</p>
           </div>
           <div className="footer-col">
             <h4>Product</h4>
             <ul className="footer-links">
-              <li className="footer-link">Features</li>
-              <li className="footer-link">Metrics</li>
-              <li className="footer-link">Pricing</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('about')}>Features</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('about')}>Metrics</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('pricing')}>Pricing</li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>Resources</h4>
             <ul className="footer-links">
-              <li className="footer-link">Documentation</li>
-              <li className="footer-link">Release Notes</li>
-              <li className="footer-link">API Status</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('doc')}>Documentation</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('release_notes')}>Release Notes</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('api_status')}>API Status</li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>Company</h4>
             <ul className="footer-links">
-              <li className="footer-link">About</li>
-              <li className="footer-link">Privacy Policy</li>
-              <li className="footer-link">Terms</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('about')}>About</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('privacy')}>Privacy Policy</li>
+              <li className="footer-link" onClick={() => handleOpenPolicy('terms')}>Terms</li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>Connect</h4>
             <ul className="footer-links">
-              <li className="footer-link">GitHub</li>
-              <li className="footer-link">LinkedIn</li>
-              <li className="footer-link">Contact Support</li>
+              <li className="footer-link"><span style={{ opacity: 0.5, cursor: 'not-allowed' }}>GitHub</span></li>
+              <li className="footer-link"><span style={{ opacity: 0.5, cursor: 'not-allowed' }}>LinkedIn</span></li>
+              <li className="footer-link"><a href="mailto:opsiai127@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }}>Contact Support</a></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom">
           <div>&copy; {new Date().getFullYear()} OpsiAI. All rights reserved.</div>
           <div style={{ display: 'flex', gap: '20px' }}>
-            <span>GitHub</span>
-            <span>LinkedIn</span>
+            <span style={{ opacity: 0.5, cursor: 'not-allowed' }}>GitHub</span>
+            <span style={{ opacity: 0.5, cursor: 'not-allowed' }}>LinkedIn</span>
           </div>
         </div>
       </footer>
+
+      {/* Policy and Info Modals */}
+      {showPolicyModal && (
+        <div className="modal-backdrop" onClick={() => setShowPolicyModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, cursor: 'pointer' }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px', width: '90%', maxHeight: '80vh', overflowY: 'auto', background: 'var(--panel-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '30px', position: 'relative', cursor: 'default', animation: 'fadeIn 0.3s ease-out' }}>
+            <button className="modal-close" onClick={() => setShowPolicyModal(false)} style={{ position: 'absolute', top: '15px', right: '20px', border: 'none', background: 'transparent', color: 'var(--text-color)', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
+            
+            {policyType === 'privacy' && (
+              <div>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>🔒 Privacy Policy</h2>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p><strong>Last updated: July 18, 2026</strong></p>
+                  <p>At OpsiAI, we prioritize the confidentiality and safety of your preferences. This policy details how we handle information:</p>
+                  <p><strong>1. Information Collection:</strong> We only collect your email address and personalized topic subscription configurations to curate daily reports.</p>
+                  <p><strong>2. Third-Party Sharing:</strong> We do not sell or distribute user emails or browsing history to any advertisers or marketing networks.</p>
+                  <p><strong>3. Cookie Usage:</strong> We utilize minimal browser local storage strictly for token session authentication persistence and preferences cache.</p>
+                  <p>For questions regarding this policy, please contact our support desk at <a href="mailto:opsiai127@gmail.com" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>opsiai127@gmail.com</a>.</p>
+                </div>
+              </div>
+            )}
+
+            {policyType === 'terms' && (
+              <div>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>📄 Terms of Service</h2>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p><strong>Last updated: July 18, 2026</strong></p>
+                  <p>By registering or using OpsiAI services, you agree to the following conditions:</p>
+                  <p><strong>1. Proper Usage:</strong> OpsiAI delivers curated daily digests for informational/educational purposes only. Automated scraping of OpsiAI endpoints is prohibited.</p>
+                  <p><strong>2. Fair Subscription:</strong> Users may subscribe to or unsubscribe from our daily newsletter delivery at any time via their profile portal.</p>
+                  <p><strong>3. Limitation of Liability:</strong> OpsiAI is provided "as is". We are not responsible for any direct or indirect actions resulting from the contents of the parsed summaries.</p>
+                </div>
+              </div>
+            )}
+
+            {policyType === 'doc' && (
+              <div>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>📖 Documentation & Guide</h2>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p>Welcome to OpsiAI! Here is a simple guide on how to navigate the platform:</p>
+                  <p><strong>1. Personalize Interests:</strong> Navigate to the <em>Preferences</em> tab to whitelist or blacklist categories (e.g. OpenAI, Kubernetes, AWS). This immediately filters both your dashboard feeds and daily newsletters.</p>
+                  <p><strong>2. Daily Newsfeed:</strong> The dashboard aggregates daily briefings with summaries, "Why It Matters" context, and calculated reading time metrics.</p>
+                  <p><strong>3. Historical Surfing:</strong> Switch dates inside the header menu or apply <em>From/To Date</em> fields to search for keyword topics across all briefings generated till date.</p>
+                  <p><strong>4. Newsletter:</strong> Opt-in or out of the daily automated email briefing in the <em>Profile</em> menu.</p>
+                </div>
+              </div>
+            )}
+
+            {policyType === 'release_notes' && (
+              <div>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>🚀 Release Notes</h2>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p><strong>Version 1.0.0 (First Release)</strong></p>
+                  <p>Welcome to the initial launch of OpsiAI! In this milestone release, we are proud to introduce:</p>
+                  <p><strong>• AI-Powered Parsing:</strong> Automated scraping and indexing of key AI and DevOps engineering posts via Gemini AI.</p>
+                  <p><strong>• Personalized Whitelisting:</strong> Interactive preference controls to select exactly what news categories matter to you.</p>
+                  <p><strong>• Global Search & Ranges:</strong> Advanced search functionality scanning all historical reports by keyword or From/To dates.</p>
+                  <p><strong>• Mobile Shell UI:</strong> Premium native-app-like experience optimized for smartphones and tablets.</p>
+                </div>
+              </div>
+            )}
+
+            {policyType === 'api_status' && (
+              <div>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>🟢 System & API Status</h2>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p>Real-time status updates of OpsiAI components:</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: 'var(--body-bg)', padding: '15px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <div><strong>API Gateway:</strong> <span style={{ color: 'var(--success)' }}>Operational 🟢</span></div>
+                    <div><strong>PostgreSQL/Supabase DB:</strong> <span style={{ color: 'var(--success)' }}>Connected 🟢</span></div>
+                    <div><strong>AI Scraper Cron:</strong> <span style={{ color: 'var(--success)' }}>Active (Daily) 🟢</span></div>
+                    <div><strong>SMTP Server:</strong> <span style={{ color: 'var(--success)' }}>Operational 🟢</span></div>
+                  </div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Status checks are updated dynamically. Last checked: just now.</p>
+                </div>
+              </div>
+            )}
+
+            {policyType === 'about' && (
+              <div>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>ℹ️ About OpsiAI</h2>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p>OpsiAI was founded in 2026 to solve modern information overload.</p>
+                  <p>Every day, hundreds of announcements, releases, and articles are published across the AI and DevOps ecosystem. Finding the raw engineering facts behind the headlines requires hours of tedious scrolling.</p>
+                  <p>OpsiAI automates this entirely. Using Gemini AI model analysis, our crawler parses and evaluates the daily news pipeline, indexing whitelisted updates, translating why it matters, and delivering a clean intelligence digest directly to your inbox and dashboard.</p>
+                </div>
+              </div>
+            )}
+
+            {policyType === 'pricing' && (
+              <div>
+                <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>💎 Pricing</h2>
+                <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p><strong>Beta Access:</strong> OpsiAI is currently in free public beta.</p>
+                  <p>Enjoy unlimited daily email newsletters, whitelisted custom topic settings, and full access to our historical multi-date search engines at no charge.</p>
+                </div>
+              </div>
+            )}
+            
+            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn-primary" onClick={() => setShowPolicyModal(false)} style={{ padding: '8px 20px', fontSize: '12px' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
