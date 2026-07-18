@@ -12,9 +12,9 @@ interface LandingPageProps {
   onNavigateToTab?: (tab: string) => void;
 }
 
-export const LandingPage: React.FC<LandingPageProps> = ({ 
-  onNavigateToLogin, 
-  onNavigateToSignUp, 
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onNavigateToLogin,
+  onNavigateToSignUp,
   onViewDemo,
   isAuthenticated = false,
   onNavigateToDashboard,
@@ -83,15 +83,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Editorial Navigation */}
       <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
-        <div 
-          className="nav-logo" 
+        <div
+          className="nav-logo"
           onClick={() => {
             if (isAuthenticated && onNavigateToDashboard) {
               onNavigateToDashboard();
             } else {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
-          }} 
+          }}
           style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
         >
           <img src="/logo.jpg" alt="OpsiAI Logo" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -101,7 +101,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {isAuthenticated ? (
           <ul className="nav-items">
             <li className="nav-link" onClick={() => onNavigateToDashboard && onNavigateToDashboard()}>Dashboard</li>
-            <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('reports')}>Reports</li>
+            <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('reports')}>Daily Reports</li>
             <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Topics</li>
             <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('profile')}>Profile</li>
           </ul>
@@ -379,7 +379,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
         <div style={{ position: 'relative', background: 'var(--panel-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '30px', opacity: 0.4, pointerEvents: 'none', maxWidth: '850px', margin: '0 auto' }}>
           <span style={{ position: 'absolute', top: '-12px', right: '20px', backgroundColor: 'var(--primary)', color: '#0b0f19', fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Coming Soon</span>
-          
+
           <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '16px', marginBottom: '16px' }}>
             <div style={{ width: '80px', height: '24px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
             <div style={{ marginLeft: 'auto', width: '200px', height: '24px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}></div>
@@ -404,8 +404,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="footer-col">
             <h4>Product</h4>
             <ul className="footer-links">
-              <li className="footer-link" onClick={() => handleOpenPolicy('about')}>Features</li>
-              <li className="footer-link" onClick={() => handleOpenPolicy('about')}>Metrics</li>
+              <li className="footer-link" onClick={() => {
+                const el = document.getElementById('features');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}>Features</li>
+              <li className="footer-link" onClick={() => {
+                const el = document.getElementById('metrics');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}>Metrics</li>
               <li className="footer-link" onClick={() => handleOpenPolicy('pricing')}>Pricing</li>
             </ul>
           </div>
@@ -448,7 +454,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="modal-backdrop" onClick={() => setShowPolicyModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, cursor: 'pointer' }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px', width: '90%', maxHeight: '80vh', overflowY: 'auto', background: 'var(--panel-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '30px', position: 'relative', cursor: 'default', animation: 'fadeIn 0.3s ease-out' }}>
             <button className="modal-close" onClick={() => setShowPolicyModal(false)} style={{ position: 'absolute', top: '15px', right: '20px', border: 'none', background: 'transparent', color: 'var(--text-color)', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
-            
+
             {policyType === 'privacy' && (
               <div>
                 <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>🔒 Privacy Policy</h2>
@@ -539,7 +545,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
             )}
-            
+
             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
               <button className="btn-primary" onClick={() => setShowPolicyModal(false)} style={{ padding: '8px 20px', fontSize: '12px' }}>Close</button>
             </div>
