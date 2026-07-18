@@ -155,6 +155,11 @@ def get_articles(
         })
     return filtered
 
+@router.get("/articles/counts")
+def get_weekly_article_counts(repo=Depends(get_repo)):
+    """Fetches weekly article counts per category/topic from the last 7 days."""
+    return repo.get_weekly_topic_counts()
+
 @router.get("/metrics")
 def get_opsi_metrics(repo=Depends(get_repo)):
     """Fetches real-time OpsiAI metrics for the landing page."""

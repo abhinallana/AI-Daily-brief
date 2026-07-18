@@ -439,6 +439,27 @@ class SQLiteArticleRepository:
                 "time_saved_hours": 0
             }
 
+    def get_weekly_topic_counts(self) -> dict:
+        """Computes weekly article counts per category/topic from the last 7 days in SQLite."""
+        try:
+            from datetime import date, timedelta
+            limit_date = (date.today() - timedelta(days=7)).isoformat()
+            
+            with self._get_connection() as conn:
+                cursor = conn.execute("""
+                    SELECT a.category, COUNT(*) 
+                    FROM articles a
+                    JOIN report_articles ra ON a.id = ra.article_id
+                    JOIN daily_reports dr ON ra.report_id = dr.id
+                    WHERE dr.report_date >= ? AND a.category IS NOT NULL AND a.category != ''
+                    GROUP BY a.category
+                """, (limit_date,))
+                rows = cursor.fetchall()
+                return {row[0]: row[1] for row in rows}
+        except Exception as e:
+            logger.error(f"Error loading SQLite weekly topic counts: {e}", exc_info=True)
+            return {}
+
     def save_user_preferences(self, email: str, topics: list[str]) -> None:
         """Saves or updates active topic preferences for a user in SQLite."""
         topics_str = ",".join(topics)
@@ -991,6 +1012,28 @@ class PostgreSQLArticleRepository:
                 "reports_generated": 0,
                 "time_saved_hours": 0
             }
+
+    def get_weekly_topic_counts(self) -> dict:
+        """Computes weekly article counts per category/topic from the last 7 days in PostgreSQL."""
+        try:
+            from datetime import date, timedelta
+            limit_date = date.today() - timedelta(days=7)
+            
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT a.category, COUNT(*) 
+                        FROM articles a
+                        JOIN report_articles ra ON a.id = ra.article_id
+                        JOIN daily_reports dr ON ra.report_id = dr.id
+                        WHERE dr.report_date >= %s AND a.category IS NOT NULL AND a.category != ''
+                        GROUP BY a.category
+                    """, (limit_date,))
+                    rows = cursor.fetchall()
+                    return {row[0]: row[1] for row in rows}
+        except Exception as e:
+            logger.error(f"Error loading PostgreSQL weekly topic counts: {e}", exc_info=True)
+            return {}
 
     def save_user_preferences(self, email: str, topics: list[str]) -> None:
         """Saves or updates active topic preferences for a user in PostgreSQL."""

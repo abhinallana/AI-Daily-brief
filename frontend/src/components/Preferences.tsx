@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { savePreferences } from '../services/api';
+import { savePreferences, fetchTopicCounts } from '../services/api';
 
 interface Topic {
   id: string;
@@ -81,6 +81,19 @@ export const Preferences: React.FC<PreferencesProps> = ({
 
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    async function loadCounts() {
+      try {
+        const counts = await fetchTopicCounts();
+        setDbCounts(counts);
+      } catch (err) {
+        console.warn('Failed to load real-time topic counts:', err);
+      }
+    }
+    loadCounts();
+  }, []);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -343,10 +356,10 @@ export const Preferences: React.FC<PreferencesProps> = ({
                       className="auth-input"
                       style={{ background: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border)' }}
                     >
-                      <option value="06:00 AM">06:00 AM (EST)</option>
-                      <option value="08:00 AM">08:00 AM (EST)</option>
-                      <option value="10:00 AM">10:00 AM (EST)</option>
-                      <option value="12:00 PM">12:00 PM (EST)</option>
+                      <option value="06:00 AM">06:00 AM (IST)</option>
+                      <option value="08:00 AM">08:00 AM (IST)</option>
+                      <option value="10:00 AM">10:00 AM (IST)</option>
+                      <option value="12:00 PM">12:00 PM (IST)</option>
                     </select>
                   </div>
 
@@ -413,9 +426,9 @@ export const Preferences: React.FC<PreferencesProps> = ({
                             {topic.recommended && (
                               <span style={{ fontSize: '9px', backgroundColor: 'var(--primary-glow)', color: 'var(--primary)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--primary)', fontWeight: 800, textTransform: 'uppercase' }}>Recommended</span>
                             )}
-                            <span style={{ fontFamily: 'var(--font-stats)', fontSize: '11px', color: 'var(--accent)', marginLeft: 'auto' }}>
-                              {topic.countThisWeek} this week
-                            </span>
+                             <span style={{ fontFamily: 'var(--font-stats)', fontSize: '11px', color: 'var(--accent)', marginLeft: 'auto' }}>
+                               {dbCounts[topic.id] !== undefined ? dbCounts[topic.id] : 0} this week
+                             </span>
                           </div>
                           <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>
                             {topic.description}

@@ -420,3 +420,46 @@ export async function searchArticles(query: string, fromDate?: string, toDate?: 
     return [];
   }
 }
+
+// Fetch real-time weekly article counts grouped by category/topic from the database
+export async function fetchTopicCounts(): Promise<Record<string, number>> {
+  if (import.meta.env.VITE_API_URL) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/articles/counts`);
+      if (response.ok) return response.json();
+    } catch (e) {
+      console.warn("Backend counts fetch failed, falling back to direct Supabase.", e);
+    }
+  }
+
+  // Direct Supabase query fallback (last 7 days)
+  try {
+    const limitDate = new Date();
+    limitDate.setDate(limitDate.getDate() - 7);
+    const limitStr = limitDate.toISOString().split('T')[0];
+
+    const { data, error } = await supabase
+      .from('report_articles')
+      .select(`
+        article:articles!inner (category),
+        report:daily_reports!inner (report_date)
+      `)
+      .gte('report.report_date', limitStr);
+
+    if (error) throw error;
+
+    const counts: Record<string, number> = {};
+    if (data) {
+      data.forEach((item: any) => {
+        const cat = item.article?.category;
+        if (cat) {
+          counts[cat] = (counts[cat] || 0) + 1;
+        }
+      });
+    }
+    return counts;
+  } catch (e) {
+    console.error("Failed to fetch topic counts from Supabase:", e);
+    return {};
+  }
+}
