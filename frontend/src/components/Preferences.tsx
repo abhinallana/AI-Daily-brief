@@ -27,15 +27,15 @@ const CATEGORIES: Category[] = [
       { id: 'Anthropic', name: 'Anthropic', icon: '🧠', description: 'Claude models, Reasoning parameters & Model Context Protocol.', countThisWeek: 0, recommended: true },
       { id: 'Meta AI', name: 'Meta AI', icon: '🦙', description: 'Llama architectures, open-weights releases & PyTorch tools.', countThisWeek: 0 },
       { id: 'Google Gemini', name: 'Google Gemini', icon: '⚡', description: 'Gemini context expansions, Flash fine-tunes & Vertex platforms.', countThisWeek: 0 },
-      { id: 'Mistral AI', name: 'Mistral AI', icon: '🆕', description: 'Mixture of Experts models, codegen weights, and French AI news.', countThisWeek: 0 },
-      { id: 'xAI', name: 'xAI (Grok)', icon: '🆕', description: 'Grok models, real-time X news queries, and reasoning upgrades.', countThisWeek: 0 },
-      { id: 'Cohere', name: 'Cohere', icon: '🆕', description: 'Enterprise RAG, Command models, embed APIs, and custom agent weights.', countThisWeek: 0 },
-      { id: 'DeepSeek', name: 'DeepSeek', icon: '🆕', description: 'DeepSeek models, codegen benchmarks, and open-weights math releases.', countThisWeek: 0 },
-      { id: 'Perplexity AI', name: 'Perplexity AI', icon: '🆕', description: 'Perplexity Pro search agents, Sonar models, and citation news.', countThisWeek: 0 },
-      { id: 'Stability AI', name: 'Stability AI', icon: '🆕', description: 'Stable Diffusion, image/video model updates, and open weights releases.', countThisWeek: 0 },
-      { id: 'Hugging Face Blog', name: 'Hugging Face Blog', icon: '🆕', description: 'Transformers announcements, Space demos, and new datasets.', countThisWeek: 0 },
-      { id: 'Together AI', name: 'Together AI', icon: '🆕', description: 'Fast serverless model hosting, custom fine-tunes, and API status.', countThisWeek: 0 },
-      { id: 'Fireworks AI', name: 'Fireworks AI', icon: '🆕', description: 'Serverless inference APIs, function calling, and structured output speed.', countThisWeek: 0 }
+      { id: 'Mistral AI', name: 'Mistral AI', icon: '🌬️', description: 'Mixture of Experts models, codegen weights, and French AI news.', countThisWeek: 0 },
+      { id: 'xAI', name: 'xAI (Grok)', icon: '🕳️', description: 'Grok models, real-time X news queries, and reasoning upgrades.', countThisWeek: 0 },
+      { id: 'Cohere', name: 'Cohere', icon: '🧬', description: 'Enterprise RAG, Command models, embed APIs, and custom agent weights.', countThisWeek: 0 },
+      { id: 'DeepSeek', name: 'DeepSeek', icon: '🐳', description: 'DeepSeek models, codegen benchmarks, and open-weights math releases.', countThisWeek: 0 },
+      { id: 'Perplexity AI', name: 'Perplexity AI', icon: '🔍', description: 'Perplexity Pro search agents, Sonar models, and citation news.', countThisWeek: 0 },
+      { id: 'Stability AI', name: 'Stability AI', icon: '🎨', description: 'Stable Diffusion, image/video model updates, and open weights releases.', countThisWeek: 0 },
+      { id: 'Hugging Face Blog', name: 'Hugging Face Blog', icon: '🤗', description: 'Transformers announcements, Space demos, and new datasets.', countThisWeek: 0 },
+      { id: 'Together AI', name: 'Together AI', icon: '🤝', description: 'Fast serverless model hosting, custom fine-tunes, and API status.', countThisWeek: 0 },
+      { id: 'Fireworks AI', name: 'Fireworks AI', icon: '🎆', description: 'Serverless inference APIs, function calling, and structured output speed.', countThisWeek: 0 }
     ]
   },
   {
