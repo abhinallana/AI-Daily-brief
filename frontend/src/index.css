@@ -1569,6 +1569,20 @@ input:checked + .slider:before {
   .metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .landing-section {
+    padding: 60px 20px;
+  }
+  .section-intro h2 {
+    font-size: 24px;
+  }
+  .carousel-wrapper {
+    gap: 16px;
+    padding-bottom: 24px;
+  }
+  .carousel-card {
+    flex: 0 0 280px;
+    padding: 16px;
+  }
 }
 
 @media (max-width: 576px) {
