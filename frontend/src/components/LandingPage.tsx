@@ -347,9 +347,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* CTA Section */}
         <div style={{ padding: '50px 16px', textAlign: 'center', borderTop: '1px solid var(--border)', background: 'linear-gradient(180deg, rgba(228, 185, 91, 0.02) 0%, rgba(0,0,0,0) 100%)' }}>
-          <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Start Every Morning Smarter.</h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Join OpsiAI and receive curated AI intelligence instead of endless headlines.</p>
-          <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
+          {isAuthenticated ? (
+            <>
+              <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Ready to Explore Your Technical Feed?</h2>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Access your personalized reports and configure your whitelisted topics.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToDashboard}>Go to Dashboard</button>
+                <button className="btn-outline" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Configure Topics</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Start Every Morning Smarter.</h2>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Join OpsiAI and receive curated AI intelligence instead of endless headlines.</p>
+              <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
+            </>
+          )}
         </div>
 
         {/* Mobile Footer */}
@@ -738,9 +751,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
       {/* Final CTA */}
       <section className="cta-container">
-        <h2>Start Every Morning Smarter.</h2>
-        <p>Join OpsiAI and receive curated AI intelligence instead of endless headlines.</p>
-        <button className="btn-primary btn-large" onClick={onNavigateToSignUp}>Get Started Free</button>
+        {isAuthenticated ? (
+          <>
+            <h2>Ready to Explore Your Technical Feed?</h2>
+            <p>Access your personalized reports and configure your whitelisted topics.</p>
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
+              <button className="btn-primary btn-large" onClick={onNavigateToDashboard}>Go to Dashboard</button>
+              <button className="btn-outline btn-large" onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Configure Topics</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2>Start Every Morning Smarter.</h2>
+            <p>Join OpsiAI and receive curated AI intelligence instead of endless headlines.</p>
+            <button className="btn-primary btn-large" onClick={onNavigateToSignUp}>Get Started Free</button>
+          </>
+        )}
       </section>
 
       {/* Editorial Footer */}
