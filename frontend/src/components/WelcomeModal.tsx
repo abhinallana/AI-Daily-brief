@@ -199,15 +199,13 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
                     borderColor: isSelected ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
                     backgroundColor: isSelected ? 'rgba(129, 140, 248, 0.08)' : 'rgba(255, 255, 255, 0.02)',
                     cursor: 'pointer',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     boxShadow: isSelected ? `0 0 20px ${pack.glowColor}` : 'none',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    minHeight: isMobile ? '110px' : '140px',
-                    transform: isSelected ? 'translateY(-2px)' : 'none'
+                    minHeight: isMobile ? '110px' : '140px'
                   }}
-                  className="onboarding-card"
+                  className={`onboarding-card ${isSelected ? 'selected' : ''}`}
                 >
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
