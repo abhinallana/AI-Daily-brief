@@ -1752,8 +1752,9 @@ input:checked + .slider:before {
   justify-content: center;
   gap: 4px;
   color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  font-weight: 700;
   cursor: pointer;
   background: none;
   border: none;

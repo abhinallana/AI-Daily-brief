@@ -1266,24 +1266,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {/* Horizontal screenshots card carousel */}
-              <div style={{ marginTop: '10px' }}>
-                <h3 style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '12px', fontWeight: 800 }}>Onboarding Carousel</h3>
-                <div className="mobile-swipe-carousel-wrap">
-                  <div className="mobile-swipe-card">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80" alt="Dashboard customization" />
-                    <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>1. Choose your technical interests</p>
-                  </div>
-                  <div className="mobile-swipe-card">
-                    <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=400&q=80" alt="Concise Briefings" />
-                    <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>2. Get concise reports every day</p>
-                  </div>
-                  <div className="mobile-swipe-card">
-                    <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&q=80" alt="Privacy First" />
-                    <p style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-color)', margin: 0 }}>3. Dynamic toggles respect your privacy</p>
-                  </div>
-                </div>
-              </div>
+              <div style={{ minHeight: '20px' }} />
             </>
           )}
 
@@ -1330,26 +1313,7 @@ const App: React.FC = () => {
                       </select>
                     </div>
                   )}
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>From:</span>
-                      <input 
-                        type="date" 
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        style={{ background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-color)', fontSize: '11px', padding: '4px 6px', width: '100%', outline: 'none' }}
-                      />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>To:</span>
-                      <input 
-                        type="date" 
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        style={{ background: 'var(--body-bg)', border: '1px solid var(--border)', borderRadius: '6px', color: 'var(--text-color)', fontSize: '11px', padding: '4px 6px', width: '100%', outline: 'none' }}
-                      />
-                    </div>
-                  </div>
+                  {/* From/To inputs are now inside the Filter drawer */}
                   {(searchQuery || fromDate || toDate) && (
                     <button 
                       className="btn-outline"
@@ -1518,99 +1482,62 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {!loading && mobileTab === 'bookmarks' && (
-            <>
-              <div style={{ marginBottom: '4px' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Saved Briefings</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Offline-ready bookmarks you have saved for reading.</p>
-              </div>
-
-              {bookmarks.length === 0 ? (
-                <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
-                  <h3>No Saved Briefings</h3>
-                  <p style={{ fontSize: '13px', marginTop: '6px' }}>Tap the folder icon on any article card to save it here for later reading.</p>
-                </div>
-              ) : (
-                <div className="mobile-feed-container">
-                  {bookmarks.map(article => {
-                    return (
-                      <div className="mobile-article-card" key={article.link}>
-                        <div className="meta-badges">
-                          {article.category && <span className="mobile-badge category">{article.category}</span>}
-                          {article.priority && (
-                            <span className={`mobile-badge priority-${article.priority.toLowerCase()}`}>
-                              {article.priority}
-                            </span>
-                          )}
-                          {article.reading_time && <span className="mobile-badge category">{article.reading_time}</span>}
-                        </div>
-                        <h3>{article.title}</h3>
-                        {article.ai_summary && <p className="summary-text">{article.ai_summary}</p>}
-                        {article.why_it_matters && (
-                          <div className="why-matters-box">
-                            <strong>Why It Matters</strong>
-                            <p>{article.why_it_matters}</p>
-                          </div>
-                        )}
-                        <div className="mobile-card-actions">
-                          <a href={article.link} target="_blank" rel="noopener noreferrer" className="mobile-read-link">
-                            Read Article ↗
-                          </a>
-                          <div className="mobile-action-buttons">
-                            <button
-                              className="mobile-icon-btn"
-                              style={{ width: '36px', height: '36px', backgroundColor: 'var(--primary-glow)' }}
-                              onClick={() => toggleBookmark(article)}
-                            >
-                              🔖
-                            </button>
-                            <button
-                              className="mobile-icon-btn"
-                              style={{ width: '36px', height: '36px' }}
-                              onClick={() => {
-                                if (navigator.share) {
-                                  navigator.share({ title: article.title, url: article.link }).catch(() => { });
-                                } else {
-                                  navigator.clipboard.writeText(article.link);
-                                  alert('Article link copied to clipboard!');
-                                }
-                              }}
-                            >
-                              📤
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
-
           {!loading && mobileTab === 'profile' && userId && userEmail && (
             <div className="mobile-settings-container">
               <div style={{ marginBottom: '4px' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Account Settings</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Configure your identity, appearance theme, and subscriptions.</p>
               </div>
+              
               <ProfilePage
                 userId={userId}
                 userEmail={userEmail}
                 defaultView="profile"
                 onProfileUpdated={setUserFirstName}
               />
+
+              {/* Saved Briefings Section inside Profile Tab */}
+              <div style={{ marginTop: '30px', borderTop: '1px solid var(--border)', paddingTop: '20px', textAlign: 'left' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '4px' }}>🔖 Saved Briefings</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '16px' }}>Offline-ready bookmarks you have saved for reading.</p>
+                {bookmarks.length === 0 ? (
+                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--panel-bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <p style={{ fontSize: '12px', margin: 0 }}>No saved briefings yet. Tap the bookmark icon on any article in your reports feed.</p>
+                  </div>
+                ) : (
+                  <div className="mobile-feed-container" style={{ maxHeight: '350px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {bookmarks.map(article => (
+                      <div className="mobile-article-card" key={article.link} style={{ background: 'var(--panel-bg)', border: '1px solid var(--border)', padding: '16px', borderRadius: '8px' }}>
+                        <h4 style={{ fontSize: '13px', margin: '0 0 8px 0', fontWeight: 700, lineHeight: '1.4', color: 'var(--text-color)' }}>{article.title}</h4>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                          <a href={article.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+                            Read Article ↗
+                          </a>
+                          <button
+                            className="mobile-icon-btn"
+                            style={{ width: '32px', height: '32px', minHeight: '32px', padding: 0 }}
+                            onClick={() => toggleBookmark(article)}
+                          >
+                            ❌
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button
                 className="btn-outline"
                 onClick={handleLogout}
                 style={{
-                  marginTop: '10px',
+                  marginTop: '24px',
                   borderColor: 'var(--strategic)',
                   color: 'var(--strategic)',
                   minHeight: '48px',
                   borderRadius: '12px',
-                  fontWeight: 700
+                  fontWeight: 700,
+                  width: '100%'
                 }}
               >
                 Log Out
@@ -1622,24 +1549,20 @@ const App: React.FC = () => {
         {/* Bottom Nav Bar */}
         <nav className="mobile-bottom-nav">
           <button className={`mobile-nav-item ${mobileTab === 'dashboard' ? 'active' : ''}`} onClick={() => handleMobileTabChange('dashboard')}>
-            <div className="icon">🏠</div>
-            <span>Home</span>
+            <div className="icon">📊</div>
+            <span>DASHBOARD</span>
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'reports' ? 'active' : ''}`} onClick={() => handleMobileTabChange('reports')}>
-            <div className="icon">📰</div>
-            <span>Feed</span>
+            <div className="icon">📅</div>
+            <span>DAILY REPORTS</span>
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'topics' ? 'active' : ''}`} onClick={() => handleMobileTabChange('topics')}>
             <div className="icon">💡</div>
-            <span>Topics</span>
-          </button>
-          <button className={`mobile-nav-item ${mobileTab === 'bookmarks' ? 'active' : ''}`} onClick={() => handleMobileTabChange('bookmarks')}>
-            <div className="icon">🔖</div>
-            <span>Saved</span>
+            <span>TOPICS</span>
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'profile' ? 'active' : ''}`} onClick={() => handleMobileTabChange('profile')}>
-            <div className="icon">⚙️</div>
-            <span>Settings</span>
+            <div className="icon">👤</div>
+            <span>PROFILE</span>
           </button>
         </nav>
 
@@ -1739,6 +1662,27 @@ const App: React.FC = () => {
                   </select>
                 </div>
 
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>From Date</label>
+                    <input 
+                      type="date" 
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                      style={{ width: '100%', height: '44px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', padding: '0 12px', outline: 'none' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>To Date</label>
+                    <input 
+                      type="date" 
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                      style={{ width: '100%', height: '44px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', padding: '0 12px', outline: 'none' }}
+                    />
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                   <button
                     className="btn-outline"
@@ -1746,6 +1690,8 @@ const App: React.FC = () => {
                       setFilterCategory('All');
                       setFilterPriority('All');
                       setFilterSource('All');
+                      setFromDate('');
+                      setToDate('');
                       setShowFilterDrawer(false);
                     }}
                     style={{ flex: 1, minHeight: '44px', borderRadius: '8px' }}

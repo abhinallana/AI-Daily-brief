@@ -361,35 +361,35 @@
                     </td>
                 </tr>
                 <!-- Divider -->
+                <!-- Divider -->
                 {% if top_topics %}
                 <tr>
                     <td style="border-top: 1px dashed #272935; padding-top: 16px;">
-                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                            <tr>
-                                <td width="55%" valign="top" style="padding-right: 10px;">
-                                    <div style="font-size: 11px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Top Topics</div>
-                                    {% for topic in top_topics %}
-                                        <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 6px;">
-                                            <tr>
-                                                <td valign="top" style="color: #818cf8; font-weight: bold; font-size: 14px; padding-right: 6px; line-height: 1.2;">•</td>
-                                                <td valign="top" style="font-size: 13px; color: #f3f4f6; font-weight: 500; line-height: 1.2;">{{ topic }}</td>
-                                            </tr>
-                                        </table>
-                                    {% endfor %}
-                                </td>
-                                <td width="45%" valign="middle" align="center" style="border-left: 1px solid #272935; padding-left: 12px; background-color: #1f2029; border-radius: 8px; padding: 12px;">
-                                    <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">Estimated Reading Time</div>
-                                    <div style="font-size: 22px; color: #38bdf8; font-weight: 800; line-height: 1.2;">{{ total_reading_time }} mins</div>
-                                </td>
-                            </tr>
-                        </table>
+                        <div style="font-size: 11px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; text-align: left;">Top Topics</div>
+                        <div style="text-align: left; margin-bottom: 16px;">
+                            {% for topic in top_topics %}
+                                <span style="font-size: 12px; color: #f3f4f6; font-weight: 500; padding: 4px 8px; background-color: #1f2029; border-radius: 4px; display: inline-block; margin-right: 6px; margin-bottom: 6px; border: 1px solid #272935;">
+                                    {{ topic }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border-top: 1px dashed #272935; padding-top: 16px;">
+                        <div style="background-color: #1f2029; border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">Estimated Reading Time</div>
+                            <div style="font-size: 22px; color: #38bdf8; font-weight: 800; line-height: 1.2;">{{ total_reading_time }} mins</div>
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td style="border-top: 1px dashed #272935; padding-top: 16px; text-align: center; background-color: #1f2029; border-radius: 8px; padding: 12px;">
-                        <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">Estimated Reading Time</div>
-                        <div style="font-size: 22px; color: #38bdf8; font-weight: 800; line-height: 1.2;">{{ total_reading_time }} mins</div>
+                    <td style="border-top: 1px dashed #272935; padding-top: 16px;">
+                        <div style="background-color: #1f2029; border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: #9ca3af; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">Estimated Reading Time</div>
+                            <div style="font-size: 22px; color: #38bdf8; font-weight: 800; line-height: 1.2;">{{ total_reading_time }} mins</div>
+                        </div>
                     </td>
                 </tr>
                 {% endif %}
