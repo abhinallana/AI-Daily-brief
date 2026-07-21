@@ -12,7 +12,7 @@ export const AboutUs: React.FC = () => {
 
       <h2>What is OpsiAI used for?</h2>
       <p>
-        OpsiAI is built specifically to address content overflow in tech sectors. It streamlines your morning feed by tracking top AI developments (like OpenAI announcements, LLMs, framework releases) and Core DevOps utilities (such as Kubernetes orchestration patches, AWS updates, and CNCF releases).
+        OpsiAI is built specifically to address content overflow in tech sectors. It streamlines your daily feed by tracking top AI developments (like OpenAI announcements, LLMs, framework releases) and Core DevOps utilities (such as Kubernetes orchestration patches, AWS updates, and CNCF releases).
       </p>
 
       <h2>Why use OpsiAI?</h2>

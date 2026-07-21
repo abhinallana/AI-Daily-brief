@@ -17,7 +17,7 @@ export const SubscribeModal: React.FC<SubscribeModalProps> = ({ isOpen, onClose,
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <span style={{ fontSize: '40px', display: 'block', marginBottom: '12px' }}>📬</span>
           <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px' }}>Get Daily AI Intelligence</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Receive one concise AI Intelligence Report every morning.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Receive one concise AI Intelligence Report every day.</p>
         </div>
 
         <div style={{ background: 'var(--bg-color)', border: '1px solid var(--border)', borderRadius: '8px', padding: '16px', marginBottom: '24px' }}>

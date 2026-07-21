@@ -114,7 +114,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* Hero Section */}
         <div style={{ padding: '96px 16px 30px 16px', textAlign: 'center' }}>
-          <div className="hero-tag" style={{ alignSelf: 'center', margin: '0 auto 16px auto', fontSize: '11px', display: 'inline-block' }}>Platform for Technical Teams</div>
           <h1 style={{ fontSize: '26px', fontWeight: 800, lineHeight: '1.25', margin: '0 0 12px 0', color: 'var(--text-color)', letterSpacing: '-0.02em' }}>
             Cut Through the Noise.<br />
             <span className="gold-accent">Stay Ahead of AI.</span>
@@ -175,7 +174,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Showcase Carousel Section */}
         <div style={{ padding: '40px 16px', textAlign: 'center', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-color)' }}>See What You'll Receive Every Morning</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-color)' }}>See What You'll Receive Every Day</h2>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>Every report is structured logically so you can scan the brief in under 5 minutes.</p>
           </div>
 
@@ -358,7 +357,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </>
           ) : (
             <>
-              <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Start Every Morning Smarter.</h2>
+              <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Start Every Day Smarter.</h2>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Join OpsiAI and receive curated AI intelligence instead of endless headlines.</p>
               <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
             </>
@@ -366,21 +365,57 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         {/* Mobile Footer */}
-        <footer style={{ padding: '40px 16px 20px 16px', borderTop: '1px solid var(--border)', background: 'var(--body-bg)', textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
-            <div>
-              <h3 style={{ color: 'var(--primary)', margin: '0 0 6px 0', fontSize: '18px', fontWeight: 800 }}>OpsiAI</h3>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>AI and DevOps intelligence parsed and curated daily for everyone.</p>
+        <footer className="landing-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--body-bg)', padding: '40px 16px 20px 16px' }}>
+          <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', textAlign: 'center' }}>
+            <div className="footer-brand">
+              <h3 style={{ color: 'var(--primary)', margin: '0 0 8px 0', fontSize: '18px', fontWeight: 800 }}>OpsiAI</h3>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>AI and DevOps intelligence parsed and curated daily for everyone.</p>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px', fontSize: '12px' }}>
-              <span onClick={() => handleOpenPolicy('privacy')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Privacy Policy</span>
-              <span onClick={() => handleOpenPolicy('terms')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Terms</span>
-              <span onClick={() => handleOpenPolicy('doc')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Guide</span>
-              <span onClick={() => handleOpenPolicy('about')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>About</span>
+            <div className="footer-col">
+              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Product</h4>
+              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li className="footer-link" onClick={() => {
+                  const el = document.getElementById('features');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}>Features</li>
+                <li className="footer-link" onClick={() => {
+                  const el = document.getElementById('metrics');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}>Metrics</li>
+                <li className="footer-link" onClick={() => handleOpenPolicy('pricing')}>Pricing</li>
+              </ul>
+            </div>
+            <div className="footer-col">
+              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Resources</h4>
+              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li className="footer-link" onClick={() => handleOpenPolicy('doc')}>Documentation</li>
+                <li className="footer-link" onClick={() => handleOpenPolicy('release_notes')}>Release Notes</li>
+                <li className="footer-link" onClick={() => handleOpenPolicy('api_status')}>API Status</li>
+              </ul>
+            </div>
+            <div className="footer-col">
+              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Company</h4>
+              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li className="footer-link" onClick={() => handleOpenPolicy('about')}>About</li>
+                <li className="footer-link" onClick={() => handleOpenPolicy('privacy')}>Privacy Policy</li>
+                <li className="footer-link" onClick={() => handleOpenPolicy('terms')}>Terms</li>
+              </ul>
+            </div>
+            <div className="footer-col">
+              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Connect</h4>
+              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li className="footer-link"><span style={{ opacity: 0.5 }}>GitHub</span></li>
+                <li className="footer-link"><span style={{ opacity: 0.5 }}>LinkedIn</span></li>
+                <li className="footer-link"><a href="mailto:opsiai127@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }}>Contact Support</a></li>
+              </ul>
             </div>
           </div>
-          <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-            &copy; {new Date().getFullYear()} OpsiAI. All rights reserved.
+          <div className="footer-bottom" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', marginTop: '30px', borderTop: '1px solid var(--border)', paddingTop: '16px', fontSize: '12px' }}>
+            <div>&copy; {new Date().getFullYear()} OpsiAI. All rights reserved.</div>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <span style={{ opacity: 0.5 }}>GitHub</span>
+              <span style={{ opacity: 0.5 }}>LinkedIn</span>
+            </div>
           </div>
         </footer>
 
@@ -488,7 +523,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Hero Section */}
       <header className="hero-container">
         <div className="hero-left">
-          <div className="hero-tag">Platform for Technical Teams</div>
           <h1 className="hero-title">
             Cut Through the Noise.<br />
             <span className="gold-accent">Stay Ahead of AI.</span>
@@ -599,7 +633,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Email Showcase Sections */}
       <section className="landing-section" id="showcase">
         <div className="section-intro">
-          <h2>See What You'll Receive Every Morning</h2>
+          <h2>See What You'll Receive Every Day</h2>
           <p>Every report is structured logically so you can scan the day's brief in under 5 minutes.</p>
         </div>
         <div className="carousel-wrapper">
@@ -762,7 +796,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </>
         ) : (
           <>
-            <h2>Start Every Morning Smarter.</h2>
+            <h2>Start Every Day Smarter.</h2>
             <p>Join OpsiAI and receive curated AI intelligence instead of endless headlines.</p>
             <button className="btn-primary btn-large" onClick={onNavigateToSignUp}>Get Started Free</button>
           </>

@@ -125,7 +125,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
   
   // Newsletter delivery preferences states
   const [emailEnabled, setEmailEnabled] = useState(isEmailSubscribed ?? false);
-  const [deliveryTime, setDeliveryTime] = useState(localStorage.getItem('opsiai_delivery_time') || '08:00 AM');
+  const [deliveryTime, setDeliveryTime] = useState(localStorage.getItem('opsiai_delivery_time') || '03:00 PM');
   const [frequency, setFrequency] = useState(localStorage.getItem('opsiai_delivery_frequency') || 'Daily');
   const [collapsedNewsletter, setCollapsedNewsletter] = useState(false);
 
@@ -331,12 +331,18 @@ export const Preferences: React.FC<PreferencesProps> = ({
                   onChange={(e) => setDeliveryTime(e.target.value)}
                   style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 600, outline: 'none', textAlign: 'right' }}
                 >
+                  <option value="03:00 PM">03:00 PM</option>
                   <option value="06:00 AM">06:00 AM</option>
                   <option value="08:00 AM">08:00 AM</option>
                   <option value="10:00 AM">10:00 AM</option>
                   <option value="12:00 PM">12:00 PM</option>
                 </select>
               </div>
+              {deliveryTime !== '03:00 PM' && (
+                <div style={{ color: 'var(--important)', fontSize: '11px', padding: '10px 16px', background: 'rgba(235,94,85,0.05)', borderRadius: '6px', borderLeft: '3px solid var(--important)', margin: '8px 16px', textAlign: 'left', lineHeight: '1.4' }}>
+                  Beta Feature: Custom delivery times are currently in beta and will be available soon. We're actively working on it.
+                </div>
+              )}
 
               <div className="mobile-settings-row">
                 <div className="mobile-settings-left">
@@ -509,11 +515,17 @@ export const Preferences: React.FC<PreferencesProps> = ({
                       className="auth-input"
                       style={{ background: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border)' }}
                     >
+                      <option value="03:00 PM">03:00 PM (IST)</option>
                       <option value="06:00 AM">06:00 AM (IST)</option>
                       <option value="08:00 AM">08:00 AM (IST)</option>
                       <option value="10:00 AM">10:00 AM (IST)</option>
                       <option value="12:00 PM">12:00 PM (IST)</option>
                     </select>
+                    {deliveryTime !== '03:00 PM' && (
+                      <span style={{ color: 'var(--important)', fontSize: '10px', marginTop: '4px', lineHeight: '1.4' }}>
+                        Beta Feature: Custom delivery times are currently in beta and will be available soon. We're actively working on it.
+                      </span>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

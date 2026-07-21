@@ -1107,11 +1107,10 @@ input:checked + .slider:before {
 /* Value Flow Section */
 .value-flow-container {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 60px;
-  flex-wrap: wrap;
-  gap: 30px;
+  gap: 16px;
 }
 
 .flow-node {
