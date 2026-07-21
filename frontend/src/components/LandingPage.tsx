@@ -92,7 +92,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return (
       <div className="mobile-landing-container" style={{ overflowX: 'hidden', paddingBottom: '40px' }}>
         {/* Navigation Bar */}
-        <nav className="landing-nav scrolled" style={{ height: '64px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: 'rgba(18, 24, 38, 0.95)', backdropFilter: 'blur(12px)' }}>
+        <nav className="landing-nav scrolled" style={{ height: '64px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000 }}>
           <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="/logo.jpg" alt="OpsiAI Logo" style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
             <span style={{ fontSize: '16px', fontWeight: 800 }}>OpsiAI</span>
