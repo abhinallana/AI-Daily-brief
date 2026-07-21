@@ -388,40 +388,99 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="modal-backdrop" onClick={() => setShowPolicyModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 2000, cursor: 'pointer' }}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px', width: '90%', maxHeight: '80vh', overflowY: 'auto', background: 'var(--panel-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px', position: 'relative', cursor: 'default' }}>
               <button onClick={() => setShowPolicyModal(false)} style={{ position: 'absolute', top: '10px', right: '15px', border: 'none', background: 'transparent', color: 'var(--text-color)', fontSize: '20px', cursor: 'pointer' }}>&times;</button>
+              
               {policyType === 'privacy' && (
                 <div>
-                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>🔒 Privacy Policy</h2>
-                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-                    <p>At OpsiAI, we prioritize user privacy. We only collect your email address and topic selections to curate daily briefings. We never share your data.</p>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>🔒 Privacy Policy</h2>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                    <p><strong>Last updated: July 18, 2026</strong></p>
+                    <p>At OpsiAI, we prioritize the confidentiality and safety of your preferences. This policy details how we handle information:</p>
+                    <p><strong>1. Information Collection:</strong> We only collect your email address and personalized topic subscription configurations to curate daily reports.</p>
+                    <p><strong>2. Third-Party Sharing:</strong> We do not sell or distribute user emails or browsing history to any advertisers or marketing networks.</p>
+                    <p><strong>3. Cookie Usage:</strong> We utilize minimal browser local storage strictly for token session authentication persistence and preferences cache.</p>
+                    <p>For questions regarding this policy, please contact our support desk at <a href="mailto:opsiai127@gmail.com" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>opsiai127@gmail.com</a>.</p>
                   </div>
                 </div>
               )}
+
               {policyType === 'terms' && (
                 <div>
-                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>📄 Terms of Service</h2>
-                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-                    <p>OpsiAI delivers digests for informational/educational purposes only. Automated scraping of OpsiAI endpoints is strictly prohibited.</p>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>📄 Terms of Service</h2>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                    <p><strong>Last updated: July 18, 2026</strong></p>
+                    <p>By registering or using OpsiAI services, you agree to the following conditions:</p>
+                    <p><strong>1. Proper Usage:</strong> OpsiAI delivers curated daily digests for informational/educational purposes only. Automated scraping of OpsiAI endpoints is prohibited.</p>
+                    <p><strong>2. Fair Subscription:</strong> Users may subscribe to or unsubscribe from our daily newsletter delivery at any time via their profile portal.</p>
+                    <p><strong>3. Limitation of Liability:</strong> OpsiAI is provided "as is". We are not responsible for any direct or indirect actions resulting from the contents of the parsed summaries.</p>
                   </div>
                 </div>
               )}
+
               {policyType === 'doc' && (
                 <div>
-                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>📖 Documentation & Guide</h2>
-                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-                    <p>Configure whitelists in the Topics tab to filter reports. Manage subscription options inside your Profile tab.</p>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>📖 Documentation & Guide</h2>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                    <p>Welcome to OpsiAI! Here is a simple guide on how to navigate the platform:</p>
+                    <p><strong>1. Personalize Interests:</strong> Navigate to the <em>Preferences</em> tab to whitelist or blacklist categories (e.g. OpenAI, Kubernetes, AWS). This immediately filters both your dashboard feeds and daily newsletters.</p>
+                    <p><strong>2. Daily Newsfeed:</strong> The dashboard aggregates daily briefings with summaries, "Why It Matters" context, and calculated reading time metrics.</p>
+                    <p><strong>3. Historical Surfing:</strong> Switch dates inside the header menu or apply <em>From/To Date</em> fields to search for keyword topics across all briefings generated till date.</p>
+                    <p><strong>4. Newsletter:</strong> Opt-in or out of the daily automated email briefing in the <em>Profile</em> menu.</p>
                   </div>
                 </div>
               )}
+
               {policyType === 'about' && (
                 <div>
-                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>ℹ️ About OpsiAI</h2>
-                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
-                    <p>OpsiAI parses release notes and developer blogs daily to deliver highly-curated briefs using AI-structured models.</p>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>ℹ️ About OpsiAI</h2>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                    <p>OpsiAI was founded in 2026 to solve modern information overload.</p>
+                    <p>Every day, hundreds of announcements, releases, and articles are published across the AI and DevOps ecosystem. Finding the raw engineering facts behind the headlines requires hours of tedious scrolling.</p>
+                    <p>OpsiAI automates this entirely. Using Gemini AI model analysis, our crawler parses and evaluates the daily news pipeline, indexing whitelisted updates, translating why it matters, and delivering a clean intelligence digest directly to your inbox and dashboard.</p>
                   </div>
                 </div>
               )}
-              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-                <button className="btn-primary" onClick={() => setShowPolicyModal(false)} style={{ padding: '6px 16px', fontSize: '11px' }}>Close</button>
+
+              {policyType === 'pricing' && (
+                <div>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>💎 Pricing</h2>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                    <p><strong>Beta Access:</strong> OpsiAI is currently in free public beta.</p>
+                    <p>Enjoy unlimited daily email newsletters, whitelisted custom topic settings, and full access to our historical multi-date search engines at no charge.</p>
+                  </div>
+                </div>
+              )}
+
+              {policyType === 'release_notes' && (
+                <div>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>🚀 Release Notes</h2>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                    <p><strong>Version 1.0.0 (First Release)</strong></p>
+                    <p>Welcome to the initial launch of OpsiAI! In this milestone release, we are proud to introduce:</p>
+                    <p><strong>• AI-Powered Parsing:</strong> Automated scraping and indexing of key AI and DevOps engineering posts via Gemini AI.</p>
+                    <p><strong>• Personalized Whitelisting:</strong> Interactive preference controls to select exactly what news categories matter to you.</p>
+                    <p><strong>• Global Search & Ranges:</strong> Advanced search functionality scanning all historical reports by keyword or From/To dates.</p>
+                    <p><strong>• Mobile Shell UI:</strong> Premium native-app-like experience optimized for smartphones and tablets.</p>
+                  </div>
+                </div>
+              )}
+
+              {policyType === 'api_status' && (
+                <div>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '16px', fontSize: '20px', fontWeight: 800 }}>🟢 System & API Status</h2>
+                  <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' }}>
+                    <p>Real-time status updates of OpsiAI components:</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', background: 'var(--body-bg)', padding: '15px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                      <div><strong>API Gateway:</strong> <span style={{ color: 'var(--success)' }}>Operational 🟢</span></div>
+                      <div><strong>PostgreSQL/Supabase DB:</strong> <span style={{ color: 'var(--success)' }}>Connected 🟢</span></div>
+                      <div><strong>AI Scraper Cron:</strong> <span style={{ color: 'var(--success)' }}>Active (Daily) 🟢</span></div>
+                      <div><strong>SMTP Server:</strong> <span style={{ color: 'var(--success)' }}>Operational 🟢</span></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="btn-primary" onClick={() => setShowPolicyModal(false)} style={{ padding: '8px 20px', fontSize: '12px' }}>Close</button>
               </div>
             </div>
           </div>
