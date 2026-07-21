@@ -89,18 +89,32 @@ const App: React.FC = () => {
 
   // Sync isMobile with window resize listener
   useEffect(() => {
+    let prevWidth = window.innerWidth;
     const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (mobile) {
-        if (activeView === 'today') setMobileTab('dashboard');
-        else if (activeView === 'preferences') setMobileTab('topics');
-        else if (activeView === 'profile') setMobileTab('profile');
+      const currentWidth = window.innerWidth;
+      const wasMobile = prevWidth < 768;
+      const isNowMobile = currentWidth < 768;
+      prevWidth = currentWidth;
+
+      setIsMobile(isNowMobile);
+
+      // Only perform state synchronization when crossing the mobile/desktop boundary
+      if (wasMobile !== isNowMobile) {
+        if (isNowMobile) {
+          if (activeView === 'today') setMobileTab('dashboard');
+          else if (activeView === 'preferences') setMobileTab('topics');
+          else if (activeView === 'profile') setMobileTab('profile');
+        } else {
+          // Switch back to desktop viewports
+          if (mobileTab === 'dashboard' || mobileTab === 'reports') setActiveView('today');
+          else if (mobileTab === 'topics') setActiveView('preferences');
+          else if (mobileTab === 'profile' || mobileTab === 'bookmarks') setActiveView('profile');
+        }
       }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [activeView]);
+  }, [activeView, mobileTab]);
 
   // Fetch metrics for mobile dashboard
   useEffect(() => {
@@ -131,17 +145,15 @@ const App: React.FC = () => {
 
   const handleMobileTabChange = (tab: 'dashboard' | 'reports' | 'topics' | 'bookmarks' | 'profile') => {
     setMobileTab(tab);
-    if (tab === 'dashboard') {
+    if (tab === 'dashboard' || tab === 'reports') {
       setActiveView('today');
       window.history.pushState(null, '', '/dashboard');
     } else if (tab === 'topics') {
       setActiveView('preferences');
       window.history.pushState(null, '', '/settings');
-    } else if (tab === 'profile') {
+    } else if (tab === 'profile' || tab === 'bookmarks') {
       setActiveView('profile');
       window.history.pushState(null, '', '/profile');
-    } else {
-      window.history.pushState(null, '', '/dashboard');
     }
   };
 
