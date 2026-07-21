@@ -254,8 +254,8 @@ const App: React.FC = () => {
   const filteredSearchArticles = searchResults.filter(article => {
     if (!article.category) return true;
     const matchKey = Object.keys(enabledTopics || {}).find(
-      key => key.toLowerCase().includes(article.category!.toLowerCase()) || 
-             article.category!.toLowerCase().includes(key.toLowerCase())
+      key => key.toLowerCase().includes(article.category!.toLowerCase()) ||
+        article.category!.toLowerCase().includes(key.toLowerCase())
     );
     if (matchKey !== undefined) {
       return enabledTopics[matchKey] !== false;
@@ -324,7 +324,7 @@ const App: React.FC = () => {
           if (profileData) {
             setUserFirstName(profileData.first_name);
             localStorage.setItem('opsiai_firstname', profileData.first_name);
-            
+
             const avatar = profileData.avatar_url || `https://robohash.org/${encodeURIComponent(email)}?set=set1&bgset=bg1`;
             setUserAvatar(avatar);
             localStorage.setItem('opsiai_avatar', avatar);
@@ -334,11 +334,11 @@ const App: React.FC = () => {
               const prefs = await fetchPreferences(email);
               if (prefs && prefs.length > 0) {
                 const defaultTopics = [
-                  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
-                  'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
-                  'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
-                  'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
-                  'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+                  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI',
+                  'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog',
+                  'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI',
+                  'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama',
+                  'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure',
                   'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
                   'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
                 ];
@@ -514,10 +514,10 @@ const App: React.FC = () => {
         try {
           setLoading(true);
           setError(null);
-          
+
           const list = await fetchReportList();
           setReportList(list);
-          
+
           if (list && list.length > 0) {
             const latestDate = list[0].date;
             setSelectedDate(latestDate);
@@ -550,7 +550,7 @@ const App: React.FC = () => {
           if (data) {
             setUserFirstName(data.first_name);
             localStorage.setItem('opsiai_firstname', data.first_name);
-            
+
             const avatar = data.avatar_url || `https://robohash.org/${encodeURIComponent(userEmail || 'default')}?set=set1&bgset=bg1`;
             setUserAvatar(avatar);
             localStorage.setItem('opsiai_avatar', avatar);
@@ -603,7 +603,7 @@ const App: React.FC = () => {
       if (data) {
         setUserFirstName(data.first_name);
         localStorage.setItem('opsiai_firstname', data.first_name);
-        
+
         const avatar = data.avatar_url || `https://robohash.org/${encodeURIComponent(email)}?set=set1&bgset=bg1`;
         setUserAvatar(avatar);
         localStorage.setItem('opsiai_avatar', avatar);
@@ -700,11 +700,11 @@ const App: React.FC = () => {
 
     if (selectedTopics.length > 0) {
       const defaultTopics = [
-        'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
-        'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
-        'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
-        'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
-        'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+        'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI',
+        'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog',
+        'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI',
+        'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama',
+        'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure',
         'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
         'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
       ];
@@ -786,7 +786,7 @@ const App: React.FC = () => {
     return (
       <div style={{ animation: 'fadeIn 0.3s ease-out', marginTop: '10px' }}>
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 800 }}>Saved Briefings</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: 800 }}> Bookmarks </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '6px' }}>
             Offline-ready bookmarks you have saved for reading.
           </p>
@@ -795,16 +795,16 @@ const App: React.FC = () => {
         {bookmarks.length === 0 ? (
           <div className="article-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
-            <h3 style={{ fontSize: '18px', fontWeight: 700 }}>No Saved Briefings</h3>
+            <h3 style={{ fontSize: '18px', fontWeight: 700 }}>No Saved Bookmarks</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '6px' }}>
               Tap the bookmark folder icon on any article in your daily reports feed to save it here.
             </p>
           </div>
         ) : (
-          <ArticleFeed 
-            articles={bookmarks} 
-            bookmarks={bookmarks} 
-            onToggleBookmark={toggleBookmark} 
+          <ArticleFeed
+            articles={bookmarks}
+            bookmarks={bookmarks}
+            onToggleBookmark={toggleBookmark}
           />
         )}
       </div>
@@ -969,8 +969,8 @@ const App: React.FC = () => {
           {/* Keyword Search Input */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', flex: '1 1 250px' }}>
             <span style={{ fontSize: '13px' }}>🔍</span>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search all historical articles by keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -995,7 +995,7 @@ const App: React.FC = () => {
                     if (!isNaN(parsed.getTime())) {
                       label = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     }
-                  } catch (e) {}
+                  } catch (e) { }
                   return (
                     <option key={r.date} value={r.date} style={{ background: 'var(--panel-bg)', color: 'var(--text-color)' }}>
                       {label} {r.date === reportList[0].date ? '(Latest)' : ''}
@@ -1009,8 +1009,8 @@ const App: React.FC = () => {
           {/* From Date Input */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
             <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>From:</span>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               style={{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
@@ -1020,8 +1020,8 @@ const App: React.FC = () => {
           {/* To Date Input */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
             <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>To:</span>
-            <input 
-              type="date" 
+            <input
+              type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               style={{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}
@@ -1030,7 +1030,7 @@ const App: React.FC = () => {
 
           {/* Clear Filters Button */}
           {(searchQuery || fromDate || toDate) && (
-            <button 
+            <button
               className="btn-outline"
               onClick={() => {
                 setSearchQuery('');
@@ -1055,7 +1055,7 @@ const App: React.FC = () => {
                 Showing matching articles across all historical daily updates.
               </p>
             </div>
-            
+
             {searching ? (
               <div className="loader-container">
                 <div className="spinner"></div>
@@ -1366,7 +1366,7 @@ const App: React.FC = () => {
                             if (!isNaN(parsed.getTime())) {
                               label = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                             }
-                          } catch (e) {}
+                          } catch (e) { }
                           return (
                             <option key={r.date} value={r.date} style={{ background: 'var(--panel-bg)', color: 'var(--text-color)' }}>
                               {label} {r.date === reportList[0].date ? '(Latest)' : ''}
@@ -1378,7 +1378,7 @@ const App: React.FC = () => {
                   )}
                   {/* From/To inputs are now inside the Filter drawer */}
                   {(searchQuery || fromDate || toDate) && (
-                    <button 
+                    <button
                       className="btn-outline"
                       onClick={() => {
                         setSearchQuery('');
@@ -1448,7 +1448,7 @@ const App: React.FC = () => {
                                     navigator.share({
                                       title: article.title,
                                       url: article.link
-                                    }).catch(() => {});
+                                    }).catch(() => { });
                                   } else {
                                     navigator.clipboard.writeText(article.link);
                                     alert('Link copied to clipboard!');
@@ -1548,14 +1548,14 @@ const App: React.FC = () => {
           {!loading && mobileTab === 'bookmarks' && (
             <div className="mobile-bookmarks-section" style={{ textAlign: 'left' }}>
               <div style={{ marginBottom: '4px' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Saved Briefings</h2>
+                <h2 style={{ fontSize: '20px', fontWeight: 800 }}> Bookmarks </h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Offline-ready bookmarks you have saved for reading.</p>
               </div>
 
               {bookmarks.length === 0 ? (
                 <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
-                  <h3>No Saved Briefings</h3>
+                  <h3>No Saved Bookmarks</h3>
                   <p style={{ fontSize: '13px', marginTop: '6px' }}>Tap the bookmark folder icon on any article in your daily reports feed to save it here.</p>
                 </div>
               ) : (
@@ -1622,7 +1622,7 @@ const App: React.FC = () => {
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Account Settings</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Configure your identity, appearance theme, and subscriptions.</p>
               </div>
-              
+
               <ProfilePage
                 userId={userId}
                 userEmail={userEmail}
@@ -1772,8 +1772,8 @@ const App: React.FC = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>From Date</label>
-                    <input 
-                      type="date" 
+                    <input
+                      type="date"
                       value={fromDate}
                       onChange={(e) => setFromDate(e.target.value)}
                       style={{ width: '100%', height: '44px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', padding: '0 12px', outline: 'none' }}
@@ -1781,8 +1781,8 @@ const App: React.FC = () => {
                   </div>
                   <div>
                     <label style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '8px' }}>To Date</label>
-                    <input 
-                      type="date" 
+                    <input
+                      type="date"
                       value={toDate}
                       onChange={(e) => setToDate(e.target.value)}
                       style={{ width: '100%', height: '44px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', padding: '0 12px', outline: 'none' }}

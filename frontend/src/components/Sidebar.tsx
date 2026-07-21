@@ -9,10 +9,10 @@ interface SidebarProps {
   onEnableEmailClick?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
-  activeView, 
-  onViewChange, 
-  onLogout, 
+export const Sidebar: React.FC<SidebarProps> = ({
+  activeView,
+  onViewChange,
+  onLogout,
   onLogoClick,
   isEmailSubscribed,
   onEnableEmailClick
@@ -24,31 +24,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <span>OpsiAI</span>
       </div>
       <ul className="nav-links">
-        <li 
+        <li
           className={`nav-item ${activeView === 'today' ? 'active' : ''}`}
           onClick={() => onViewChange('today')}
         >
           <span>🏠</span> Today's Brief
         </li>
-        <li 
+        <li
           className={`nav-item ${activeView === 'bookmarks' ? 'active' : ''}`}
           onClick={() => onViewChange('bookmarks')}
         >
-          <span>🔖</span> Saved Briefings
+          <span>🔖</span> Bookmarks
         </li>
-        <li 
+        <li
           className={`nav-item ${activeView === 'preferences' ? 'active' : ''}`}
           onClick={() => onViewChange('preferences')}
         >
           <span>⚙️</span> Preferences
         </li>
-        <li 
+        <li
           className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
           onClick={() => onViewChange('profile')}
         >
           <span>👤</span> Profile
         </li>
-        <li 
+        <li
           className={`nav-item ${activeView === 'about' ? 'active' : ''}`}
           onClick={() => onViewChange('about')}
         >
