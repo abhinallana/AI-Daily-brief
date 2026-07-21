@@ -1504,6 +1504,77 @@ const App: React.FC = () => {
             </div>
           )}
 
+          {!loading && mobileTab === 'bookmarks' && (
+            <div className="mobile-bookmarks-section" style={{ textAlign: 'left' }}>
+              <div style={{ marginBottom: '4px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Saved Briefings</h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Offline-ready bookmarks you have saved for reading.</p>
+              </div>
+
+              {bookmarks.length === 0 ? (
+                <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
+                  <h3>No Saved Briefings</h3>
+                  <p style={{ fontSize: '13px', marginTop: '6px' }}>Tap the bookmark folder icon on any article in your daily reports feed to save it here.</p>
+                </div>
+              ) : (
+                <div className="mobile-feed-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+                  {bookmarks.map(article => {
+                    return (
+                      <div className="mobile-article-card" key={article.link}>
+                        <div className="meta-badges">
+                          {article.category && <span className="mobile-badge category">{article.category}</span>}
+                          {article.priority && (
+                            <span className={`mobile-badge priority-${article.priority.toLowerCase()}`}>
+                              {article.priority}
+                            </span>
+                          )}
+                          {article.reading_time && <span className="mobile-badge category">{article.reading_time}</span>}
+                        </div>
+                        <h3>{article.title}</h3>
+                        {article.ai_summary && <p className="summary-text">{article.ai_summary}</p>}
+                        {article.why_it_matters && (
+                          <div className="why-matters-box">
+                            <strong>Why It Matters</strong>
+                            <p>{article.why_it_matters}</p>
+                          </div>
+                        )}
+                        <div className="mobile-card-actions">
+                          <a href={article.link} target="_blank" rel="noopener noreferrer" className="mobile-read-link">
+                            Read Article ↗
+                          </a>
+                          <div className="mobile-action-buttons">
+                            <button
+                              className="mobile-icon-btn"
+                              style={{ width: '36px', height: '36px', backgroundColor: 'var(--primary-glow)' }}
+                              onClick={() => toggleBookmark(article)}
+                            >
+                              🔖
+                            </button>
+                            <button
+                              className="mobile-icon-btn"
+                              style={{ width: '36px', height: '36px' }}
+                              onClick={() => {
+                                if (navigator.share) {
+                                  navigator.share({ title: article.title, url: article.link }).catch(() => { });
+                                } else {
+                                  navigator.clipboard.writeText(article.link);
+                                  alert('Article link copied to clipboard!');
+                                }
+                              }}
+                            >
+                              📤
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           {!loading && mobileTab === 'profile' && userId && userEmail && (
             <div className="mobile-settings-container">
               <div style={{ marginBottom: '4px' }}>
@@ -1517,37 +1588,6 @@ const App: React.FC = () => {
                 defaultView="profile"
                 onProfileUpdated={setUserFirstName}
               />
-
-              {/* Saved Briefings Section inside Profile Tab */}
-              <div style={{ marginTop: '30px', borderTop: '1px solid var(--border)', paddingTop: '20px', textAlign: 'left' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '4px' }}>🔖 Saved Briefings</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '16px' }}>Offline-ready bookmarks you have saved for reading.</p>
-                {bookmarks.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--panel-bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-                    <p style={{ fontSize: '12px', margin: 0 }}>No saved briefings yet. Tap the bookmark icon on any article in your reports feed.</p>
-                  </div>
-                ) : (
-                  <div className="mobile-feed-container" style={{ maxHeight: '350px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {bookmarks.map(article => (
-                      <div className="mobile-article-card" key={article.link} style={{ background: 'var(--panel-bg)', border: '1px solid var(--border)', padding: '16px', borderRadius: '8px' }}>
-                        <h4 style={{ fontSize: '13px', margin: '0 0 8px 0', fontWeight: 700, lineHeight: '1.4', color: 'var(--text-color)' }}>{article.title}</h4>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                          <a href={article.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
-                            Read Article ↗
-                          </a>
-                          <button
-                            className="mobile-icon-btn"
-                            style={{ width: '32px', height: '32px', minHeight: '32px', padding: 0 }}
-                            onClick={() => toggleBookmark(article)}
-                          >
-                            ❌
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
 
               <button
                 className="btn-outline"
@@ -1572,19 +1612,23 @@ const App: React.FC = () => {
         <nav className="mobile-bottom-nav">
           <button className={`mobile-nav-item ${mobileTab === 'dashboard' ? 'active' : ''}`} onClick={() => handleMobileTabChange('dashboard')}>
             <div className="icon">📊</div>
-            <span>DASHBOARD</span>
+            <span>Dashboard</span>
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'reports' ? 'active' : ''}`} onClick={() => handleMobileTabChange('reports')}>
             <div className="icon">📅</div>
-            <span>DAILY REPORTS</span>
+            <span>Reports</span>
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'topics' ? 'active' : ''}`} onClick={() => handleMobileTabChange('topics')}>
             <div className="icon">💡</div>
-            <span>TOPICS</span>
+            <span>Topics</span>
+          </button>
+          <button className={`mobile-nav-item ${mobileTab === 'bookmarks' ? 'active' : ''}`} onClick={() => handleMobileTabChange('bookmarks')}>
+            <div className="icon">🔖</div>
+            <span>Bookmarks</span>
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'profile' ? 'active' : ''}`} onClick={() => handleMobileTabChange('profile')}>
             <div className="icon">👤</div>
-            <span>PROFILE</span>
+            <span>Profile</span>
           </button>
         </nav>
 

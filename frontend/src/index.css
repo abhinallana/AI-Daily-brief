@@ -2430,3 +2430,50 @@ input:checked + .ios-slider:before {
   border-radius: 16px;
 }
 
+/* Custom Handcrafted Mobile Landing Overrides */
+.mobile-landing-container {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.mobile-features-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+  padding: 0 16px;
+}
+
+@media (min-width: 375px) {
+  .mobile-features-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Breakpoint Optimization Rules */
+@media (max-width: 320px) {
+  .mobile-landing-container h1 {
+    font-size: 22px !important;
+  }
+  .mobile-landing-container p {
+    font-size: 11px !important;
+  }
+}
+
+@media (min-width: 321px) and (max-width: 360px) {
+  .mobile-landing-container h1 {
+    font-size: 24px !important;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 390px) {
+  .mobile-landing-container h1 {
+    font-size: 26px !important;
+  }
+}
+
+@media (min-width: 391px) and (max-width: 767px) {
+  .mobile-landing-container h1 {
+    font-size: 28px !important;
+  }
+}
+

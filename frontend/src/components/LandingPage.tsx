@@ -28,6 +28,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [metrics, setMetrics] = useState<OpsiMetrics | null>(null);
   const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
   const [policyType, setPolicyType] = useState<'privacy' | 'terms' | 'doc' | 'release_notes' | 'api_status' | 'about' | 'pricing'>('privacy');
+  
+  // Custom mobile landing responsive configurations
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+  const [showcaseIndex, setShowcaseIndex] = useState(0);
+  const [startX, setStartX] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleOpenPolicy = (type: 'privacy' | 'terms' | 'doc' | 'release_notes' | 'api_status' | 'about' | 'pricing') => {
     setPolicyType(type);
@@ -74,6 +87,336 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
+
+  if (isMobileView) {
+    return (
+      <div className="mobile-landing-container" style={{ overflowX: 'hidden', paddingBottom: '40px' }}>
+        {/* Navigation Bar */}
+        <nav className="landing-nav scrolled" style={{ height: '64px', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: 'rgba(18, 24, 38, 0.95)', backdropFilter: 'blur(12px)' }}>
+          <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/logo.jpg" alt="OpsiAI Logo" style={{ width: '24px', height: '24px', borderRadius: '50%' }} />
+            <span style={{ fontSize: '16px', fontWeight: 800 }}>OpsiAI</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button className="theme-toggle-btn" onClick={toggleTheme} style={{ width: '36px', height: '36px', minHeight: '36px', border: 'none', background: 'transparent' }}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            {isAuthenticated ? (
+              <button className="btn-secondary" onClick={onLogout} style={{ fontSize: '12px', padding: '6px 12px', minHeight: '36px', borderRadius: '8px' }}>Sign Out</button>
+            ) : (
+              <>
+                <button className="btn-secondary" onClick={onNavigateToLogin} style={{ fontSize: '12px', padding: '6px 12px', minHeight: '36px', borderRadius: '8px' }}>Sign In</button>
+                <button className="btn-primary" onClick={onNavigateToSignUp} style={{ fontSize: '12px', padding: '6px 12px', minHeight: '36px', borderRadius: '8px' }}>Sign Up</button>
+              </>
+            )}
+          </div>
+        </nav>
+
+        {/* Hero Section */}
+        <div style={{ padding: '96px 16px 30px 16px', textAlign: 'center' }}>
+          <div className="hero-tag" style={{ alignSelf: 'center', margin: '0 auto 16px auto', fontSize: '11px', display: 'inline-block' }}>Platform for Technical Teams</div>
+          <h1 style={{ fontSize: '26px', fontWeight: 800, lineHeight: '1.25', margin: '0 0 12px 0', color: 'var(--text-color)', letterSpacing: '-0.02em' }}>
+            Cut Through the Noise.<br />
+            <span className="gold-accent">Stay Ahead of AI.</span>
+          </h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5', margin: '0 0 24px 0', padding: '0 8px' }}>
+            OpsiAI scans hundreds of trusted AI and DevOps sources every day, filters what actually matters, explains why it matters, and delivers one concise intelligence report directly to your inbox.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+            {isAuthenticated ? (
+              <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToDashboard}>Go to Dashboard</button>
+            ) : (
+              <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
+            )}
+            <button className="btn-outline" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={isAuthenticated ? onNavigateToDashboard : onViewDemo}>
+              {isAuthenticated ? "View Today's Briefing" : "View Today's Report"}
+            </button>
+          </div>
+
+          {/* Hero Email Mockup */}
+          <div className="email-mockup-wrapper" style={{ marginTop: '30px', width: '100%', boxSizing: 'border-box', animation: 'none', transform: 'none' }}>
+            <div className="email-mockup-header" style={{ textAlign: 'left' }}>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--strategic)' }}></span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--important)' }}></span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--insights)' }}></span>
+              </div>
+              <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>From: OpsiAI Intelligence &lt;brief@opsiai.com&gt;</div>
+              <div style={{ fontWeight: 700, color: 'var(--text-color)', marginTop: '2px', fontSize: '10px' }}>OpsiAI Briefing Report - Today</div>
+            </div>
+            <div className="email-mockup-window" style={{ height: '240px', overflowY: 'auto' }}>
+              <div style={{ padding: '4px 0', borderBottom: '1px solid var(--border)', marginBottom: '12px', textAlign: 'center' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>OpsiAI</h3>
+                <p style={{ fontSize: '8px', color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: '2px', margin: 0 }}>Bloomberg for Technical Updates</p>
+              </div>
+
+              {/* Today's AI Snapshot mockup */}
+              <div style={{ background: 'var(--bg-color)', border: '1px solid var(--border)', borderRadius: '6px', padding: '10px', marginBottom: '12px', textAlign: 'left' }}>
+                <div style={{ fontSize: '8px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '6px' }}>Today's AI Snapshot</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', fontWeight: 600 }}>
+                  <div>🚨 Strategic : <span style={{ color: 'var(--strategic)' }}>2</span></div>
+                  <div>📌 Important : <span style={{ color: 'var(--important)' }}>6</span></div>
+                  <div>ℹ️ Insights : <span style={{ color: 'var(--insights)' }}>4</span></div>
+                </div>
+              </div>
+
+              {/* Strategic Card */}
+              <div style={{ background: 'var(--bg-color)', border: '1px solid var(--border)', borderLeft: '3px solid var(--strategic)', padding: '10px', borderRadius: '4px', marginBottom: '10px', textAlign: 'left' }}>
+                <div style={{ fontSize: '8px', textTransform: 'uppercase', color: 'var(--strategic)', fontWeight: 800 }}>🚨 Strategic</div>
+                <div style={{ fontSize: '11px', fontWeight: 700, margin: '2px 0' }}>Introducing GPT-Live Agentic Orchestrator</div>
+                <p style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3', margin: 0 }}>
+                  <strong>Why it matters:</strong> OpenAI releases native loops lowering orchestration latency by 60%.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Showcase Carousel Section */}
+        <div style={{ padding: '40px 16px', textAlign: 'center', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-color)' }}>See What You'll Receive Every Morning</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>Every report is structured logically so you can scan the brief in under 5 minutes.</p>
+          </div>
+
+          <div 
+            onTouchStart={(e) => setStartX(e.touches[0].clientX)} 
+            onTouchEnd={(e) => {
+              const endX = e.changedTouches[0].clientX;
+              const diff = startX - endX;
+              if (diff > 50) {
+                setShowcaseIndex(prev => (prev + 1) % 3);
+              } else if (diff < -50) {
+                setShowcaseIndex(prev => (prev - 1 + 3) % 3);
+              }
+            }}
+            style={{ overflow: 'hidden', position: 'relative', width: '100%' }}
+          >
+            <div 
+              style={{ 
+                display: 'flex', 
+                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+                transform: `translateX(-${showcaseIndex * 100}%)`,
+                width: '100%' 
+              }}
+            >
+              {/* Card 1 */}
+              <div style={{ width: '100%', flexShrink: 0, padding: '0 8px', boxSizing: 'border-box' }}>
+                <div style={{ background: 'var(--panel-bg)', border: '1px solid var(--border)', padding: '20px', borderRadius: '12px', minHeight: '190px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--strategic)', marginBottom: '8px', textAlign: 'left' }}>🚨 Strategic Updates</div>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.4', textAlign: 'left' }}>Framework migrations, shifts, and foundational API updates.</p>
+                  <div style={{ background: 'var(--bg-color)', border: '1px solid var(--border)', borderLeft: '3px solid var(--strategic)', padding: '12px', borderRadius: '4px', textAlign: 'left' }}>
+                    <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--strategic)', textTransform: 'uppercase' }}>🚨 Strategic</div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, margin: '4px 0' }}>Anthropic Claude 4 Launch</div>
+                    <p style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3', margin: 0 }}>Native agent memory caching reduces execution costs.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div style={{ width: '100%', flexShrink: 0, padding: '0 8px', boxSizing: 'border-box' }}>
+                <div style={{ background: 'var(--panel-bg)', border: '1px solid var(--border)', padding: '20px', borderRadius: '12px', minHeight: '190px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--important)', marginBottom: '8px', textAlign: 'left' }}>📌 Important News</div>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.4', textAlign: 'left' }}>Tool releases, Kubernetes cluster updates, cloud patches.</p>
+                  <div style={{ background: 'var(--bg-color)', border: '1px solid var(--border)', borderLeft: '3px solid var(--important)', padding: '12px', borderRadius: '4px', textAlign: 'left' }}>
+                    <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--important)', textTransform: 'uppercase' }}>📌 Important</div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, margin: '4px 0' }}>Kubernetes v1.31 Schedule</div>
+                    <p style={{ fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.3', margin: 0 }}>Memory manager upgrades for high-density nodes.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div style={{ width: '100%', flexShrink: 0, padding: '0 8px', boxSizing: 'border-box' }}>
+                <div style={{ background: 'var(--panel-bg)', border: '1px solid var(--border)', padding: '20px', borderRadius: '12px', minHeight: '190px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--primary)', marginBottom: '8px', textAlign: 'left' }}>💡 Daily Takeaways</div>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.4', textAlign: 'left' }}>Synthetic summaries compiling announcements and total hours saved.</p>
+                  <div style={{ background: 'var(--bg-color)', border: '1px solid var(--border)', padding: '12px', borderRadius: '4px', textAlign: 'left' }}>
+                    <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>Today's Takeaways</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '10px' }}>
+                      <div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '8px' }}>ANNOUNCEMENT</div>
+                        <div style={{ fontWeight: 700 }}>GPT-Live Launch</div>
+                      </div>
+                      <div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '8px' }}>TIME SAVED</div>
+                        <div style={{ fontWeight: 700, color: 'var(--insights)' }}>45 mins</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dots */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '16px' }}>
+              {[0, 1, 2].map(idx => (
+                <span 
+                  key={idx} 
+                  onClick={() => setShowcaseIndex(idx)}
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: idx === showcaseIndex ? 'var(--primary)' : 'rgba(255, 255, 255, 0.2)',
+                    transition: 'background-color 0.3s ease',
+                    cursor: 'pointer'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* AI Pulse Stats */}
+        <div style={{ padding: '40px 16px', textAlign: 'center' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-color)' }}>OpsiAI In Numbers</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>Parsed, aggregated and organized developer facts.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="metric-card" style={{ padding: '16px' }}>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary)' }}>{metrics ? metrics.articles_analyzed.toLocaleString() : '5,842'}</div>
+              <div style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginTop: '4px' }}>Articles</div>
+            </div>
+            <div className="metric-card" style={{ padding: '16px' }}>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary)' }}>{metrics ? metrics.trusted_sources.toLocaleString() : '87'}</div>
+              <div style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginTop: '4px' }}>Sources</div>
+            </div>
+            <div className="metric-card" style={{ padding: '16px' }}>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary)' }}>{metrics ? metrics.strategic_insights.toLocaleString() : '142'}</div>
+              <div style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginTop: '4px' }}>Strategic</div>
+            </div>
+            <div className="metric-card" style={{ padding: '16px' }}>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--primary)' }}>{metrics ? `${metrics.time_saved_hours.toLocaleString()}h` : '184h'}</div>
+              <div style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginTop: '4px' }}>Time Saved</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Cards Grid (Custom Breakpoints check in index.css) */}
+        <div style={{ padding: '40px 16px', textAlign: 'center', borderTop: '1px solid var(--border)', background: 'rgba(255,255,255,0.01)' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-color)' }}>Engineered for Technical Minds</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>Precision feeds built for software and systems engineers.</p>
+          </div>
+          <div className="mobile-features-grid" style={{ display: 'grid', gap: '16px' }}>
+            <div className="metric-card" style={{ padding: '20px', textAlign: 'left' }}>
+              <h3 style={{ fontSize: '14px', color: 'var(--primary)', marginBottom: '6px', fontWeight: 800 }}>AI Intelligence</h3>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4', margin: 0 }}>Gemini AI extracts, tags, and evaluates updates using custom heuristics.</p>
+            </div>
+            <div className="metric-card" style={{ padding: '20px', textAlign: 'left' }}>
+              <h3 style={{ fontSize: '14px', color: 'var(--primary)', marginBottom: '6px', fontWeight: 800 }}>Prioritization</h3>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4', margin: 0 }}>Critical architectural news is highlighted, separating noise from signal.</p>
+            </div>
+            <div className="metric-card" style={{ padding: '20px', textAlign: 'left' }}>
+              <h3 style={{ fontSize: '14px', color: 'var(--primary)', marginBottom: '6px', fontWeight: 800 }}>Daily Reports</h3>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4', margin: 0 }}>Get a beautifully formatted dark-theme email briefing in your inbox daily.</p>
+            </div>
+            <div className="metric-card" style={{ padding: '20px', textAlign: 'left' }}>
+              <h3 style={{ fontSize: '14px', color: 'var(--primary)', marginBottom: '6px', fontWeight: 800 }}>Trusted Sources</h3>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4', margin: 0 }}>Whitelisted scraping from official engineering blogs and cloud APIs.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* How It Works Timeline */}
+        <div style={{ padding: '40px 16px', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: '30px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-color)' }}>How It Works</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>Seamless curation and summary pipeline.</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+            {[
+              { step: '①', title: 'Collect', desc: 'Aggregates news from engineering blogs, release notes, and tech portals.' },
+              { step: '②', title: 'Analyze', desc: 'Gemini AI structures news facts, filtering out duplicates and marketing noise.' },
+              { step: '③', title: 'Generate Report', desc: 'Prioritizes strategic updates, explains why it matters to developers.' },
+              { step: '④', title: 'Deliver', desc: 'Delivers a daily condensed technical briefing directly to your inbox.' }
+            ].map((item, idx) => (
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--panel-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', width: '100%', boxSizing: 'border-box' }}>
+                  <div style={{ fontSize: '22px', color: 'var(--primary)', marginBottom: '6px', fontWeight: 800 }}>{item.step}</div>
+                  <h4 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 4px 0', color: 'var(--text-color)' }}>{item.title}</h4>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', margin: 0, lineHeight: '1.4' }}>{item.desc}</p>
+                </div>
+                {idx < 3 && <div style={{ fontSize: '18px', color: 'var(--primary)', margin: '10px 0' }}>↓</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div style={{ padding: '50px 16px', textAlign: 'center', borderTop: '1px solid var(--border)', background: 'linear-gradient(180deg, rgba(228, 185, 91, 0.02) 0%, rgba(0,0,0,0) 100%)' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Start Every Morning Smarter.</h2>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Join OpsiAI and receive curated AI intelligence instead of endless headlines.</p>
+          <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
+        </div>
+
+        {/* Mobile Footer */}
+        <footer style={{ padding: '40px 16px 20px 16px', borderTop: '1px solid var(--border)', background: 'var(--body-bg)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
+            <div>
+              <h3 style={{ color: 'var(--primary)', margin: '0 0 6px 0', fontSize: '18px', fontWeight: 800 }}>OpsiAI</h3>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>AI and DevOps intelligence parsed and curated daily for everyone.</p>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px', fontSize: '12px' }}>
+              <span onClick={() => handleOpenPolicy('privacy')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Privacy Policy</span>
+              <span onClick={() => handleOpenPolicy('terms')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Terms</span>
+              <span onClick={() => handleOpenPolicy('doc')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Guide</span>
+              <span onClick={() => handleOpenPolicy('about')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>About</span>
+            </div>
+          </div>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+            &copy; {new Date().getFullYear()} OpsiAI. All rights reserved.
+          </div>
+        </footer>
+
+        {/* Policies Modals */}
+        {showPolicyModal && (
+          <div className="modal-backdrop" onClick={() => setShowPolicyModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 2000, cursor: 'pointer' }}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px', width: '90%', maxHeight: '80vh', overflowY: 'auto', background: 'var(--panel-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px', position: 'relative', cursor: 'default' }}>
+              <button onClick={() => setShowPolicyModal(false)} style={{ position: 'absolute', top: '10px', right: '15px', border: 'none', background: 'transparent', color: 'var(--text-color)', fontSize: '20px', cursor: 'pointer' }}>&times;</button>
+              {policyType === 'privacy' && (
+                <div>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>🔒 Privacy Policy</h2>
+                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
+                    <p>At OpsiAI, we prioritize user privacy. We only collect your email address and topic selections to curate daily briefings. We never share your data.</p>
+                  </div>
+                </div>
+              )}
+              {policyType === 'terms' && (
+                <div>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>📄 Terms of Service</h2>
+                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
+                    <p>OpsiAI delivers digests for informational/educational purposes only. Automated scraping of OpsiAI endpoints is strictly prohibited.</p>
+                  </div>
+                </div>
+              )}
+              {policyType === 'doc' && (
+                <div>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>📖 Documentation & Guide</h2>
+                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
+                    <p>Configure whitelists in the Topics tab to filter reports. Manage subscription options inside your Profile tab.</p>
+                  </div>
+                </div>
+              )}
+              {policyType === 'about' && (
+                <div>
+                  <h2 style={{ color: 'var(--primary)', marginBottom: '12px', fontSize: '16px', fontWeight: 800 }}>ℹ️ About OpsiAI</h2>
+                  <div style={{ fontSize: '11px', lineHeight: '1.5', color: 'var(--text-color)', display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}>
+                    <p>OpsiAI parses release notes and developer blogs daily to deliver highly-curated briefs using AI-structured models.</p>
+                  </div>
+                </div>
+              )}
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="btn-primary" onClick={() => setShowPolicyModal(false)} style={{ padding: '6px 16px', fontSize: '11px' }}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="landing-container">
