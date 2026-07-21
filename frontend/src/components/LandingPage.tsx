@@ -119,10 +119,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           {isAuthenticated ? (
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn-primary" onClick={onNavigateToDashboard}>Dashboard</button>
-              <button className="btn-secondary" style={{ borderColor: 'var(--strategic)', color: 'var(--strategic)' }} onClick={onLogout}>Sign Out</button>
-            </div>
+            <button className="btn-secondary" style={{ borderColor: 'var(--strategic)', color: 'var(--strategic)' }} onClick={onLogout}>Sign Out</button>
           ) : (
             <>
               <button className="btn-secondary" onClick={onNavigateToLogin}>Sign In</button>
