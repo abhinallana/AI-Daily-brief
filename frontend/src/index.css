@@ -2570,3 +2570,16 @@ input:checked + .ios-slider:before {
   transform: scale(0.9) !important;
   transition: transform 0.08s ease;
 }
+
+/* Desktop Article Card Action Buttons */
+.icon-action-btn:hover {
+  background-color: rgba(228, 185, 91, 0.08) !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+}
+
+.icon-action-btn:active {
+  transform: scale(0.93) !important;
+  transition: transform 0.08s ease;
+}
+

@@ -1027,14 +1027,14 @@ const App: React.FC = () => {
                 <p style={{ fontSize: '13px', marginTop: '6px' }}>Try adjusting your keywords, category settings, or change the From/To date range.</p>
               </div>
             ) : (
-              <ArticleFeed articles={filteredSearchArticles} />
+              <ArticleFeed articles={filteredSearchArticles} bookmarks={bookmarks} onToggleBookmark={toggleBookmark} />
             )}
           </div>
         ) : (
           <>
             <Takeaways report={filteredReport} />
             <SnapshotBar articles={filteredArticles} />
-            <ArticleFeed articles={filteredArticles} />
+            <ArticleFeed articles={filteredArticles} bookmarks={bookmarks} onToggleBookmark={toggleBookmark} />
           </>
         )}
 
