@@ -15,6 +15,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Email Address Input Field Tooltip States (only shown in signup mode)
+  const [showEmailTooltip, setShowEmailTooltip] = useState(false);
+  const tooltipInteractionRef = React.useRef(false);
+  const tooltipTimeoutRef = React.useRef<any>(null);
+
+  const triggerEmailTooltip = () => {
+    if (!isSignUp) return; // Only show tooltip on the registration/signup email input
+    if (tooltipInteractionRef.current) return;
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+    setShowEmailTooltip(true);
+    tooltipInteractionRef.current = true;
+    tooltipTimeoutRef.current = setTimeout(() => {
+      setShowEmailTooltip(false);
+    }, 2000);
+  };
+
+  const resetEmailTooltip = () => {
+    tooltipInteractionRef.current = false;
+    setShowEmailTooltip(false);
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,7 +130,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
             </div>
           )}
 
-          <div className="auth-input-group">
+          <div className="auth-input-group" style={{ position: 'relative' }}>
             <label className="auth-label">Email Address</label>
             <input
               type="email"
@@ -112,8 +138,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
               placeholder="you@domain.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onMouseEnter={triggerEmailTooltip}
+              onMouseLeave={resetEmailTooltip}
+              onFocus={triggerEmailTooltip}
+              onBlur={resetEmailTooltip}
               required
             />
+            {showEmailTooltip && (
+              <div className="email-tooltip">
+                Use a valid email address to receive your personalized daily intelligence reports.
+              </div>
+            )}
           </div>
 
           <div className="auth-input-group">

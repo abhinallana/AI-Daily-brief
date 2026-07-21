@@ -20,6 +20,31 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
+  // Email Address Input Field Tooltip States
+  const [showEmailTooltip, setShowEmailTooltip] = useState(false);
+  const tooltipInteractionRef = React.useRef(false);
+  const tooltipTimeoutRef = React.useRef<any>(null);
+
+  const triggerEmailTooltip = () => {
+    if (tooltipInteractionRef.current) return;
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+    setShowEmailTooltip(true);
+    tooltipInteractionRef.current = true;
+    tooltipTimeoutRef.current = setTimeout(() => {
+      setShowEmailTooltip(false);
+    }, 2000);
+  };
+
+  const resetEmailTooltip = () => {
+    tooltipInteractionRef.current = false;
+    setShowEmailTooltip(false);
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+  };
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!firstName.trim()) {
@@ -146,7 +171,7 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
             </div>
           </div>
 
-          <div className="auth-input-group" style={{ marginBottom: 0 }}>
+          <div className="auth-input-group" style={{ marginBottom: 0, position: 'relative' }}>
             <label className="auth-label">Email Address *</label>
             <input
               type="email"
@@ -154,7 +179,16 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
               placeholder="you@domain.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onMouseEnter={triggerEmailTooltip}
+              onMouseLeave={resetEmailTooltip}
+              onFocus={triggerEmailTooltip}
+              onBlur={resetEmailTooltip}
             />
+            {showEmailTooltip && (
+              <div className="email-tooltip">
+                Use a valid email address to receive your personalized daily intelligence reports.
+              </div>
+            )}
             {errors.email && <span style={{ color: 'var(--strategic)', fontSize: '10px' }}>{errors.email}</span>}
           </div>
 
