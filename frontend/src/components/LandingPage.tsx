@@ -119,7 +119,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           {isAuthenticated ? (
-            <button className="btn-secondary" style={{ borderColor: 'var(--strategic)', color: 'var(--strategic)' }} onClick={onLogout}>Sign Out</button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="btn-primary" onClick={onNavigateToDashboard}>Dashboard</button>
+              <button className="btn-secondary" style={{ borderColor: 'var(--strategic)', color: 'var(--strategic)' }} onClick={onLogout}>Sign Out</button>
+            </div>
           ) : (
             <>
               <button className="btn-secondary" onClick={onNavigateToLogin}>Sign In</button>
@@ -143,8 +146,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             and delivers one concise intelligence report directly to your inbox.
           </p>
           <div className="hero-actions">
-            <button className="btn-primary btn-large" onClick={onNavigateToSignUp}>Get Started Free</button>
-            <button className="btn-outline btn-large" onClick={onViewDemo}>View Today's Report</button>
+            {isAuthenticated ? (
+              <button className="btn-primary btn-large" onClick={onNavigateToDashboard}>Go to Dashboard</button>
+            ) : (
+              <button className="btn-primary btn-large" onClick={onNavigateToSignUp}>Get Started Free</button>
+            )}
+            <button className="btn-outline btn-large" onClick={isAuthenticated ? onNavigateToDashboard : onViewDemo}>
+              {isAuthenticated ? "View Today's Briefing" : "View Today's Report"}
+            </button>
           </div>
         </div>
 

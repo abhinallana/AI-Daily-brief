@@ -662,6 +662,16 @@ const App: React.FC = () => {
     window.history.pushState(null, '', '/');
   };
 
+  const handleGoToDashboard = () => {
+    setActiveRootView('dashboard');
+    if (isMobile) {
+      setMobileTab('dashboard');
+    } else {
+      setActiveView('today');
+    }
+    window.history.pushState(null, '', '/dashboard');
+  };
+
   const handleWelcomeNext = (selectedTopics: string[]) => {
     setShowWelcomeModal(false);
 
@@ -1120,7 +1130,7 @@ const App: React.FC = () => {
             window.history.pushState(null, '', '/dashboard');
           }}
           isAuthenticated={!!token}
-          onNavigateToDashboard={handleLogoClick}
+          onNavigateToDashboard={handleGoToDashboard}
           onLogout={handleLogout}
           onNavigateToTab={(tab) => {
             setActiveRootView('dashboard');
