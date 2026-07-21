@@ -104,11 +104,13 @@ const App: React.FC = () => {
           if (activeView === 'today') setMobileTab('dashboard');
           else if (activeView === 'preferences') setMobileTab('topics');
           else if (activeView === 'profile') setMobileTab('profile');
+          else if (activeView === 'bookmarks') setMobileTab('bookmarks');
         } else {
           // Switch back to desktop viewports
           if (mobileTab === 'dashboard' || mobileTab === 'reports') setActiveView('today');
           else if (mobileTab === 'topics') setActiveView('preferences');
-          else if (mobileTab === 'profile' || mobileTab === 'bookmarks') setActiveView('profile');
+          else if (mobileTab === 'profile') setActiveView('profile');
+          else if (mobileTab === 'bookmarks') setActiveView('bookmarks');
         }
       }
     };
@@ -278,10 +280,13 @@ const App: React.FC = () => {
         const path = window.location.pathname;
         if (['/', '', '/login', '/signup'].includes(path)) {
           setActiveRootView('landing');
-        } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+        } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports', '/bookmarks'].includes(path) || path.startsWith('/article/')) {
           if (path === '/profile') {
             setActiveView('profile');
             setMobileTab('profile');
+          } else if (path === '/bookmarks') {
+            setActiveView('bookmarks');
+            setMobileTab('bookmarks');
           } else if (path === '/settings' || path === '/topics') {
             setActiveView('preferences');
             setMobileTab('topics');
@@ -368,11 +373,14 @@ const App: React.FC = () => {
         const path = window.location.pathname;
         if (['/', '', '/login', '/signup'].includes(path)) {
           setActiveRootView('landing');
-        } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+        } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports', '/bookmarks'].includes(path) || path.startsWith('/article/')) {
           setActiveRootView('dashboard');
           if (path === '/profile') {
             setActiveView('profile');
             setMobileTab('profile');
+          } else if (path === '/bookmarks') {
+            setActiveView('bookmarks');
+            setMobileTab('bookmarks');
           } else if (path === '/settings' || path === '/topics') {
             setActiveView('preferences');
             setMobileTab('topics');
@@ -387,7 +395,7 @@ const App: React.FC = () => {
       } else {
         console.log("No active Supabase user session detected.");
         const path = window.location.pathname;
-        if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+        if (['/dashboard', '/settings', '/profile', '/topics', '/reports', '/bookmarks'].includes(path) || path.startsWith('/article/')) {
           console.log("Protected path visited without session. Redirecting to login path:", path);
           setRedirectPath(path);
           setActiveRootView('login');
@@ -468,12 +476,15 @@ const App: React.FC = () => {
         } else {
           setActiveRootView('signup');
         }
-      } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports'].includes(path) || path.startsWith('/article/')) {
+      } else if (['/dashboard', '/settings', '/profile', '/topics', '/reports', '/bookmarks'].includes(path) || path.startsWith('/article/')) {
         if (cachedToken) {
           setActiveRootView('dashboard');
           if (path === '/profile') {
             setActiveView('profile');
             setMobileTab('profile');
+          } else if (path === '/bookmarks') {
+            setActiveView('bookmarks');
+            setMobileTab('bookmarks');
           } else if (path === '/settings' || path === '/topics') {
             setActiveView('preferences');
             setMobileTab('topics');
@@ -760,6 +771,7 @@ const App: React.FC = () => {
     setActiveView(view);
     if (view === 'profile') window.history.pushState(null, '', '/profile');
     else if (view === 'preferences') window.history.pushState(null, '', '/settings');
+    else if (view === 'bookmarks') window.history.pushState(null, '', '/bookmarks');
     else window.history.pushState(null, '', '/dashboard');
   };
 
@@ -768,6 +780,35 @@ const App: React.FC = () => {
     if (hour < 12) return `Good Morning, ${name} 👋`;
     if (hour < 17) return `Good Afternoon, ${name} 👋`;
     return `Good Evening, ${name} 👋`;
+  };
+
+  const renderBookmarksView = () => {
+    return (
+      <div style={{ animation: 'fadeIn 0.3s ease-out', marginTop: '10px' }}>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 800 }}>Saved Briefings</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '6px' }}>
+            Offline-ready bookmarks you have saved for reading.
+          </p>
+        </div>
+
+        {bookmarks.length === 0 ? (
+          <div className="article-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
+            <h3 style={{ fontSize: '18px', fontWeight: 700 }}>No Saved Briefings</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '6px' }}>
+              Tap the bookmark folder icon on any article in your daily reports feed to save it here.
+            </p>
+          </div>
+        ) : (
+          <ArticleFeed 
+            articles={bookmarks} 
+            bookmarks={bookmarks} 
+            onToggleBookmark={toggleBookmark} 
+          />
+        )}
+      </div>
+    );
   };
 
   const renderTodayView = () => {
@@ -1811,6 +1852,7 @@ const App: React.FC = () => {
 
       <main className="main-content">
         {activeView === 'today' && renderTodayView()}
+        {activeView === 'bookmarks' && renderBookmarksView()}
         {activeView === 'preferences' && (
           <Preferences
             enabledTopics={enabledTopics}
