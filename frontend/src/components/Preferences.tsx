@@ -132,6 +132,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
+  const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadCounts() {
@@ -318,24 +319,12 @@ export const Preferences: React.FC<PreferencesProps> = ({
                   });
                   setLocalTopics(loaded);
                   if (onSave) onSave(loaded);
+                  setAppliedPresetId(pack.id);
+                  setTimeout(() => setAppliedPresetId(null), 600);
                   setStatus(`${pack.name} preset applied! Click Save Preferences below to persist.`);
                   setTimeout(() => setStatus(null), 4000);
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                  color: 'var(--text-color)',
-                  cursor: 'pointer',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  transition: 'var(--transition)'
-                }}
-                className="preset-chip"
+                className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''}`}
               >
                 <span>{pack.icon}</span>
                 {pack.name}
@@ -496,24 +485,12 @@ export const Preferences: React.FC<PreferencesProps> = ({
                 });
                 setLocalTopics(loaded);
                 if (onSave) onSave(loaded);
+                setAppliedPresetId(pack.id);
+                setTimeout(() => setAppliedPresetId(null), 600);
                 setStatus(`${pack.name} preset applied! Click Save Preferences below to persist.`);
                 setTimeout(() => setStatus(null), 4000);
               }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
-                borderRadius: '20px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                color: 'var(--text-color)',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 600,
-                transition: 'var(--transition)'
-              }}
-              className="preset-chip"
+              className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''}`}
             >
               <span>{pack.icon}</span>
               {pack.name}
