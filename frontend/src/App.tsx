@@ -1427,7 +1427,7 @@ const App: React.FC = () => {
                 <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px' }}>📰</div>
                   <h3>No matching articles</h3>
-                  <p style={{ fontSize: '13px', marginTop: '6px' }}>Verify your whitelisted topic subscriptions in the Topics tab or clear your filters.</p>
+                  <p style={{ fontSize: '13px', marginTop: '6px' }}>Verify your whitelisted topic subscriptions in the Preferences tab or clear your filters.</p>
                 </div>
               ) : (
                 <div className="mobile-feed-container">
@@ -1492,7 +1492,7 @@ const App: React.FC = () => {
             <div className="mobile-topics-section">
               <div style={{ marginBottom: '4px' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Configure Intelligence Feed</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Your selections directly filter your dashboard reports and daily email updates.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Your selections directly filter your Reports and Daily E-mail updates.</p>
               </div>
               <Preferences
                 enabledTopics={enabledTopics}
@@ -1620,7 +1620,7 @@ const App: React.FC = () => {
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'topics' ? 'active' : ''}`} onClick={() => handleMobileTabChange('topics')}>
             <div className="icon">💡</div>
-            <span>Topics</span>
+            <span>Preferences</span>
           </button>
           <button className={`mobile-nav-item ${mobileTab === 'bookmarks' ? 'active' : ''}`} onClick={() => handleMobileTabChange('bookmarks')}>
             <div className="icon">🔖</div>

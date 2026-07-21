@@ -86,6 +86,13 @@ const INTELLIGENCE_PACKS: Pack[] = [
 
 export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onNext, firstName }) => {
   const [selectedPacks, setSelectedPacks] = useState<string[]>(['general']);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -136,7 +143,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
           width: '95%',
           maxHeight: '90vh',
           overflowY: 'auto',
-          padding: '40px',
+          padding: isMobile ? '24px 16px' : '40px',
           background: 'rgba(18, 19, 24, 0.9)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -162,21 +169,21 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
           &times;
         </button>
         
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h2 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '10px', background: 'linear-gradient(135deg, #ffffff 0%, var(--text-muted) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '20px' : '32px' }}>
+          <h2 style={{ fontSize: isMobile ? '20px' : '28px', fontWeight: 800, marginBottom: '10px', background: 'linear-gradient(135deg, #ffffff 0%, var(--text-muted) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             Welcome, {firstName || 'Reader'} 👋
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '15px', maxWidth: '550px', margin: '0 auto', lineHeight: '1.5' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: isMobile ? '12px' : '15px', maxWidth: '550px', margin: '0 auto', lineHeight: '1.5' }}>
             Choose one or more **Intelligence Packs** to personalize your AI, DevOps, and cloud news digest feed instantly.
           </p>
         </div>
 
-        <div style={{ margin: '24px 0' }}>
+        <div style={{ margin: isMobile ? '16px 0' : '24px 0' }}>
           <div 
             style={{ 
               display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', 
-              gap: '20px' 
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(230px, 1fr))', 
+              gap: isMobile ? '12px' : '20px' 
             }}
           >
             {INTELLIGENCE_PACKS.map(pack => {
@@ -186,7 +193,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
                   key={pack.id}
                   onClick={() => togglePack(pack.id)}
                   style={{
-                    padding: '24px',
+                    padding: isMobile ? '16px' : '24px',
                     borderRadius: '12px',
                     border: '1px solid',
                     borderColor: isSelected ? 'var(--primary)' : 'rgba(255, 255, 255, 0.05)',
@@ -197,14 +204,14 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    minHeight: '140px',
+                    minHeight: isMobile ? '110px' : '140px',
                     transform: isSelected ? 'translateY(-2px)' : 'none'
                   }}
                   className="onboarding-card"
                 >
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span style={{ fontSize: '32px' }}>{pack.icon}</span>
+                      <span style={{ fontSize: isMobile ? '24px' : '32px' }}>{pack.icon}</span>
                       <div 
                         style={{ 
                           width: '18px', 
@@ -224,10 +231,10 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
                         )}
                       </div>
                     </div>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: isSelected ? 'var(--primary)' : 'var(--text-color)', marginBottom: '8px' }}>
+                    <h3 style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: 700, color: isSelected ? 'var(--primary)' : 'var(--text-color)', marginBottom: '8px' }}>
                       {pack.name}
                     </h3>
-                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                    <p style={{ fontSize: isMobile ? '11px' : '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
                       {pack.description}
                     </p>
                   </div>
@@ -241,16 +248,16 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
           style={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
-            marginTop: '35px', 
+            marginTop: isMobile ? '24px' : '35px', 
             borderTop: '1px solid rgba(255, 255, 255, 0.08)', 
-            paddingTop: '25px',
+            paddingTop: isMobile ? '16px' : '25px',
             alignItems: 'center'
           }}
         >
           <button 
             className="btn-secondary" 
             onClick={handleSkip}
-            style={{ padding: '12px 28px', fontSize: '13px' }}
+            style={{ padding: isMobile ? '10px 20px' : '12px 28px', fontSize: '13px' }}
           >
             Use Defaults
           </button>
@@ -259,7 +266,7 @@ export const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose, onN
             className="btn-primary" 
             onClick={handleNext}
             style={{ 
-              padding: '14px 36px', 
+              padding: isMobile ? '12px 24px' : '14px 36px', 
               fontSize: '13px', 
               boxShadow: '0 0 15px rgba(129, 140, 248, 0.3)'
             }}

@@ -349,10 +349,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {isAuthenticated ? (
             <>
               <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Ready to Explore Your Technical Feed?</h2>
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Access your personalized reports and configure your whitelisted topics.</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Access your personalized reports and configure your whitelisted preferences.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToDashboard}>Go to Dashboard</button>
-                <button className="btn-outline" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Configure Topics</button>
+                <button className="btn-outline" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Configure Preferences</button>
               </div>
             </>
           ) : (
@@ -516,7 +516,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <ul className="nav-items">
             <li className="nav-link" onClick={() => onNavigateToDashboard && onNavigateToDashboard()}>Dashboard</li>
             <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('reports')}>Daily Reports</li>
-            <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Topics</li>
+            <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Preferences</li>
             <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('profile')}>Profile</li>
           </ul>
         ) : (
@@ -811,10 +811,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {isAuthenticated ? (
           <>
             <h2>Ready to Explore Your Technical Feed?</h2>
-            <p>Access your personalized reports and configure your whitelisted topics.</p>
+            <p>Access your personalized reports and configure your whitelisted preferences.</p>
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
               <button className="btn-primary btn-large" onClick={onNavigateToDashboard}>Go to Dashboard</button>
-              <button className="btn-outline btn-large" onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Configure Topics</button>
+              <button className="btn-outline btn-large" onClick={() => onNavigateToTab && onNavigateToTab('topics')}>Configure Preferences</button>
             </div>
           </>
         ) : (
