@@ -365,57 +365,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         {/* Mobile Footer */}
-        <footer className="landing-footer" style={{ borderTop: '1px solid var(--border)', background: 'var(--body-bg)', padding: '40px 16px 20px 16px' }}>
-          <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px', textAlign: 'center' }}>
-            <div className="footer-brand">
-              <h3 style={{ color: 'var(--primary)', margin: '0 0 8px 0', fontSize: '18px', fontWeight: 800 }}>OpsiAI</h3>
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>AI and DevOps intelligence parsed and curated daily for everyone.</p>
+        <footer style={{ padding: '40px 16px 20px 16px', borderTop: '1px solid var(--border)', background: 'var(--body-bg)', textAlign: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
+            <div>
+              <h3 style={{ color: 'var(--primary)', margin: '0 0 6px 0', fontSize: '18px', fontWeight: 800 }}>OpsiAI</h3>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>AI and DevOps intelligence parsed and curated daily for everyone.</p>
             </div>
-            <div className="footer-col">
-              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Product</h4>
-              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <li className="footer-link" onClick={() => {
-                  const el = document.getElementById('features');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}>Features</li>
-                <li className="footer-link" onClick={() => {
-                  const el = document.getElementById('metrics');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}>Metrics</li>
-                <li className="footer-link" onClick={() => handleOpenPolicy('pricing')}>Pricing</li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Resources</h4>
-              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <li className="footer-link" onClick={() => handleOpenPolicy('doc')}>Documentation</li>
-                <li className="footer-link" onClick={() => handleOpenPolicy('release_notes')}>Release Notes</li>
-                <li className="footer-link" onClick={() => handleOpenPolicy('api_status')}>API Status</li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Company</h4>
-              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <li className="footer-link" onClick={() => handleOpenPolicy('about')}>About</li>
-                <li className="footer-link" onClick={() => handleOpenPolicy('privacy')}>Privacy Policy</li>
-                <li className="footer-link" onClick={() => handleOpenPolicy('terms')}>Terms</li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>Connect</h4>
-              <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <li className="footer-link"><span style={{ opacity: 0.5 }}>GitHub</span></li>
-                <li className="footer-link"><span style={{ opacity: 0.5 }}>LinkedIn</span></li>
-                <li className="footer-link"><a href="mailto:opsiai127@gmail.com" style={{ color: 'inherit', textDecoration: 'none' }}>Contact Support</a></li>
-              </ul>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px', fontSize: '12px' }}>
+              <span onClick={() => handleOpenPolicy('privacy')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Privacy Policy</span>
+              <span onClick={() => handleOpenPolicy('terms')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Terms</span>
+              <span onClick={() => handleOpenPolicy('doc')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Guide</span>
+              <span onClick={() => handleOpenPolicy('about')} style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>About</span>
             </div>
           </div>
-          <div className="footer-bottom" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', marginTop: '30px', borderTop: '1px solid var(--border)', paddingTop: '16px', fontSize: '12px' }}>
-            <div>&copy; {new Date().getFullYear()} OpsiAI. All rights reserved.</div>
-            <div style={{ display: 'flex', gap: '20px' }}>
-              <span style={{ opacity: 0.5 }}>GitHub</span>
-              <span style={{ opacity: 0.5 }}>LinkedIn</span>
-            </div>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+            &copy; {new Date().getFullYear()} OpsiAI. All rights reserved.
           </div>
         </footer>
 
