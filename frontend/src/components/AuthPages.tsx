@@ -122,7 +122,7 @@ export const SignUpPage: React.FC<SignUpProps> = ({ onNavigateToLogin, onSignUpS
   return (
     <div 
       onClick={onClose}
-      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-color)', position: 'relative', padding: '20px', cursor: 'pointer' }}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-color)', position: 'relative', overflow: 'hidden', padding: '20px', cursor: 'pointer' }}
     >
       <div className="subtle-grid"></div>
       <div className="landing-glow-1"></div>
@@ -299,7 +299,7 @@ export const LoginPage: React.FC<LoginProps> = ({ onNavigateToSignUp, onLoginSuc
   return (
     <div 
       onClick={onClose}
-      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-color)', position: 'relative', padding: '20px', cursor: 'pointer' }}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--bg-color)', position: 'relative', overflow: 'hidden', padding: '20px', cursor: 'pointer' }}
     >
       <div className="subtle-grid"></div>
       <div className="landing-glow-1"></div>
