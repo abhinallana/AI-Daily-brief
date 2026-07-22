@@ -1204,6 +1204,8 @@ const App: React.FC = () => {
           }}
           isAuthenticated={!!token}
           isGuest={isGuest}
+          userId={userId || undefined}
+          userEmail={userEmail || undefined}
           onNavigateToDashboard={handleGoToDashboard}
           onLogout={handleLogout}
           onNavigateToTab={(tab) => {

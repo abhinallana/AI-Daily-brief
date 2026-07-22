@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchOpsiMetrics } from '../services/api';
 import type { OpsiMetrics } from '../services/api';
+import { FeedbackSection } from './FeedbackSection';
 
 interface LandingPageProps {
   onNavigateToLogin: () => void;
@@ -11,6 +12,8 @@ interface LandingPageProps {
   onLogout?: () => void;
   onNavigateToTab?: (tab: string) => void;
   isGuest?: boolean;
+  userId?: string;
+  userEmail?: string;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -21,7 +24,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onNavigateToDashboard,
   onLogout,
   onNavigateToTab,
-  isGuest = false
+  isGuest = false,
+  userId,
+  userEmail
 }) => {
   const isRealUser = isAuthenticated && !isGuest;
   const [scrolled, setScrolled] = useState(false);
@@ -366,6 +371,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </>
           )}
         </div>
+
+        <FeedbackSection userId={userId} userEmail={userEmail} isGuest={isGuest} />
 
         {/* Mobile Footer */}
         <footer style={{ padding: '40px 16px 20px 16px', borderTop: '1px solid var(--border)', background: 'var(--body-bg)', textAlign: 'center' }}>
