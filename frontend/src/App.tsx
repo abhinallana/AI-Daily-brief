@@ -1286,12 +1286,22 @@ const App: React.FC = () => {
             <button className="mobile-icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
-            <div className="mobile-avatar-btn" onClick={() => handleMobileTabChange('profile')}>
-              <img
-                src={userAvatar || `https://robohash.org/${encodeURIComponent(userEmail || 'default')}?set=set1&bgset=bg1`}
-                alt="Avatar"
-              />
-            </div>
+            {isGuest ? (
+              <button 
+                className="btn-primary" 
+                onClick={() => setShowGuestAuthModal(true)}
+                style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '8px', fontWeight: 700 }}
+              >
+                Sign Up
+              </button>
+            ) : (
+              <div className="mobile-avatar-btn" onClick={() => handleMobileTabChange('profile')}>
+                <img
+                  src={userAvatar || `https://robohash.org/${encodeURIComponent(userEmail || 'default')}?set=set1&bgset=bg1`}
+                  alt="Avatar"
+                />
+              </div>
+            )}
           </div>
         </header>
 
@@ -1657,6 +1667,7 @@ const App: React.FC = () => {
                 onProfileUpdated={setUserFirstName}
                 onLogout={handleLogout}
                 isGuest={isGuest}
+                onOpenAuth={() => setShowGuestAuthModal(true)}
               />
 
               {!isGuest && (
@@ -1903,6 +1914,7 @@ const App: React.FC = () => {
             onProfileUpdated={setUserFirstName}
             onLogout={handleLogout}
             isGuest={isGuest}
+            onOpenAuth={() => setShowGuestAuthModal(true)}
           />
         )}
         {activeView === 'about' && <AboutUs />}

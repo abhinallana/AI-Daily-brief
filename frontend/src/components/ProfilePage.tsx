@@ -20,6 +20,7 @@ interface ProfilePageProps {
   onProfileUpdated?: (firstName: string) => void;
   onLogout?: () => void;
   isGuest?: boolean;
+  onOpenAuth?: () => void;
 }
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ 
@@ -28,7 +29,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   userEmail,
   onProfileUpdated,
   onLogout,
-  isGuest
+  isGuest,
+  onOpenAuth
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'settings'>(defaultView);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -309,12 +311,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
         {/* Save changes button */}
         <button 
-          type="submit" 
+          type={isGuest ? "button" : "submit"} 
           className="btn-primary" 
-          disabled={saving || isGuest}
+          onClick={isGuest ? onOpenAuth : undefined}
+          disabled={saving}
           style={{ minHeight: '48px', width: '100%', borderRadius: '12px', marginTop: '10px', fontSize: '15px', fontWeight: 700 }}
         >
-          {saving ? 'Saving...' : (isGuest ? 'Disabled in Demo' : 'Save Profile Changes')}
+          {saving ? 'Saving...' : (isGuest ? 'Create your Account' : 'Save Profile Changes')}
         </button>
       </form>
     );
@@ -585,8 +588,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '20px', marginTop: '10px' }}>
-            <button type="submit" className="btn-primary" disabled={saving || isGuest} style={{ padding: '12px 28px' }}>
-              {saving ? 'Saving changes...' : (isGuest ? 'Disabled in Demo' : 'Save Settings')}
+            <button 
+              type={isGuest ? "button" : "submit"} 
+              className="btn-primary" 
+              onClick={isGuest ? onOpenAuth : undefined}
+              disabled={saving} 
+              style={{ padding: '12px 28px' }}
+            >
+              {saving ? 'Saving changes...' : (isGuest ? 'Create your Account' : 'Save Settings')}
             </button>
           </div>
         </form>
