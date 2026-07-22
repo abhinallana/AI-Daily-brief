@@ -373,25 +373,49 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </button>
         </div>
         
-        {!isMobile && onLogout && (
-          <button 
-            onClick={onLogout}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontFamily: 'var(--font-headings)',
-              fontSize: '14px',
-              fontWeight: 700,
-              color: 'var(--strategic)',
-              cursor: 'pointer',
-              paddingBottom: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <span>🚪</span> Sign Out
-          </button>
+        {!isMobile && (
+          isGuest ? (
+            <button 
+              onClick={onOpenAuth}
+              style={{
+                background: 'var(--primary)',
+                border: 'none',
+                fontFamily: 'var(--font-headings)',
+                fontSize: '14px',
+                fontWeight: 700,
+                color: '#fff',
+                cursor: 'pointer',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>✨</span> Create your Account
+            </button>
+          ) : (
+            onLogout && (
+              <button 
+                onClick={onLogout}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontFamily: 'var(--font-headings)',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: 'var(--strategic)',
+                  cursor: 'pointer',
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>🚪</span> Sign Out
+              </button>
+            )
+          )
         )}
       </div>
 

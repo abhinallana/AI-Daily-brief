@@ -68,7 +68,9 @@ const App: React.FC = () => {
   const [filterSource, setFilterSource] = useState<string>('All');
 
   // Theme State
-  const [theme, setThemeState] = useState<string>(localStorage.getItem('opsiai_theme') || 'dark');
+  const [theme, setThemeState] = useState<string>(
+    localStorage.getItem('opsiai_theme') || (window.innerWidth < 768 ? 'light' : 'dark')
+  );
 
   const setTheme = (newTheme: string) => {
     setThemeState(newTheme);
