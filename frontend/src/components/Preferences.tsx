@@ -101,6 +101,25 @@ const CATEGORIES: Category[] = [
   }
 ];
 
+const DEFAULT_TOPICS = [
+  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
+  'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
+  'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
+  'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
+  'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
+  'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
+  'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
+];
+
+const PRESETS = [
+  { id: 'ai-engineer', name: 'AI Engineer', icon: '🧠', topics: ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 'MCP', 'GitHub', 'Hugging Face'] },
+  { id: 'devops', name: 'DevOps Specialist', icon: '⚓', topics: ['Kubernetes', 'CNCF', 'GitHub', 'AWS', 'Google Cloud', 'Azure', 'Cloudflare'] },
+  { id: 'cloud', name: 'Cloud Architect', icon: '☁️', topics: ['AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'Kubernetes', 'CNCF'] },
+  { id: 'founder', name: 'Founder & Investor', icon: '📈', topics: ['TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding', 'OpenAI', 'Anthropic', 'xAI', 'Perplexity AI', 'LangChain', 'CrewAI'] },
+  { id: 'general', name: 'General Reader', icon: '🌐', topics: ['OpenAI', 'Anthropic', 'Google Gemini', 'Kubernetes', 'AWS', 'TechCrunch AI', 'YC Blog', 'AI Startup Funding', 'Hugging Face', 'GitHub'] },
+  { id: 'all', name: 'Select All', icon: '✨', topics: DEFAULT_TOPICS }
+];
+
 interface PreferencesProps {
   enabledTopics?: Record<string, boolean>;
   onSave?: (updated: Record<string, boolean>) => void;
@@ -133,6 +152,21 @@ export const Preferences: React.FC<PreferencesProps> = ({
   const [status, setStatus] = useState<string | null>(null);
   const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
+  const [activePresetId, setActivePresetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let matchedPreset: string | null = null;
+    const activeKeys = Object.keys(localTopics).filter(k => localTopics[k]);
+    if (activeKeys.length > 0) {
+      for (const pack of PRESETS) {
+        if (pack.topics.length === activeKeys.length && pack.topics.every(t => localTopics[t])) {
+          matchedPreset = pack.id;
+          break;
+        }
+      }
+    }
+    setActivePresetId(matchedPreset);
+  }, [localTopics]);
 
   useEffect(() => {
     async function loadCounts() {
@@ -162,16 +196,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
           const prefs = await fetchPreferences(email);
           if (prefs && prefs.length > 0) {
             const loaded: Record<string, boolean> = {};
-            const defaultTopics = [
-              'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
-              'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
-              'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
-              'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
-              'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
-              'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
-              'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
-            ];
-            defaultTopics.forEach((topicId: string) => {
+            DEFAULT_TOPICS.forEach((topicId: string) => {
               loaded[topicId] = false;
             });
             prefs.forEach((topicId: string) => {
@@ -292,29 +317,13 @@ export const Preferences: React.FC<PreferencesProps> = ({
             Select a pre-configured pack to instantly toggle interest checkboxes below.
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {[
-              { id: 'ai-engineer', name: 'AI Engineer', icon: '🧠', topics: ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 'MCP', 'GitHub', 'Hugging Face'] },
-              { id: 'devops', name: 'DevOps Specialist', icon: '⚓', topics: ['Kubernetes', 'CNCF', 'GitHub', 'AWS', 'Google Cloud', 'Azure', 'Cloudflare'] },
-              { id: 'cloud', name: 'Cloud Architect', icon: '☁️', topics: ['AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'Kubernetes', 'CNCF'] },
-              { id: 'founder', name: 'Founder & Investor', icon: '📈', topics: ['TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding', 'OpenAI', 'Anthropic', 'xAI', 'Perplexity AI', 'LangChain', 'CrewAI'] },
-              { id: 'general', name: 'General Reader', icon: '🌐', topics: ['OpenAI', 'Anthropic', 'Google Gemini', 'Kubernetes', 'AWS', 'TechCrunch AI', 'YC Blog', 'AI Startup Funding', 'Hugging Face', 'GitHub'] },
-              { id: 'all', name: 'Select All', icon: '✨', topics: ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face', 'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'] }
-            ].map(pack => (
+            {PRESETS.map(pack => (
               <button
                 key={pack.id}
                 type="button"
                 onClick={() => {
                   const loaded: Record<string, boolean> = {};
-                  const defaultTopics = [
-                    'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
-                    'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
-                    'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
-                    'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
-                    'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
-                    'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
-                    'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
-                  ];
-                  defaultTopics.forEach(topicId => {
+                  DEFAULT_TOPICS.forEach(topicId => {
                     loaded[topicId] = pack.topics.includes(topicId);
                   });
                   setLocalTopics(loaded);
@@ -324,7 +333,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
                   setStatus(`${pack.name} preset applied! Click Save Preferences below to persist.`);
                   setTimeout(() => setStatus(null), 4000);
                 }}
-                className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''}`}
+                className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''} ${activePresetId === pack.id ? 'active' : ''}`}
               >
                 <span>{pack.icon}</span>
                 {pack.name}
@@ -459,28 +468,12 @@ export const Preferences: React.FC<PreferencesProps> = ({
           Select a pre-configured pack to instantly toggle interest checkboxes below.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          {[
-            { id: 'ai-engineer', name: 'AI Engineer', icon: '🧠', topics: ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 'MCP', 'GitHub', 'Hugging Face'] },
-            { id: 'devops', name: 'DevOps Specialist', icon: '⚓', topics: ['Kubernetes', 'CNCF', 'GitHub', 'AWS', 'Google Cloud', 'Azure', 'Cloudflare'] },
-            { id: 'cloud', name: 'Cloud Architect', icon: '☁️', topics: ['AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'Kubernetes', 'CNCF'] },
-            { id: 'founder', name: 'Founder & Investor', icon: '📈', topics: ['TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding', 'OpenAI', 'Anthropic', 'xAI', 'Perplexity AI', 'LangChain', 'CrewAI'] },
-            { id: 'general', name: 'General Reader', icon: '🌐', topics: ['OpenAI', 'Anthropic', 'Google Gemini', 'Kubernetes', 'AWS', 'TechCrunch AI', 'YC Blog', 'AI Startup Funding', 'Hugging Face', 'GitHub'] },
-            { id: 'all', name: 'Select All', icon: '✨', topics: ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face', 'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'] }
-          ].map(pack => (
+          {PRESETS.map(pack => (
             <button
               key={pack.id}
               onClick={() => {
                 const loaded: Record<string, boolean> = {};
-                const defaultTopics = [
-                  'OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Mistral AI', 'xAI', 
-                  'Cohere', 'DeepSeek', 'Perplexity AI', 'Stability AI', 'Hugging Face Blog', 
-                  'Together AI', 'Fireworks AI', 'LangChain', 'LangGraph', 'CrewAI', 
-                  'LlamaIndex', 'AutoGen', 'DSPy', 'Haystack', 'OpenRouter', 'Ollama', 
-                  'MCP', 'Kubernetes', 'CNCF', 'AWS', 'Google Cloud', 'Azure', 
-                  'Oracle Cloud', 'Cloudflare', 'DigitalOcean', 'Netlify', 'GitHub', 'Hugging Face',
-                  'TechCrunch AI', 'YC Blog', 'Andreessen Horowitz', 'Sequoia', 'AI Startup Funding'
-                ];
-                defaultTopics.forEach(topicId => {
+                DEFAULT_TOPICS.forEach(topicId => {
                   loaded[topicId] = pack.topics.includes(topicId);
                 });
                 setLocalTopics(loaded);
@@ -490,7 +483,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
                 setStatus(`${pack.name} preset applied! Click Save Preferences below to persist.`);
                 setTimeout(() => setStatus(null), 4000);
               }}
-              className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''}`}
+              className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''} ${activePresetId === pack.id ? 'active' : ''}`}
             >
               <span>{pack.icon}</span>
               {pack.name}
