@@ -6,7 +6,7 @@ import { ArticleFeed } from './components/ArticleFeed';
 import { AboutUs } from './components/AboutUs';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage, SignUpPage } from './components/AuthPages';
-import { LoginModal } from './components/LoginModal';
+
 import { WelcomeModal } from './components/WelcomeModal';
 import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
@@ -42,7 +42,7 @@ const App: React.FC = () => {
   const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('opsiai_avatar'));
 
   const isGuest = userEmail === 'guest@opsiai.com';
-  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+
 
   // Mobile Native Shell States
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -771,6 +771,11 @@ const App: React.FC = () => {
     localStorage.setItem('opsiai_banner_dismissed', 'true');
   };
 
+  const handleGuestRedirect = (view: 'login' | 'signup') => {
+    setActiveRootView(view);
+    window.history.pushState(null, '', `/${view}`);
+  };
+
   const navigateToView = (view: string) => {
     setActiveView(view);
     if (view === 'profile') window.history.pushState(null, '', '/profile');
@@ -794,8 +799,8 @@ const App: React.FC = () => {
         You're currently exploring OpsiAI as a Guest. Sign in or create an account to access {featureName} and your personalized intelligence feed.
       </p>
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <button className="btn-secondary" onClick={() => setShowGuestAuthModal(true)} style={{ padding: '12px 24px' }}>Sign In</button>
-        <button className="btn-primary" onClick={() => setShowGuestAuthModal(true)} style={{ padding: '12px 24px' }}>Create Free Account</button>
+        <button className="btn-secondary" onClick={() => handleGuestRedirect('login')} style={{ padding: '12px 24px' }}>Sign In</button>
+        <button className="btn-primary" onClick={() => handleGuestRedirect('signup')} style={{ padding: '12px 24px' }}>Create Free Account</button>
       </div>
     </div>
   );
@@ -1289,7 +1294,7 @@ const App: React.FC = () => {
             {isGuest ? (
               <button 
                 className="btn-primary" 
-                onClick={() => setShowGuestAuthModal(true)}
+                onClick={() => handleGuestRedirect('signup')}
                 style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '8px', fontWeight: 700 }}
               >
                 Sign Up
@@ -1667,7 +1672,7 @@ const App: React.FC = () => {
                 onProfileUpdated={setUserFirstName}
                 onLogout={handleLogout}
                 isGuest={isGuest}
-                onOpenAuth={() => setShowGuestAuthModal(true)}
+                onOpenAuth={() => handleGuestRedirect('signup')}
               />
 
               {!isGuest && (
@@ -1888,7 +1893,7 @@ const App: React.FC = () => {
         onViewChange={navigateToView}
         onLogoClick={handleLogoClick}
         isEmailSubscribed={isEmailSubscribed}
-        onEnableEmailClick={() => isGuest ? setShowGuestAuthModal(true) : setShowSubscribeModal(true)}
+        onEnableEmailClick={() => isGuest ? handleGuestRedirect('signup') : setShowSubscribeModal(true)}
         isGuest={isGuest}
       />
 
@@ -1914,7 +1919,7 @@ const App: React.FC = () => {
             onProfileUpdated={setUserFirstName}
             onLogout={handleLogout}
             isGuest={isGuest}
-            onOpenAuth={() => setShowGuestAuthModal(true)}
+            onOpenAuth={() => handleGuestRedirect('signup')}
           />
         )}
         {activeView === 'about' && <AboutUs />}
@@ -1937,12 +1942,6 @@ const App: React.FC = () => {
       <GoogleSoonModal
         isOpen={showGoogleSoon}
         onClose={() => setShowGoogleSoon(false)}
-      />
-
-      <LoginModal
-        isOpen={showGuestAuthModal}
-        onClose={() => setShowGuestAuthModal(false)}
-        onLoginSuccess={handleLoginSuccess}
       />
     </div>
   );
