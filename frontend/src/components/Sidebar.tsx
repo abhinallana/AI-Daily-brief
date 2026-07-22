@@ -3,19 +3,19 @@ import React from 'react';
 interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
-  onLogout?: () => void;
   onLogoClick?: () => void;
   isEmailSubscribed?: boolean;
   onEnableEmailClick?: () => void;
+  isGuest?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeView,
   onViewChange,
-  onLogout,
   onLogoClick,
   isEmailSubscribed,
-  onEnableEmailClick
+  onEnableEmailClick,
+  isGuest
 }) => {
   return (
     <aside className="sidebar">
@@ -48,6 +48,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <span>👤</span> Profile
         </li>
+        {(!isEmailSubscribed || isGuest) && onEnableEmailClick && (
+          <li
+            className="nav-item"
+            onClick={onEnableEmailClick}
+            style={{ color: 'var(--primary)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '12px', marginTop: '4px' }}
+          >
+            <span>📬</span> Daily Briefs
+            <span style={{ display: 'block', fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>Enable Email Reports</span>
+          </li>
+        )}
         <li
           className={`nav-item ${activeView === 'about' ? 'active' : ''}`}
           onClick={() => onViewChange('about')}
@@ -57,22 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </ul>
 
       <div style={{ marginTop: 'auto' }}>
-        {!isEmailSubscribed && onEnableEmailClick && (
-          <ul className="nav-links" style={{ marginBottom: '16px' }}>
-            <li className="nav-item" onClick={onEnableEmailClick} style={{ color: 'var(--primary)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '16px' }}>
-              <span>📬</span> Daily Briefs
-              <span style={{ display: 'block', fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>Enable Email Reports</span>
-            </li>
-          </ul>
-        )}
-
-        {onLogout && (
-          <ul className="nav-links">
-            <li className="nav-item" onClick={onLogout} style={{ color: 'var(--strategic)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '16px' }}>
-              <span>🚪</span> Sign Out
-            </li>
-          </ul>
-        )}
+        {/* Sign Out has been relocated to ProfilePage.tsx */}
       </div>
     </aside>
   );

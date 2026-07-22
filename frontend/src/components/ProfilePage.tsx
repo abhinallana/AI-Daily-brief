@@ -18,13 +18,17 @@ interface ProfilePageProps {
   defaultView?: 'profile' | 'settings';
   userEmail: string;
   onProfileUpdated?: (firstName: string) => void;
+  onLogout?: () => void;
+  isGuest?: boolean;
 }
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ 
   userId, 
   defaultView = 'profile', 
   userEmail,
-  onProfileUpdated
+  onProfileUpdated,
+  onLogout,
+  isGuest
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'settings'>(defaultView);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -53,6 +57,28 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     async function loadProfile() {
       try {
         setLoading(true);
+        if (isGuest) {
+          const mockProfile: ProfileData = {
+            id: userId,
+            first_name: 'Guest',
+            last_name: 'User',
+            email: 'guest@opsiai.com',
+            avatar_url: `https://robohash.org/guest?set=set1&bgset=bg1`,
+            newsletter_enabled: false,
+            preferred_topics: ['OpenAI', 'Anthropic', 'Google Gemini'],
+            theme: 'light',
+            created_at: new Date().toISOString()
+          };
+          setProfile(mockProfile);
+          setFirstName(mockProfile.first_name);
+          setLastName(mockProfile.last_name || '');
+          setNewsletterEnabled(mockProfile.newsletter_enabled);
+          setPreferredTopics(mockProfile.preferred_topics);
+          setThemePreference(mockProfile.theme);
+          setLoading(false);
+          return;
+        }
+
         const data = await getProfile(userId);
         setProfile(data);
         
@@ -90,6 +116,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   }, [userId, userEmail]);
 
   const toggleTopic = (topic: string) => {
+    if (isGuest) return;
     setPreferredTopics(prev => 
       prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]
     );
@@ -97,6 +124,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isGuest) return;
     setSaving(true);
     setStatus(null);
 
@@ -280,44 +308,75 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   }
 
   return (
-    <div className="preferences-panel" style={{ animation: 'fadeIn 0.3s ease-out', maxWidth: '800px' }}>
+    <div className="profile-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
       
-      {/* Profile Header Tabs */}
-      <div style={{ display: 'flex', gap: '20px', borderBottom: '1px solid var(--border)', marginBottom: '30px', paddingBottom: '10px' }}>
-        <button 
-          onClick={() => setActiveTab('profile')}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontFamily: 'var(--font-headings)',
-            fontSize: '18px',
-            fontWeight: 800,
-            color: activeTab === 'profile' ? 'var(--primary)' : 'var(--text-muted)',
-            cursor: 'pointer',
-            paddingBottom: '8px',
-            borderBottom: activeTab === 'profile' ? '2px solid var(--primary)' : 'none',
-            transition: 'var(--transition)'
-          }}
-        >
-          👤 My Profile
-        </button>
-        <button 
-          onClick={() => setActiveTab('settings')}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontFamily: 'var(--font-headings)',
-            fontSize: '18px',
-            fontWeight: 800,
-            color: activeTab === 'settings' ? 'var(--primary)' : 'var(--text-muted)',
-            cursor: 'pointer',
-            paddingBottom: '8px',
-            borderBottom: activeTab === 'settings' ? '2px solid var(--primary)' : 'none',
-            transition: 'var(--transition)'
-          }}
-        >
-          ⚙️ Edit Settings
-        </button>
+      {isGuest && (
+        <div className="article-card" style={{ borderLeft: '4px solid var(--primary)', padding: '16px 20px', marginBottom: '24px', background: 'rgba(228, 185, 91, 0.05)' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '6px', color: 'var(--primary)' }}>Demo Profile</h2>
+          <p style={{ color: 'var(--text-color)', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>
+            You're currently viewing a preview of the OpsiAI profile experience. Sign in or create an account to personalize your profile and access all features.
+          </p>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', marginBottom: '30px' }}>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <button 
+            onClick={() => setActiveTab('profile')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontFamily: 'var(--font-headings)',
+              fontSize: '18px',
+              fontWeight: 800,
+              color: activeTab === 'profile' ? 'var(--primary)' : 'var(--text-muted)',
+              cursor: 'pointer',
+              paddingBottom: '8px',
+              borderBottom: activeTab === 'profile' ? '2px solid var(--primary)' : 'none',
+              transition: 'var(--transition)'
+            }}
+          >
+            👤 My Profile
+          </button>
+          <button 
+            onClick={() => setActiveTab('settings')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontFamily: 'var(--font-headings)',
+              fontSize: '18px',
+              fontWeight: 800,
+              color: activeTab === 'settings' ? 'var(--primary)' : 'var(--text-muted)',
+              cursor: 'pointer',
+              paddingBottom: '8px',
+              borderBottom: activeTab === 'settings' ? '2px solid var(--primary)' : 'none',
+              transition: 'var(--transition)'
+            }}
+          >
+            ⚙️ Edit Settings
+          </button>
+        </div>
+        
+        {onLogout && (
+          <button 
+            onClick={onLogout}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontFamily: 'var(--font-headings)',
+              fontSize: '14px',
+              fontWeight: 700,
+              color: 'var(--strategic)',
+              cursor: 'pointer',
+              paddingBottom: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <span>🚪</span> Sign Out
+          </button>
+        )}
       </div>
 
       {status && (
@@ -425,6 +484,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
+                disabled={isGuest}
               />
             </div>
             <div className="auth-input-group" style={{ marginBottom: 0 }}>
@@ -434,6 +494,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 className="auth-input"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                disabled={isGuest}
               />
             </div>
           </div>
@@ -446,9 +507,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 onChange={(e) => setThemePreference(e.target.value)}
                 className="auth-input"
                 style={{ background: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border)' }}
+                disabled={isGuest}
               >
                 <option value="dark">🌙 Dark Theme (Luxurious Gold)</option>
-                <option value="light">🔆 Light Theme (Clean Off-White)</option>
+                <option value="light">🔆 Light Theme (Clean Editorial)</option>
               </select>
             </div>
             
@@ -472,6 +534,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   type="checkbox"
                   checked={newsletterEnabled}
                   onChange={(e) => setNewsletterEnabled(e.target.checked)}
+                  disabled={isGuest}
                 />
                 <span className="slider"></span>
               </label>
@@ -509,8 +572,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '20px', marginTop: '10px' }}>
-            <button type="submit" className="btn-primary" disabled={saving} style={{ padding: '12px 28px' }}>
-              {saving ? 'Saving changes...' : 'Save Settings'}
+            <button type="submit" className="btn-primary" disabled={saving || isGuest} style={{ padding: '12px 28px' }}>
+              {saving ? 'Saving changes...' : (isGuest ? 'Disabled in Demo' : 'Save Settings')}
             </button>
           </div>
         </form>

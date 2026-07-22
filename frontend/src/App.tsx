@@ -6,6 +6,7 @@ import { ArticleFeed } from './components/ArticleFeed';
 import { AboutUs } from './components/AboutUs';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage, SignUpPage } from './components/AuthPages';
+import { LoginModal } from './components/LoginModal';
 import { WelcomeModal } from './components/WelcomeModal';
 import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
@@ -39,6 +40,9 @@ const App: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem('opsiai_email'));
   const [userFirstName, setUserFirstName] = useState<string>(localStorage.getItem('opsiai_firstname') || 'Reader');
   const [userAvatar, setUserAvatar] = useState<string | null>(localStorage.getItem('opsiai_avatar'));
+
+  const isGuest = userEmail === 'guest@opsiai.com';
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
 
   // Mobile Native Shell States
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -782,7 +786,23 @@ const App: React.FC = () => {
     return `Good Evening, ${name} 👋`;
   };
 
+  const renderGuestRestrictedView = (featureName: string) => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center', padding: '20px' }}>
+      <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+      <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '12px', color: 'var(--primary)' }}>Personalized Feature</h2>
+      <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '400px', lineHeight: 1.6, marginBottom: '24px' }}>
+        You're currently exploring OpsiAI as a Guest. Sign in or create an account to access {featureName} and your personalized intelligence feed.
+      </p>
+      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button className="btn-secondary" onClick={() => setShowGuestAuthModal(true)} style={{ padding: '12px 24px' }}>Sign In</button>
+        <button className="btn-primary" onClick={() => setShowGuestAuthModal(true)} style={{ padding: '12px 24px' }}>Create Free Account</button>
+      </div>
+    </div>
+  );
+
   const renderBookmarksView = () => {
+    if (isGuest) return renderGuestRestrictedView('Bookmarks');
+
     return (
       <div style={{ animation: 'fadeIn 0.3s ease-out', marginTop: '10px' }}>
         <div style={{ marginBottom: '24px' }}>
@@ -1535,13 +1555,15 @@ const App: React.FC = () => {
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Configure Intelligence Feed</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Your selections directly filter your Reports and Daily E-mail updates.</p>
               </div>
-              <Preferences
-                enabledTopics={enabledTopics}
-                onSave={setEnabledTopics}
-                userEmail={userEmail}
-                isEmailSubscribed={isEmailSubscribed}
-                onSetEmailSubscribed={setIsEmailSubscribed}
-              />
+              {isGuest ? renderGuestRestrictedView('Preferences') : (
+                <Preferences
+                  enabledTopics={enabledTopics}
+                  onSave={setEnabledTopics}
+                  userEmail={userEmail}
+                  isEmailSubscribed={isEmailSubscribed}
+                  onSetEmailSubscribed={setIsEmailSubscribed}
+                />
+              )}
             </div>
           )}
 
@@ -1552,66 +1574,68 @@ const App: React.FC = () => {
                 <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>Offline-ready bookmarks you have saved for reading.</p>
               </div>
 
-              {bookmarks.length === 0 ? (
-                <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
-                  <h3>No Saved Bookmarks</h3>
-                  <p style={{ fontSize: '13px', marginTop: '6px' }}>Tap the bookmark folder icon on any article in your daily reports feed to save it here.</p>
-                </div>
-              ) : (
-                <div className="mobile-feed-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-                  {bookmarks.map(article => {
-                    return (
-                      <div className="mobile-article-card" key={article.link}>
-                        <div className="meta-badges">
-                          {article.category && <span className="mobile-badge category">{article.category}</span>}
-                          {article.priority && (
-                            <span className={`mobile-badge priority-${article.priority.toLowerCase()}`}>
-                              {article.priority}
-                            </span>
+              {isGuest ? renderGuestRestrictedView('Bookmarks') : (
+                bookmarks.length === 0 ? (
+                  <div style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔖</div>
+                    <h3>No Saved Bookmarks</h3>
+                    <p style={{ fontSize: '13px', marginTop: '6px' }}>Tap the bookmark folder icon on any article in your daily reports feed to save it here.</p>
+                  </div>
+                ) : (
+                  <div className="mobile-feed-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+                    {bookmarks.map(article => {
+                      return (
+                        <div className="mobile-article-card" key={article.link}>
+                          <div className="meta-badges">
+                            {article.category && <span className="mobile-badge category">{article.category}</span>}
+                            {article.priority && (
+                              <span className={`mobile-badge priority-${article.priority.toLowerCase()}`}>
+                                {article.priority}
+                              </span>
+                            )}
+                            {article.reading_time && <span className="mobile-badge category">{article.reading_time}</span>}
+                          </div>
+                          <h3>{article.title}</h3>
+                          {article.ai_summary && <p className="summary-text">{article.ai_summary}</p>}
+                          {article.why_it_matters && (
+                            <div className="why-matters-box">
+                              <strong>Why It Matters</strong>
+                              <p>{article.why_it_matters}</p>
+                            </div>
                           )}
-                          {article.reading_time && <span className="mobile-badge category">{article.reading_time}</span>}
-                        </div>
-                        <h3>{article.title}</h3>
-                        {article.ai_summary && <p className="summary-text">{article.ai_summary}</p>}
-                        {article.why_it_matters && (
-                          <div className="why-matters-box">
-                            <strong>Why It Matters</strong>
-                            <p>{article.why_it_matters}</p>
-                          </div>
-                        )}
-                        <div className="mobile-card-actions">
-                          <a href={article.link} target="_blank" rel="noopener noreferrer" className="mobile-read-link">
-                            Read Article ↗
-                          </a>
-                          <div className="mobile-action-buttons">
-                            <button
-                              className="mobile-icon-btn"
-                              style={{ width: '36px', height: '36px', backgroundColor: 'var(--primary-glow)' }}
-                              onClick={() => toggleBookmark(article)}
-                            >
-                              🔖
-                            </button>
-                            <button
-                              className="mobile-icon-btn"
-                              style={{ width: '36px', height: '36px' }}
-                              onClick={() => {
-                                if (navigator.share) {
-                                  navigator.share({ title: article.title, url: article.link }).catch(() => { });
-                                } else {
-                                  navigator.clipboard.writeText(article.link);
-                                  alert('Article link copied to clipboard!');
-                                }
-                              }}
-                            >
-                              📤
-                            </button>
+                          <div className="mobile-card-actions">
+                            <a href={article.link} target="_blank" rel="noopener noreferrer" className="mobile-read-link">
+                              Read Article ↗
+                            </a>
+                            <div className="mobile-action-buttons">
+                              <button
+                                className="mobile-icon-btn"
+                                style={{ width: '36px', height: '36px', backgroundColor: 'var(--primary-glow)' }}
+                                onClick={() => toggleBookmark(article)}
+                              >
+                                🔖
+                              </button>
+                              <button
+                                className="mobile-icon-btn"
+                                style={{ width: '36px', height: '36px' }}
+                                onClick={() => {
+                                  if (navigator.share) {
+                                    navigator.share({ title: article.title, url: article.link }).catch(() => { });
+                                  } else {
+                                    navigator.clipboard.writeText(article.link);
+                                    alert('Article link copied to clipboard!');
+                                  }
+                                }}
+                              >
+                                📤
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )
               )}
             </div>
           )}
@@ -1628,23 +1652,9 @@ const App: React.FC = () => {
                 userEmail={userEmail}
                 defaultView="profile"
                 onProfileUpdated={setUserFirstName}
+                onLogout={handleLogout}
+                isGuest={isGuest}
               />
-
-              <button
-                className="btn-outline"
-                onClick={handleLogout}
-                style={{
-                  marginTop: '24px',
-                  borderColor: 'var(--strategic)',
-                  color: 'var(--strategic)',
-                  minHeight: '48px',
-                  borderRadius: '12px',
-                  fontWeight: 700,
-                  width: '100%'
-                }}
-              >
-                Log Out
-              </button>
             </div>
           )}
         </main>
@@ -1844,23 +1854,25 @@ const App: React.FC = () => {
       <Sidebar
         activeView={activeView}
         onViewChange={navigateToView}
-        onLogout={handleLogout}
         onLogoClick={handleLogoClick}
         isEmailSubscribed={isEmailSubscribed}
         onEnableEmailClick={() => setShowSubscribeModal(true)}
+        isGuest={isGuest}
       />
 
       <main className="main-content">
         {activeView === 'today' && renderTodayView()}
         {activeView === 'bookmarks' && renderBookmarksView()}
         {activeView === 'preferences' && (
-          <Preferences
-            enabledTopics={enabledTopics}
-            onSave={setEnabledTopics}
-            userEmail={userEmail}
-            isEmailSubscribed={isEmailSubscribed}
-            onSetEmailSubscribed={setIsEmailSubscribed}
-          />
+          isGuest ? renderGuestRestrictedView('Preferences') : (
+            <Preferences
+              enabledTopics={enabledTopics}
+              onSave={setEnabledTopics}
+              userEmail={userEmail}
+              isEmailSubscribed={isEmailSubscribed}
+              onSetEmailSubscribed={setIsEmailSubscribed}
+            />
+          )
         )}
         {activeView === 'profile' && userId && userEmail && (
           <ProfilePage
@@ -1868,6 +1880,8 @@ const App: React.FC = () => {
             userEmail={userEmail}
             defaultView="profile"
             onProfileUpdated={setUserFirstName}
+            onLogout={handleLogout}
+            isGuest={isGuest}
           />
         )}
         {activeView === 'about' && <AboutUs />}
@@ -1890,6 +1904,12 @@ const App: React.FC = () => {
       <GoogleSoonModal
         isOpen={showGoogleSoon}
         onClose={() => setShowGoogleSoon(false)}
+      />
+
+      <LoginModal
+        isOpen={showGuestAuthModal}
+        onClose={() => setShowGuestAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
     </div>
   );
