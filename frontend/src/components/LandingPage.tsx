@@ -836,6 +836,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         )}
       </section>
 
+      <FeedbackSection userId={userId} userEmail={userEmail} isGuest={isGuest} />
+
       {/* Editorial Footer */}
       <footer className="landing-footer">
         <div className="footer-grid">
