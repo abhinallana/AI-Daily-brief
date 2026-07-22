@@ -1655,6 +1655,24 @@ const App: React.FC = () => {
                 onLogout={handleLogout}
                 isGuest={isGuest}
               />
+
+              {!isGuest && (
+                <button
+                  className="btn-outline"
+                  onClick={handleLogout}
+                  style={{
+                    marginTop: '24px',
+                    borderColor: 'var(--strategic)',
+                    color: 'var(--strategic)',
+                    minHeight: '48px',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    width: '100%'
+                  }}
+                >
+                  Log Out
+                </button>
+              )}
             </div>
           )}
         </main>
@@ -1856,7 +1874,7 @@ const App: React.FC = () => {
         onViewChange={navigateToView}
         onLogoClick={handleLogoClick}
         isEmailSubscribed={isEmailSubscribed}
-        onEnableEmailClick={() => setShowSubscribeModal(true)}
+        onEnableEmailClick={() => isGuest ? setShowGuestAuthModal(true) : setShowSubscribeModal(true)}
         isGuest={isGuest}
       />
 

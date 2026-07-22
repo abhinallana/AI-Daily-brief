@@ -357,7 +357,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </button>
         </div>
         
-        {onLogout && (
+        {!isMobile && onLogout && (
           <button 
             onClick={onLogout}
             style={{

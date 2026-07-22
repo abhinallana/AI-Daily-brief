@@ -42,22 +42,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <span>⚙️</span> Preferences
         </li>
+        {(!isEmailSubscribed || isGuest) && onEnableEmailClick && (
+          <li
+            className="nav-item"
+            onClick={onEnableEmailClick}
+            style={{ color: 'var(--primary)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '12px', marginTop: '4px', marginBottom: '4px' }}
+          >
+            <span>📬</span> Enable Email Reports
+          </li>
+        )}
         <li
           className={`nav-item ${activeView === 'profile' ? 'active' : ''}`}
           onClick={() => onViewChange('profile')}
         >
           <span>👤</span> Profile
         </li>
-        {(!isEmailSubscribed || isGuest) && onEnableEmailClick && (
-          <li
-            className="nav-item"
-            onClick={onEnableEmailClick}
-            style={{ color: 'var(--primary)', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '12px', marginTop: '4px' }}
-          >
-            <span>📬</span> Daily Briefs
-            <span style={{ display: 'block', fontSize: '9px', color: 'var(--text-muted)', marginTop: '2px' }}>Enable Email Reports</span>
-          </li>
-        )}
         <li
           className={`nav-item ${activeView === 'about' ? 'active' : ''}`}
           onClick={() => onViewChange('about')}
