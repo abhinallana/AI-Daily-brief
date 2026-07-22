@@ -74,7 +74,8 @@ export async function fetchTodayReport(): Promise<DailyReport> {
       const { data: arts } = await supabase
         .from('articles')
         .select('*')
-        .in('id', ids);
+        .in('id', ids)
+        .order('published_at', { ascending: false });
       articles = arts || [];
     }
 
@@ -189,7 +190,8 @@ export async function fetchReportByDate(dateStr: string): Promise<DailyReport> {
       const { data: arts } = await supabase
         .from('articles')
         .select('*')
-        .in('id', ids);
+        .in('id', ids)
+        .order('published_at', { ascending: false });
       articles = arts || [];
     }
 

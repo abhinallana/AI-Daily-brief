@@ -343,6 +343,7 @@ class SQLiteArticleRepository:
                     FROM articles a
                     JOIN report_articles ra ON a.id = ra.article_id
                     WHERE ra.report_id = ?
+                    ORDER BY a.published_at DESC, a.id DESC
                     """,
                     (report_id,)
                 )
@@ -911,6 +912,7 @@ class PostgreSQLArticleRepository:
                         FROM articles a
                         JOIN report_articles ra ON a.id = ra.article_id
                         WHERE ra.report_id = %s
+                        ORDER BY a.published_at DESC, a.id DESC
                         """,
                         (report_id,)
                     )
