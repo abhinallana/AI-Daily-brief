@@ -1203,6 +1203,7 @@ const App: React.FC = () => {
             window.history.pushState(null, '', '/dashboard');
           }}
           isAuthenticated={!!token}
+          isGuest={isGuest}
           onNavigateToDashboard={handleGoToDashboard}
           onLogout={handleLogout}
           onNavigateToTab={(tab) => {

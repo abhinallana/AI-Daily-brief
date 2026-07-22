@@ -211,6 +211,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   if (isMobile) {
     return (
       <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeIn 0.3s ease-out' }}>
+        {isGuest && (
+          <div className="article-card" style={{ borderLeft: '4px solid var(--primary)', padding: '16px 20px', background: 'rgba(228, 185, 91, 0.05)' }}>
+            <h2 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '6px', color: 'var(--primary)' }}>Demo Profile</h2>
+            <p style={{ color: 'var(--text-color)', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>
+              You're viewing a preview of the OpsiAI profile experience. Sign in or create an account to personalize your profile and access all features.
+            </p>
+          </div>
+        )}
+
         {status && (
           <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.05)', borderLeft: '4px solid var(--success)', padding: '12px', borderRadius: '8px' }}>
             <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>🎉 {status}</p>
@@ -232,6 +241,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="First Name"
               required
+              disabled={isGuest}
               style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', textAlign: 'right', outline: 'none', fontWeight: 600 }}
             />
           </div>
@@ -246,6 +256,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               value={lastName} 
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Optional"
+              disabled={isGuest}
               style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', textAlign: 'right', outline: 'none', fontWeight: 600 }}
             />
           </div>
@@ -271,6 +282,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <select 
               value={themePreference} 
               onChange={(e) => setThemePreference(e.target.value)}
+              disabled={isGuest}
               style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 600, outline: 'none', textAlign: 'right' }}
             >
               <option value="dark">Dark Theme</option>
@@ -288,6 +300,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 type="checkbox" 
                 checked={newsletterEnabled} 
                 onChange={(e) => setNewsletterEnabled(e.target.checked)} 
+                disabled={isGuest}
               />
               <span className="ios-slider" />
             </label>
@@ -298,10 +311,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         <button 
           type="submit" 
           className="btn-primary" 
-          disabled={saving}
+          disabled={saving || isGuest}
           style={{ minHeight: '48px', width: '100%', borderRadius: '12px', marginTop: '10px', fontSize: '15px', fontWeight: 700 }}
         >
-          {saving ? 'Saving...' : 'Save Profile Changes'}
+          {saving ? 'Saving...' : (isGuest ? 'Disabled in Demo' : 'Save Profile Changes')}
         </button>
       </form>
     );

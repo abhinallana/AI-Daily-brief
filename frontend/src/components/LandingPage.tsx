@@ -10,6 +10,7 @@ interface LandingPageProps {
   onNavigateToDashboard?: () => void;
   onLogout?: () => void;
   onNavigateToTab?: (tab: string) => void;
+  isGuest?: boolean;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -19,8 +20,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   isAuthenticated = false,
   onNavigateToDashboard,
   onLogout,
-  onNavigateToTab
+  onNavigateToTab,
+  isGuest = false
 }) => {
+  const isRealUser = isAuthenticated && !isGuest;
   const [scrolled, setScrolled] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(
     (localStorage.getItem('opsiai_theme') as 'dark' | 'light') || 'dark'
@@ -101,7 +104,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <button className="theme-toggle-btn" onClick={toggleTheme} style={{ width: '36px', height: '36px', minHeight: '36px', border: 'none', background: 'transparent' }}>
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
-            {isAuthenticated ? (
+            {isRealUser ? (
               <button className="btn-secondary" onClick={onLogout} style={{ fontSize: '12px', padding: '6px 12px', minHeight: '36px', borderRadius: '8px' }}>Sign Out</button>
             ) : (
               <>
@@ -121,14 +124,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5', margin: '0 0 24px 0', padding: '0 8px' }}>
             OpsiAI scans hundreds of trusted AI and DevOps sources every day, filters what actually matters, explains why it matters, and delivers one concise intelligence report directly to your inbox.
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
-            {isAuthenticated ? (
-              <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToDashboard}>Go to Dashboard</button>
+          <div className="hero-actions" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+            {isRealUser ? (
+              <button className="btn-primary btn-large" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToDashboard}>Go to Dashboard</button>
             ) : (
-              <button className="btn-primary" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
+              <button className="btn-primary btn-large" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
             )}
-            <button className="btn-outline" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={isAuthenticated ? onNavigateToDashboard : onViewDemo}>
-              {isAuthenticated ? "View Today's Briefing" : "View Today's Report"}
+            <button className="btn-outline btn-large" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={isRealUser ? onNavigateToDashboard : onViewDemo}>
+              {isRealUser ? "View Today's Briefing" : "Try Demo Experience"}
             </button>
           </div>
 
@@ -346,7 +349,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* CTA Section */}
         <div style={{ padding: '50px 16px', textAlign: 'center', borderTop: '1px solid var(--border)', background: 'linear-gradient(180deg, rgba(228, 185, 91, 0.02) 0%, rgba(0,0,0,0) 100%)' }}>
-          {isAuthenticated ? (
+          {isRealUser ? (
             <>
               <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: 'var(--text-color)' }}>Ready to Explore Your Technical Feed?</h2>
               <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '24px', lineHeight: '1.4' }}>Access your personalized reports and configure your whitelisted preferences.</p>
@@ -500,7 +503,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div
           className="nav-logo"
           onClick={() => {
-            if (isAuthenticated && onNavigateToDashboard) {
+            if (isRealUser && onNavigateToDashboard) {
               onNavigateToDashboard();
             } else {
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -512,7 +515,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           Opsi<span>AI</span>
         </div>
 
-        {isAuthenticated ? (
+        {isRealUser ? (
           <ul className="nav-items">
             <li className="nav-link" onClick={() => onNavigateToDashboard && onNavigateToDashboard()}>Dashboard</li>
             <li className="nav-link" onClick={() => onNavigateToTab && onNavigateToTab('reports')}>Daily Reports</li>
@@ -532,7 +535,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <button className="theme-toggle-btn" onClick={toggleTheme} title="Toggle theme">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          {isAuthenticated ? (
+          {isRealUser ? (
             <button className="btn-secondary" style={{ borderColor: 'var(--strategic)', color: 'var(--strategic)' }} onClick={onLogout}>Sign Out</button>
           ) : (
             <>
@@ -556,13 +559,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             and delivers one concise intelligence report directly to your inbox.
           </p>
           <div className="hero-actions">
-            {isAuthenticated ? (
+            {isRealUser ? (
               <button className="btn-primary btn-large" onClick={onNavigateToDashboard}>Go to Dashboard</button>
             ) : (
               <button className="btn-primary btn-large" onClick={onNavigateToSignUp}>Get Started Free</button>
             )}
             <button className="btn-outline btn-large" onClick={isAuthenticated ? onNavigateToDashboard : onViewDemo}>
-              {isAuthenticated ? "View Today's Briefing" : "View Today's Report"}
+              {isRealUser ? "View Today's Briefing" : "Try Demo Experience"}
             </button>
           </div>
         </div>
