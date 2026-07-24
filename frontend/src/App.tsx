@@ -12,7 +12,7 @@ import { SubscribeModal } from './components/SubscribeModal';
 import { ProfilePage } from './components/ProfilePage';
 import { Preferences } from './components/Preferences';
 import { GoogleSoonModal } from './components/GoogleSoonModal';
-import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics, fetchReportList, fetchReportByDate, searchArticles, fetchPreferences } from './services/api';
+import { fetchTodayReport, getProfile, saveProfile, fetchOpsiMetrics, fetchReportList, fetchReportByDate, searchArticles, fetchPreferences, updateTheme } from './services/api';
 import type { DailyReport, Article, ReportSummary } from './services/api';
 import { supabase } from './services/supabaseClient';
 
@@ -80,6 +80,12 @@ const App: React.FC = () => {
       root.classList.add('light-theme');
     } else {
       root.classList.remove('light-theme');
+    }
+    
+    // Immediately persist to backend if logged in
+    const currentUserId = userId || localStorage.getItem('opsiai_userid');
+    if (currentUserId && currentUserId !== 'demo-guest-id') {
+      updateTheme(currentUserId, newTheme).catch(e => console.warn('Failed to update theme on backend', e));
     }
   };
 
@@ -1185,6 +1191,10 @@ const App: React.FC = () => {
     return (
       <>
         <LandingPage
+          globalTheme={theme}
+          setGlobalTheme={(newTheme) => {
+            setTheme(newTheme);
+          }}
           onNavigateToLogin={() => {
             setActiveRootView('login');
             window.history.pushState(null, '', '/login');
@@ -1294,8 +1304,8 @@ const App: React.FC = () => {
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             {isGuest ? (
-              <button 
-                className="btn-primary" 
+              <button
+                className="btn-primary"
                 onClick={() => handleGuestRedirect('signup')}
                 style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '8px', fontWeight: 700 }}
               >
@@ -1671,6 +1681,11 @@ const App: React.FC = () => {
                 userId={userId}
                 userEmail={userEmail}
                 defaultView="profile"
+                globalTheme={theme}
+                setGlobalTheme={(newTheme) => {
+                  setTheme(newTheme);
+                  updateTheme(userId, newTheme);
+                }}
                 onProfileUpdated={setUserFirstName}
                 onLogout={handleLogout}
                 isGuest={isGuest}
@@ -1918,6 +1933,11 @@ const App: React.FC = () => {
             userId={userId}
             userEmail={userEmail}
             defaultView="profile"
+            globalTheme={theme}
+            setGlobalTheme={(newTheme) => {
+              setTheme(newTheme);
+              updateTheme(userId, newTheme);
+            }}
             onProfileUpdated={setUserFirstName}
             onLogout={handleLogout}
             isGuest={isGuest}

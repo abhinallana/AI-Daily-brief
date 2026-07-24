@@ -76,6 +76,7 @@ class SQLiteArticleRepository:
             newsletter_enabled INTEGER DEFAULT 0,
             preferred_topics TEXT,
             theme TEXT DEFAULT 'dark',
+            delivery_time TEXT DEFAULT '03:00 PM',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
@@ -121,6 +122,13 @@ class SQLiteArticleRepository:
                     logger.info("Migrating database: adding 'is_relevant' column.")
                     conn.execute("ALTER TABLE articles ADD COLUMN is_relevant INTEGER DEFAULT 1")
                 
+                # Check user_profiles table for migrations
+                cursor_prof = conn.execute("PRAGMA table_info(user_profiles)")
+                columns_prof = [row["name"] for row in cursor_prof.fetchall()]
+                if "delivery_time" not in columns_prof:
+                    logger.info("Migrating database: adding 'delivery_time' column to user_profiles.")
+                    conn.execute("ALTER TABLE user_profiles ADD COLUMN delivery_time TEXT DEFAULT '03:00 PM'")
+
                 conn.commit()
             logger.debug("Database schema checked/initialized successfully.")
         except sqlite3.Error as e:
@@ -488,21 +496,31 @@ class SQLiteArticleRepository:
             logger.error(f"Failed to load user preferences: {e}", exc_info=True)
         return []
 
+    def update_user_delivery_time(self, email: str, delivery_time: str) -> None:
+        """Updates delivery time for a user in SQLite."""
+        try:
+            with self._get_connection() as conn:
+                conn.execute("UPDATE user_profiles SET delivery_time = ? WHERE LOWER(email) = LOWER(?)", (delivery_time, email.strip()))
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Failed to update delivery time in SQLite: {e}", exc_info=True)
+
     def save_user_profile(self, profile: dict) -> None:
         """Saves a user profile in SQLite."""
         try:
             with self._get_connection() as conn:
                 conn.execute(
                     """
-                    INSERT INTO user_profiles (id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO user_profiles (id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(id) DO UPDATE SET
                         first_name = excluded.first_name,
                         last_name = excluded.last_name,
                         avatar_url = excluded.avatar_url,
                         newsletter_enabled = excluded.newsletter_enabled,
                         preferred_topics = excluded.preferred_topics,
-                        theme = excluded.theme
+                        theme = excluded.theme,
+                        delivery_time = excluded.delivery_time
                     """,
                     (
                         profile["id"],
@@ -512,7 +530,8 @@ class SQLiteArticleRepository:
                         profile.get("avatar_url"),
                         1 if profile.get("newsletter_enabled") else 0,
                         profile.get("preferred_topics", ""),
-                        profile.get("theme", "dark")
+                        profile.get("theme", "dark"),
+                        profile.get("delivery_time", "03:00 PM")
                     )
                 )
         except Exception as e:
@@ -523,7 +542,7 @@ class SQLiteArticleRepository:
         try:
             with self._get_connection() as conn:
                 cursor = conn.execute(
-                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM user_profiles WHERE id = ?",
+                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time, created_at FROM user_profiles WHERE id = ?",
                     (profile_id,)
                 )
                 row = cursor.fetchone()
@@ -537,6 +556,7 @@ class SQLiteArticleRepository:
                         "newsletter_enabled": bool(row["newsletter_enabled"]),
                         "preferred_topics": [t.strip() for t in row["preferred_topics"].split(",") if t.strip()] if row["preferred_topics"] else [],
                         "theme": row["theme"],
+                        "delivery_time": row["delivery_time"],
                         "created_at": row["created_at"]
                     }
         except Exception as e:
@@ -548,7 +568,7 @@ class SQLiteArticleRepository:
         try:
             with self._get_connection() as conn:
                 cursor = conn.execute(
-                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM user_profiles WHERE LOWER(email) = LOWER(?)",
+                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time, created_at FROM user_profiles WHERE LOWER(email) = LOWER(?)",
                     (email.strip(),)
                 )
                 row = cursor.fetchone()
@@ -562,19 +582,23 @@ class SQLiteArticleRepository:
                         "newsletter_enabled": bool(row["newsletter_enabled"]),
                         "preferred_topics": [t.strip() for t in row["preferred_topics"].split(",") if t.strip()] if row["preferred_topics"] else [],
                         "theme": row["theme"],
+                        "delivery_time": row["delivery_time"],
                         "created_at": row["created_at"]
                     }
         except Exception as e:
             logger.error(f"Failed to load user profile by email: {e}", exc_info=True)
         return None
 
-    def get_active_subscribers(self) -> list[dict]:
-        """Gets all user profiles with newsletter_enabled = 1 from SQLite."""
+    def get_active_subscribers(self, delivery_time: str = None) -> list[dict]:
+        """Gets all user profiles with newsletter_enabled = 1 from SQLite, optionally filtered by delivery time."""
         try:
             with self._get_connection() as conn:
-                cursor = conn.execute(
-                    "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM user_profiles WHERE newsletter_enabled = 1"
-                )
+                query = "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time, created_at FROM user_profiles WHERE newsletter_enabled = 1"
+                params = []
+                if delivery_time:
+                    query += " AND delivery_time = ?"
+                    params.append(delivery_time)
+                cursor = conn.execute(query, params)
                 rows = cursor.fetchall()
                 subscribers = []
                 for row in rows:
@@ -587,6 +611,7 @@ class SQLiteArticleRepository:
                         "newsletter_enabled": True,
                         "preferred_topics": [t.strip() for t in row["preferred_topics"].split(",") if t.strip()] if row["preferred_topics"] else [],
                         "theme": row["theme"],
+                        "delivery_time": row["delivery_time"],
                         "created_at": row["created_at"]
                     })
                 return subscribers
@@ -669,6 +694,7 @@ class PostgreSQLArticleRepository:
             newsletter_enabled BOOLEAN DEFAULT FALSE,
             preferred_topics TEXT,
             theme VARCHAR(50) DEFAULT 'dark',
+            delivery_time VARCHAR(20) DEFAULT '03:00 PM',
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
         """
@@ -681,6 +707,14 @@ class PostgreSQLArticleRepository:
                     cursor.execute(prefs_schema)
                     cursor.execute(profiles_schema)
                     cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_link_hash ON articles(link_hash)")
+                    
+                    # Check user_profiles table for migrations
+                    cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='user_profiles'")
+                    columns_prof = [row[0] for row in cursor.fetchall()]
+                    if "delivery_time" not in columns_prof:
+                        logger.info("Migrating Postgres database: adding 'delivery_time' column to user_profiles.")
+                        cursor.execute("ALTER TABLE public.user_profiles ADD COLUMN delivery_time VARCHAR(20) DEFAULT '03:00 PM'")
+
                 conn.commit()
             logger.debug("PostgreSQL database initialized successfully.")
         except Exception as e:
@@ -1072,6 +1106,16 @@ class PostgreSQLArticleRepository:
             logger.error(f"Failed to load user preferences from PostgreSQL: {e}", exc_info=True)
         return []
 
+    def update_user_delivery_time(self, email: str, delivery_time: str) -> None:
+        """Updates delivery time for a user in PostgreSQL."""
+        try:
+            with self._get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("UPDATE public.user_profiles SET delivery_time = %s WHERE LOWER(email) = LOWER(%s)", (delivery_time, email.strip()))
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Failed to update delivery time in PostgreSQL: {e}", exc_info=True)
+
     def save_user_profile(self, profile: dict) -> None:
         """Saves or updates a user profile in PostgreSQL."""
         try:
@@ -1079,15 +1123,16 @@ class PostgreSQLArticleRepository:
                 with conn.cursor() as cursor:
                     cursor.execute(
                         """
-                        INSERT INTO public.user_profiles (id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        INSERT INTO public.user_profiles (id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT(id) DO UPDATE SET
                             first_name = EXCLUDED.first_name,
                             last_name = EXCLUDED.last_name,
                             avatar_url = EXCLUDED.avatar_url,
                             newsletter_enabled = EXCLUDED.newsletter_enabled,
                             preferred_topics = EXCLUDED.preferred_topics,
-                            theme = EXCLUDED.theme
+                            theme = EXCLUDED.theme,
+                            delivery_time = EXCLUDED.delivery_time
                         """,
                         (
                             profile["id"],
@@ -1097,7 +1142,8 @@ class PostgreSQLArticleRepository:
                             profile.get("avatar_url"),
                             profile.get("newsletter_enabled") or False,
                             profile.get("preferred_topics", ""),
-                            profile.get("theme", "dark")
+                            profile.get("theme", "dark"),
+                            profile.get("delivery_time", "03:00 PM")
                         )
                     )
                 conn.commit()
@@ -1110,7 +1156,7 @@ class PostgreSQLArticleRepository:
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
-                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM public.user_profiles WHERE id = %s",
+                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time, created_at FROM public.user_profiles WHERE id = %s",
                         (profile_id,)
                     )
                     row = cursor.fetchone()
@@ -1126,6 +1172,7 @@ class PostgreSQLArticleRepository:
                             "newsletter_enabled": bool(row[columns.index("newsletter_enabled")]),
                             "preferred_topics": [t.strip() for t in pref_topics_str.split(",") if t.strip()] if pref_topics_str else [],
                             "theme": row[columns.index("theme")],
+                            "delivery_time": row[columns.index("delivery_time")] if "delivery_time" in columns else "03:00 PM",
                             "created_at": row[columns.index("created_at")].isoformat() if row[columns.index("created_at")] else None
                         }
         except Exception as e:
@@ -1138,7 +1185,7 @@ class PostgreSQLArticleRepository:
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(
-                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM public.user_profiles WHERE LOWER(email) = LOWER(%s)",
+                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time, created_at FROM public.user_profiles WHERE LOWER(email) = LOWER(%s)",
                         (email.strip(),)
                     )
                     row = cursor.fetchone()
@@ -1154,20 +1201,25 @@ class PostgreSQLArticleRepository:
                             "newsletter_enabled": bool(row[columns.index("newsletter_enabled")]),
                             "preferred_topics": [t.strip() for t in pref_topics_str.split(",") if t.strip()] if pref_topics_str else [],
                             "theme": row[columns.index("theme")],
+                            "delivery_time": row[columns.index("delivery_time")] if "delivery_time" in columns else "03:00 PM",
                             "created_at": row[columns.index("created_at")].isoformat() if row[columns.index("created_at")] else None
                         }
         except Exception as e:
             logger.error(f"Failed to load user profile by email from PostgreSQL: {e}", exc_info=True)
         return None
 
-    def get_active_subscribers(self) -> list[dict]:
-        """Gets all user profiles with newsletter_enabled = true from PostgreSQL."""
+    def get_active_subscribers(self, delivery_time: str = None) -> list[dict]:
+        """Gets all user profiles with newsletter_enabled = true from PostgreSQL, optionally filtered by delivery time."""
         try:
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, created_at FROM public.user_profiles WHERE newsletter_enabled = true"
-                    )
+                    query = "SELECT id, first_name, last_name, email, avatar_url, newsletter_enabled, preferred_topics, theme, delivery_time, created_at FROM public.user_profiles WHERE newsletter_enabled = true"
+                    params = []
+                    if delivery_time:
+                        query += " AND delivery_time = %s"
+                        params.append(delivery_time)
+                    cursor.execute(query, params)
+                    
                     rows = cursor.fetchall()
                     subscribers = []
                     columns = [col[0] for col in cursor.description]
@@ -1182,6 +1234,7 @@ class PostgreSQLArticleRepository:
                             "newsletter_enabled": True,
                             "preferred_topics": [t.strip() for t in pref_topics_str.split(",") if t.strip()] if pref_topics_str else [],
                             "theme": row[columns.index("theme")],
+                            "delivery_time": row[columns.index("delivery_time")] if "delivery_time" in columns else "03:00 PM",
                             "created_at": row[columns.index("created_at")].isoformat() if row[columns.index("created_at")] else None
                         })
                     return subscribers

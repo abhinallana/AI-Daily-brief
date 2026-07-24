@@ -14,6 +14,8 @@ interface LandingPageProps {
   isGuest?: boolean;
   userId?: string;
   userEmail?: string;
+  globalTheme: string;
+  setGlobalTheme: (theme: string) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -26,13 +28,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onNavigateToTab,
   isGuest = false,
   userId,
-  userEmail
+  userEmail,
+  globalTheme,
+  setGlobalTheme
 }) => {
   const isRealUser = isAuthenticated && !isGuest;
   const [scrolled, setScrolled] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>(
-    (localStorage.getItem('opsiai_theme') as 'dark' | 'light') || 'dark'
-  );
   const [metrics, setMetrics] = useState<OpsiMetrics | null>(null);
   const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
   const [policyType, setPolicyType] = useState<'privacy' | 'terms' | 'doc' | 'release_notes' | 'api_status' | 'about' | 'pricing'>('privacy');
@@ -82,18 +83,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light-theme');
-    } else {
-      root.classList.remove('light-theme');
-    }
-    localStorage.setItem('opsiai_theme', theme);
-  }, [theme]);
-
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setGlobalTheme(globalTheme === 'dark' ? 'light' : 'dark');
   };
 
   if (isMobileView) {
@@ -107,7 +98,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button className="theme-toggle-btn" onClick={toggleTheme} style={{ width: '36px', height: '36px', minHeight: '36px', border: 'none', background: 'transparent' }}>
-              {theme === 'dark' ? '☀️' : '🌙'}
+              {globalTheme === 'dark' ? '☀️' : '🌙'}
             </button>
             {isRealUser ? (
               <button className="btn-secondary" onClick={onLogout} style={{ fontSize: '12px', padding: '6px 12px', minHeight: '36px', borderRadius: '8px' }}>Sign Out</button>
@@ -540,7 +531,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         <div className="nav-buttons">
           <button className="theme-toggle-btn" onClick={toggleTheme} title="Toggle theme">
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {globalTheme === 'dark' ? '☀️' : '🌙'}
           </button>
           {isRealUser ? (
             <button className="btn-secondary" style={{ borderColor: 'var(--strategic)', color: 'var(--strategic)' }} onClick={onLogout}>Sign Out</button>

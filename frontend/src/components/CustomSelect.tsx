@@ -77,7 +77,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, opt
             top: '100%',
             [align === 'right' ? 'right' : 'left']: 0,
             marginTop: '8px',
-            background: '#0f172a', /* solid dark background */
+            background: 'var(--card-bg)', /* solid background */
             border: '1px solid var(--border)',
             borderRadius: '8px',
             boxShadow: '0 10px 30px rgba(0,0,0,0.5)',

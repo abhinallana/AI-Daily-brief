@@ -11,6 +11,7 @@ export interface ProfileData {
   newsletter_enabled: boolean;
   preferred_topics: string[];
   theme: string;
+  delivery_time?: string;
   created_at?: string | null;
 }
 
@@ -22,6 +23,8 @@ interface ProfilePageProps {
   onLogout?: () => void;
   isGuest?: boolean;
   onOpenAuth?: () => void;
+  globalTheme: string;
+  setGlobalTheme: (theme: string) => void;
 }
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ 
@@ -31,7 +34,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   onProfileUpdated,
   onLogout,
   isGuest,
-  onOpenAuth
+  onOpenAuth,
+  globalTheme,
+  setGlobalTheme
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'settings'>(defaultView);
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -55,7 +60,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [lastName, setLastName] = useState('');
   const [newsletterEnabled, setNewsletterEnabled] = useState(false);
   const [preferredTopics, setPreferredTopics] = useState<string[]>([]);
-  const [themePreference, setThemePreference] = useState('dark');
 
   const availableTopics = ['OpenAI', 'Anthropic', 'Meta AI', 'Google Gemini', 'Kubernetes', 'AWS', 'Google Cloud', 'GitHub', 'Hugging Face', 'Vercel'];
 
@@ -80,7 +84,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           setLastName(mockProfile.last_name || '');
           setNewsletterEnabled(mockProfile.newsletter_enabled);
           setPreferredTopics(mockProfile.preferred_topics);
-          setThemePreference(mockProfile.theme);
+          setPreferredTopics(mockProfile.preferred_topics);
           setLoading(false);
           return;
         }
@@ -93,7 +97,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         setLastName(data.last_name || '');
         setNewsletterEnabled(data.newsletter_enabled);
         setPreferredTopics(data.preferred_topics || []);
-        setThemePreference(data.theme || 'dark');
       } catch (err) {
         console.warn('Backend profile offline. Loading sandbox settings profile.');
         // Fallback placeholder profile
@@ -113,7 +116,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         setLastName(mockProfile.last_name || '');
         setNewsletterEnabled(mockProfile.newsletter_enabled);
         setPreferredTopics(mockProfile.preferred_topics);
-        setThemePreference(mockProfile.theme);
       } finally {
         setLoading(false);
       }
@@ -127,8 +129,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
            lastName !== (profile.last_name || '') ||
            newsletterEnabled !== profile.newsletter_enabled ||
            JSON.stringify(preferredTopics) !== JSON.stringify(profile.preferred_topics || []) ||
-           themePreference !== (profile.theme || 'dark');
-  }, [profile, firstName, lastName, newsletterEnabled, preferredTopics, themePreference]);
+           globalTheme !== profile.theme;
+  }, [profile, firstName, lastName, newsletterEnabled, preferredTopics, globalTheme]);
 
   const toggleTopic = (topic: string) => {
     if (isGuest) return;
@@ -153,7 +155,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       avatar_url: profile?.avatar_url || null,
       newsletter_enabled: newsletterEnabled,
       preferred_topics: preferredTopics.join(','),
-      theme: themePreference
+      theme: globalTheme
     };
 
     try {
@@ -164,26 +166,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         last_name: lastName,
         newsletter_enabled: newsletterEnabled,
         preferred_topics: preferredTopics,
-        theme: themePreference
+        theme: globalTheme
       });
 
       // Save local tokens/theme
-      localStorage.setItem('opsiai_theme', themePreference);
       localStorage.setItem('opsiai_email_subscribed', newsletterEnabled ? 'true' : 'false');
+      localStorage.setItem('opsiai_theme', globalTheme);
       
       const topicsObj: Record<string, boolean> = {};
       availableTopics.forEach(t => {
         topicsObj[t] = preferredTopics.includes(t);
       });
       localStorage.setItem('opsiai_subscriptions', JSON.stringify(topicsObj));
-
-      // Trigger root html color adaptation
-      const root = document.documentElement;
-      if (themePreference === 'light') {
-        root.classList.add('light-theme');
-      } else {
-        root.classList.remove('light-theme');
-      }
 
       if (onProfileUpdated) {
         onProfileUpdated(firstName);
@@ -195,18 +189,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     } catch (err) {
       console.warn('API connection offline. Syncing local preferences client-side.', err);
       // Fallback local update
-      localStorage.setItem('opsiai_theme', themePreference);
       localStorage.setItem('opsiai_email_subscribed', newsletterEnabled ? 'true' : 'false');
+      localStorage.setItem('opsiai_theme', globalTheme);
       
       const topicsObj: Record<string, boolean> = {};
       availableTopics.forEach(t => {
         topicsObj[t] = preferredTopics.includes(t);
       });
       localStorage.setItem('opsiai_subscriptions', JSON.stringify(topicsObj));
-
-      const root = document.documentElement;
-      if (themePreference === 'light') root.classList.add('light-theme');
-      else root.classList.remove('light-theme');
 
       if (onProfileUpdated) onProfileUpdated(firstName);
 
@@ -216,7 +206,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         last_name: lastName,
         newsletter_enabled: newsletterEnabled,
         preferred_topics: preferredTopics,
-        theme: themePreference
+        theme: globalTheme
       });
 
       setSaveStatus('saved');
@@ -308,8 +298,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <span>Theme</span>
             </div>
             <select 
-              value={themePreference} 
-              onChange={(e) => setThemePreference(e.target.value)}
+              value={globalTheme} 
+              onChange={(e) => setGlobalTheme(e.target.value)}
               disabled={isGuest}
               style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 600, outline: 'none', textAlign: 'right' }}
             >
@@ -507,7 +497,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div>
               <h4 style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '8px' }}>Active Theme</h4>
               <span style={{ fontSize: '13px', fontWeight: 600, textTransform: 'capitalize' }}>
-                {profile?.theme === 'light' ? '🔆 Light Theme (Clean Editorial)' : '🌙 Dark Theme (Luxury Gold)'}
+                {globalTheme === 'light' ? '🔆 Light Theme (Clean Editorial)' : '🌙 Dark Theme (Luxury Gold)'}
               </span>
             </div>
           </div>
@@ -568,8 +558,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="auth-input-group" style={{ marginBottom: 0 }}>
               <label className="auth-label">Preferred Theme</label>
               <select
-                value={themePreference}
-                onChange={(e) => setThemePreference(e.target.value)}
+                value={globalTheme}
+                onChange={(e) => setGlobalTheme(e.target.value)}
                 className="auth-input"
                 style={{ background: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border)' }}
                 disabled={isGuest}

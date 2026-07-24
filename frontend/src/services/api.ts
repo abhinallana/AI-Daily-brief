@@ -350,14 +350,29 @@ export async function saveProfile(profile: any): Promise<void> {
   if (error) throw error;
 }
 
+// Update theme directly
+export async function updateTheme(userId: string, theme: string): Promise<void> {
+  // Direct Supabase update for immediate effect
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ theme })
+    .eq('id', userId);
+    
+  if (error) {
+    console.warn("Supabase theme update failed:", error);
+  }
+}
+
 // Save preferences with backend + Supabase direct fallback
-export async function savePreferences(email: string, topics: string[]): Promise<void> {
+export async function savePreferences(email: string, topics: string[], deliveryTime?: string): Promise<void> {
   if (import.meta.env.VITE_API_URL) {
     try {
+      const payload: any = { email, subscribed_topics: topics };
+      if (deliveryTime) payload.delivery_time = deliveryTime;
       const response = await fetch(`${API_BASE_URL}/users/preferences`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, subscribed_topics: topics })
+        body: JSON.stringify(payload)
       });
       if (response.ok) return;
     } catch (e) {

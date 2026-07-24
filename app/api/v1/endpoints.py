@@ -8,6 +8,11 @@ from app.services.report_builder import ReportBuilderService
 
 router = APIRouter()
 
+from app.infrastructure.database.repository import get_repository
+from app.services.report_builder import ReportBuilderService
+from app.delivery.email import EmailService
+from fastapi import Header
+
 def get_repo():
     return get_repository()
 
@@ -170,11 +175,14 @@ from pydantic import BaseModel
 class UserPreferencesPayload(BaseModel):
     email: str
     subscribed_topics: List[str]
+    delivery_time: Optional[str] = None
 
 @router.post("/users/preferences")
 def save_user_preferences(payload: UserPreferencesPayload, repo=Depends(get_repo)):
     """Saves subscriber preferences to the database repository."""
     repo.save_user_preferences(payload.email, payload.subscribed_topics)
+    if payload.delivery_time:
+        repo.update_user_delivery_time(payload.email, payload.delivery_time)
     return {"status": "success", "message": "Preferences saved."}
 
 @router.get("/users/preferences")
@@ -192,6 +200,7 @@ class UserProfilePayload(BaseModel):
     newsletter_enabled: Optional[bool] = False
     preferred_topics: Optional[str] = ""
     theme: Optional[str] = "dark"
+    delivery_time: Optional[str] = "03:00 PM"
 
 @router.post("/users/profiles")
 def save_user_profile(payload: UserProfilePayload, repo=Depends(get_repo)):
@@ -206,3 +215,39 @@ def get_user_profile(profile_id: str, repo=Depends(get_repo)):
     if not profile:
         raise HTTPException(status_code=404, detail="User profile not found.")
     return profile
+
+@router.post("/trigger-delivery")
+def trigger_delivery(
+    delivery_time: str = Query("03:00 PM", description="The exact delivery_time string to match, e.g. '03:00 PM'"),
+    x_cron_secret: str = Header(None, alias="X-Cron-Secret"),
+    repo=Depends(get_repo)
+):
+    """Triggers the delivery for users subscribed to a specific delivery time."""
+    cron_secret = getattr(config, "CRON_SECRET", None)
+    if cron_secret and x_cron_secret != cron_secret:
+        raise HTTPException(status_code=401, detail="Unauthorized cron trigger.")
+    
+    # 1. Build the daily report
+    builder = ReportBuilderService(repo)
+    report = builder.build_daily_report()
+    
+    if not report.articles:
+        return {"status": "success", "message": "No articles in report. Skipped delivery."}
+        
+    # 2. Get subscribers for this delivery time
+    subscribers = repo.get_active_subscribers(delivery_time=delivery_time)
+    
+    if not subscribers:
+        return {"status": "success", "message": f"No active subscribers found for delivery time {delivery_time}."}
+        
+    # 3. Trigger email delivery for these subscribers
+    # We will override EmailService to ONLY fetch these subscribers, or just use the existing one but mock the fetch.
+    # The existing EmailService fetches ALL subscribers from the repo internally. Let's fix that.
+    # Actually, we should just let EmailService accept a list of subscribers!
+    email_service = EmailService()
+    success = email_service.send_briefing(report, custom_subscribers=subscribers)
+    
+    if success:
+        return {"status": "success", "message": f"Delivered to {len(subscribers)} subscribers for {delivery_time}."}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to deliver emails.")

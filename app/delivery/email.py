@@ -202,7 +202,7 @@ class EmailService:
 
         return html_content, txt_content
 
-    def send_briefing(self, report: DailyReport) -> bool:
+    def send_briefing(self, report: DailyReport, custom_subscribers: list[dict] = None) -> bool:
         """Constructs and sends the daily brief email, customized per recipient based on topic preferences."""
         is_configured = (
             self.smtp_username and 
@@ -220,15 +220,18 @@ class EmailService:
             logger.error(f"Failed to fetch repository for preferences checking: {e}")
             repo = None
 
-        # Load active subscribers from Supabase/PostgreSQL database
+        # Load active subscribers from Supabase/PostgreSQL database if not provided
         db_subscribers = []
-        if repo:
+        if custom_subscribers is not None:
+            db_subscribers = custom_subscribers
+            logger.info(f"Using {len(db_subscribers)} custom newsletter subscribers provided for delivery.")
+        elif repo:
             try:
                 db_subscribers = repo.get_active_subscribers()
                 logger.info(f"Loaded {len(db_subscribers)} active newsletter subscribers from database.")
             except Exception as e:
                 logger.error(f"Failed to query active subscribers from repository: {e}")
-
+                
         # Load hardcoded whitelist from environment variable/secret
         secret_recipients = [e.strip() for e in self.email_to.split(",") if e.strip()]
         

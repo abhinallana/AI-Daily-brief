@@ -306,7 +306,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
     if (email) {
       try {
         const activeList = Object.keys(localTopics).filter(k => localTopics[k]);
-        await savePreferences(email, activeList);
+        await savePreferences(email, activeList, deliveryTime);
       } catch (err) {
         console.warn('Backend server offline. Settings saved locally.', err);
         setSaving(false);
