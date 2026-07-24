@@ -9,6 +9,7 @@ interface LandingPageProps {
   onViewDemo: () => void;
   isAuthenticated?: boolean;
   onNavigateToDashboard?: () => void;
+  onNavigateToReports?: () => void;
   onLogout?: () => void;
   onNavigateToTab?: (tab: string) => void;
   isGuest?: boolean;
@@ -24,6 +25,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onViewDemo,
   isAuthenticated = false,
   onNavigateToDashboard,
+  onNavigateToReports,
   onLogout,
   onNavigateToTab,
   isGuest = false,
@@ -126,7 +128,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             ) : (
               <button className="btn-primary btn-large" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={onNavigateToSignUp}>Get Started Free</button>
             )}
-            <button className="btn-outline btn-large" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700 }} onClick={isRealUser ? onNavigateToDashboard : onViewDemo}>
+            <button className="btn-outline btn-large" style={{ width: '100%', height: '48px', minHeight: '48px', borderRadius: '10px', fontSize: '14px', fontWeight: 700, borderColor: 'var(--border)' }} onClick={isAuthenticated ? onNavigateToReports : onViewDemo}>
               {isRealUser ? "View Today's Briefing" : "Try Demo Experience"}
             </button>
           </div>
@@ -562,7 +564,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             ) : (
               <button className="btn-primary btn-large" onClick={onNavigateToSignUp}>Get Started Free</button>
             )}
-            <button className="btn-outline btn-large" onClick={isAuthenticated ? onNavigateToDashboard : onViewDemo}>
+            <button className="btn-outline btn-large" onClick={isAuthenticated ? onNavigateToReports : onViewDemo}>
               {isRealUser ? "View Today's Briefing" : "Try Demo Experience"}
             </button>
           </div>

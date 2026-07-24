@@ -25,10 +25,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
       <ul className="nav-links">
         <li
-          className={`nav-item ${activeView === 'today' ? 'active' : ''}`}
-          onClick={() => onViewChange('today')}
+          className={`nav-item ${activeView === 'dashboard' ? 'active' : ''}`}
+          onClick={() => onViewChange('dashboard')}
         >
-          <span>🏠</span> Today's Brief
+          <span>📊</span> Dashboard
+        </li>
+        <li
+          className={`nav-item ${activeView === 'reports' ? 'active' : ''}`}
+          onClick={() => onViewChange('reports')}
+        >
+          <span>📅</span> Daily Reports
         </li>
         <li
           className={`nav-item ${activeView === 'bookmarks' ? 'active' : ''}`}

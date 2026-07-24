@@ -118,8 +118,8 @@ const App: React.FC = () => {
           else if (activeView === 'profile') setMobileTab('profile');
           else if (activeView === 'bookmarks') setMobileTab('bookmarks');
         } else {
-          // Switch back to desktop viewports
-          if (mobileTab === 'dashboard' || mobileTab === 'reports') setActiveView('today');
+          if (mobileTab === 'dashboard') setActiveView('dashboard');
+          else if (mobileTab === 'reports') setActiveView('reports');
           else if (mobileTab === 'topics') setActiveView('preferences');
           else if (mobileTab === 'profile') setActiveView('profile');
           else if (mobileTab === 'bookmarks') setActiveView('bookmarks');
@@ -159,9 +159,12 @@ const App: React.FC = () => {
 
   const handleMobileTabChange = (tab: 'dashboard' | 'reports' | 'topics' | 'bookmarks' | 'profile') => {
     setMobileTab(tab);
-    if (tab === 'dashboard' || tab === 'reports') {
-      setActiveView('today');
+    if (tab === 'dashboard') {
+      setActiveView('dashboard');
       window.history.pushState(null, '', '/dashboard');
+    } else if (tab === 'reports') {
+      setActiveView('reports');
+      window.history.pushState(null, '', '/reports');
     } else if (tab === 'topics') {
       setActiveView('preferences');
       window.history.pushState(null, '', '/settings');
@@ -303,10 +306,10 @@ const App: React.FC = () => {
             setActiveView('preferences');
             setMobileTab('topics');
           } else if (path === '/reports') {
-            setActiveView('today');
+            setActiveView('reports');
             setMobileTab('reports');
           } else {
-            setActiveView('today');
+            setActiveView('dashboard');
             setMobileTab('dashboard');
           }
         }
@@ -475,7 +478,7 @@ const App: React.FC = () => {
       } else if (path === '/login') {
         if (cachedToken) {
           setActiveRootView('dashboard');
-          setActiveView('today');
+          setActiveView('dashboard');
           window.history.pushState(null, '', '/dashboard');
         } else {
           setActiveRootView('login');
@@ -483,7 +486,7 @@ const App: React.FC = () => {
       } else if (path === '/signup') {
         if (cachedToken) {
           setActiveRootView('dashboard');
-          setActiveView('today');
+          setActiveView('dashboard');
           window.history.pushState(null, '', '/dashboard');
         } else {
           setActiveRootView('signup');
@@ -501,10 +504,10 @@ const App: React.FC = () => {
             setActiveView('preferences');
             setMobileTab('topics');
           } else if (path === '/reports') {
-            setActiveView('today');
+            setActiveView('reports');
             setMobileTab('reports');
           } else {
-            setActiveView('today');
+            setActiveView('dashboard');
             setMobileTab('dashboard');
           }
         } else {
@@ -702,9 +705,19 @@ const App: React.FC = () => {
     if (isMobile) {
       setMobileTab('dashboard');
     } else {
-      setActiveView('today');
+      setActiveView('dashboard');
     }
     window.history.pushState(null, '', '/dashboard');
+  };
+
+  const handleGoToReports = () => {
+    setActiveRootView('dashboard');
+    if (isMobile) {
+      setMobileTab('reports');
+    } else {
+      setActiveView('reports');
+    }
+    window.history.pushState(null, '', '/reports');
   };
 
   const handleWelcomeNext = (selectedTopics: string[]) => {
@@ -990,15 +1003,18 @@ const App: React.FC = () => {
         )}
 
         {/* Header Greeting Banner */}
-        <div className="header-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '24px' }}>
-          <div>
-            <h1 style={{ marginBottom: '4px' }}>{getGreeting(userFirstName)}</h1>
-            <p style={{ margin: 0 }}>Filter, search and personalize your Daily Briefings.</p>
+        {activeView === 'dashboard' && (
+          <div className="header-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '24px' }}>
+            <div>
+              <h1 style={{ marginBottom: '4px' }}>{getGreeting(userFirstName)}</h1>
+              <p style={{ margin: 0 }}>Filter, search and personalize your Daily Briefings.</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Unified Premium Filter & Search Bar */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', background: 'var(--panel-bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '24px' }}>
+        {activeView === 'reports' && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', background: 'var(--panel-bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '24px' }}>
           {/* Keyword Search Input */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--body-bg)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', flex: '1 1 250px' }}>
             <span style={{ fontSize: '13px' }}>🔍</span>
@@ -1076,9 +1092,10 @@ const App: React.FC = () => {
             </button>
           )}
         </div>
+        )}
 
         {/* Main Feed Content (Standard Daily vs Global Search Results) */}
-        {isSearchActive ? (
+        {isSearchActive && activeView === 'reports' ? (
           <div>
             <div className="article-card" style={{ borderLeft: '4px solid var(--primary)', padding: '16px 20px', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '4px', color: 'var(--primary)' }}>
@@ -1106,9 +1123,15 @@ const App: React.FC = () => {
           </div>
         ) : (
           <>
-            <Takeaways report={filteredReport} />
-            <SnapshotBar articles={filteredArticles} />
-            <ArticleFeed articles={filteredArticles} bookmarks={bookmarks} onToggleBookmark={toggleBookmark} />
+            {activeView === 'dashboard' && (
+              <>
+                <Takeaways report={filteredReport} />
+                <SnapshotBar articles={filteredArticles} />
+              </>
+            )}
+            {activeView === 'reports' && (
+              <ArticleFeed articles={filteredArticles} bookmarks={bookmarks} onToggleBookmark={toggleBookmark} />
+            )}
           </>
         )}
 
@@ -1224,6 +1247,7 @@ const App: React.FC = () => {
           userId={userId || undefined}
           userEmail={userEmail || undefined}
           onNavigateToDashboard={handleGoToDashboard}
+          onNavigateToReports={handleGoToReports}
           onLogout={handleLogout}
           onNavigateToTab={(tab) => {
             setActiveRootView('dashboard');
@@ -1914,9 +1938,9 @@ const App: React.FC = () => {
         isGuest={isGuest}
       />
 
-      <main className="main-content">
-        {activeView === 'today' && renderTodayView()}
-        {activeView === 'bookmarks' && renderBookmarksView()}
+        <main className="main-content">
+          {(activeView === 'dashboard' || activeView === 'reports') && renderTodayView()}
+          {activeView === 'bookmarks' && renderBookmarksView()}
         {activeView === 'preferences' && (
           isGuest ? renderGuestRestrictedView('Preferences') : (
             <Preferences
