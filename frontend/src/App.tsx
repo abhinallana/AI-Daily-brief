@@ -19,7 +19,7 @@ import { supabase } from './services/supabaseClient';
 const App: React.FC = () => {
   // Routing states
   const [activeRootView, setActiveRootView] = useState<'landing' | 'login' | 'signup' | 'dashboard'>('landing');
-  const [activeView, setActiveView] = useState<string>('today');
+  const [activeView, setActiveView] = useState<string>('dashboard');
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   // Data states
@@ -113,7 +113,8 @@ const App: React.FC = () => {
       // Only perform state synchronization when crossing the mobile/desktop boundary
       if (wasMobile !== isNowMobile) {
         if (isNowMobile) {
-          if (activeView === 'today') setMobileTab('dashboard');
+          if (activeView === 'dashboard') setMobileTab('dashboard');
+          else if (activeView === 'reports') setMobileTab('reports');
           else if (activeView === 'preferences') setMobileTab('topics');
           else if (activeView === 'profile') setMobileTab('profile');
           else if (activeView === 'bookmarks') setMobileTab('bookmarks');
@@ -400,10 +401,10 @@ const App: React.FC = () => {
             setActiveView('preferences');
             setMobileTab('topics');
           } else if (path === '/reports') {
-            setActiveView('today');
+            setActiveView('reports');
             setMobileTab('reports');
           } else {
-            setActiveView('today');
+            setActiveView('dashboard');
             setMobileTab('dashboard');
           }
         }
@@ -646,11 +647,12 @@ const App: React.FC = () => {
       setActiveRootView('dashboard');
       if (path === '/profile') setActiveView('profile');
       else if (path === '/settings' || path === '/topics') setActiveView('preferences');
-      else setActiveView('today');
+      else if (path === '/reports') setActiveView('reports');
+      else setActiveView('dashboard');
       window.history.pushState(null, '', path);
     } else {
       setActiveRootView('dashboard');
-      setActiveView('today');
+      setActiveView('dashboard');
       window.history.pushState(null, '', '/dashboard');
     }
   };
@@ -673,7 +675,7 @@ const App: React.FC = () => {
 
     // Navigate to dashboard
     setActiveRootView('dashboard');
-    setActiveView('today');
+    setActiveView('dashboard');
     window.history.pushState(null, '', '/dashboard');
 
     // Trigger onboarding Welcome Personalization immediately after signup
@@ -1239,7 +1241,7 @@ const App: React.FC = () => {
             localStorage.setItem('opsiai_firstname', 'Guest');
 
             setActiveRootView('dashboard');
-            setActiveView('today');
+            setActiveView('dashboard');
             window.history.pushState(null, '', '/dashboard');
           }}
           isAuthenticated={!!token}
@@ -1255,9 +1257,9 @@ const App: React.FC = () => {
               if (isMobile) {
                 setMobileTab('reports');
               } else {
-                setActiveView('today');
+                setActiveView('reports');
               }
-              window.history.pushState(null, '', '/dashboard');
+              window.history.pushState(null, '', '/reports');
             } else if (tab === 'topics') {
               if (isMobile) {
                 setMobileTab('topics');
