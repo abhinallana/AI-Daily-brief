@@ -2082,8 +2082,17 @@ input:checked + .slider:before {
   background-color: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 14px;
-  overflow: hidden;
   box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.mobile-settings-group > :first-child {
+  border-top-left-radius: 13px;
+  border-top-right-radius: 13px;
+}
+
+.mobile-settings-group > :last-child {
+  border-bottom-left-radius: 13px;
+  border-bottom-right-radius: 13px;
 }
 
 .mobile-settings-row {

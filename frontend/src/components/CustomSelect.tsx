@@ -44,7 +44,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, opt
   };
 
   return (
-    <div className={`custom-select-container ${className}`} style={{ position: 'relative', ...style }} ref={dropdownRef}>
+    <div className={`custom-select-container ${className}`} style={{ position: 'relative', zIndex: isOpen ? 9999 : 1, ...style }} ref={dropdownRef}>
       <button
         type="button"
         className="custom-select-trigger"
@@ -77,12 +77,13 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, opt
             top: '100%',
             [align === 'right' ? 'right' : 'left']: 0,
             marginTop: '8px',
-            background: 'var(--surface)',
+            background: '#0f172a', /* solid dark background */
             border: '1px solid var(--border)',
             borderRadius: '8px',
             boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
             zIndex: 100,
-            minWidth: '160px',
+            minWidth: '100%',
+            width: 'max-content',
             overflow: 'hidden'
           }}
         >
@@ -97,6 +98,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, opt
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                gap: '16px',
                 transition: 'background 0.2s ease',
                 backgroundColor: value === option.value ? 'rgba(228, 185, 91, 0.1)' : 'transparent',
                 color: value === option.value ? 'var(--primary)' : 'var(--text-color)'
@@ -108,8 +110,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({ value, onChange, opt
                 e.currentTarget.style.backgroundColor = value === option.value ? 'rgba(228, 185, 91, 0.1)' : 'transparent';
               }}
             >
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>{option.label}</span>
-              {option.disabled && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Coming Soon</span>}
+              <span style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap' }}>{option.label}</span>
+              {option.disabled && <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Coming Soon</span>}
             </div>
           ))}
         </div>
