@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getProfile, saveProfile } from '../services/api';
+import { useToast } from './ToastContext';
 
-interface ProfileData {
+export interface ProfileData {
   id: string;
   first_name: string;
   last_name?: string | null;
@@ -36,7 +37,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -117,6 +121,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     loadProfile();
   }, [userId, userEmail]);
 
+  const isDirty = React.useMemo(() => {
+    if (!profile) return false;
+    return firstName !== profile.first_name ||
+           lastName !== (profile.last_name || '') ||
+           newsletterEnabled !== profile.newsletter_enabled ||
+           JSON.stringify(preferredTopics) !== JSON.stringify(profile.preferred_topics || []) ||
+           themePreference !== (profile.theme || 'dark');
+  }, [profile, firstName, lastName, newsletterEnabled, preferredTopics, themePreference]);
+
   const toggleTopic = (topic: string) => {
     if (isGuest) return;
     setPreferredTopics(prev => 
@@ -126,9 +139,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isGuest) return;
+    if (isGuest || !isDirty) return;
     setSaving(true);
     setStatus(null);
+    setErrorMsg(null);
+    setSaveStatus('idle');
 
     const payload = {
       id: userId,
@@ -174,8 +189,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         onProfileUpdated(firstName);
       }
 
-      setStatus('Profile and settings updated successfully!');
-      setTimeout(() => setStatus(null), 3000);
+      setSaveStatus('saved');
+      showToast('Profile and settings updated successfully!', 'success');
+      setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (err) {
       console.warn('API connection offline. Syncing local preferences client-side.', err);
       // Fallback local update
@@ -194,8 +210,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       if (onProfileUpdated) onProfileUpdated(firstName);
 
-      setStatus('Settings saved locally in sandbox mode.');
-      setTimeout(() => setStatus(null), 3000);
+      setProfile({
+        ...profile!,
+        first_name: firstName,
+        last_name: lastName,
+        newsletter_enabled: newsletterEnabled,
+        preferred_topics: preferredTopics,
+        theme: themePreference
+      });
+
+      setSaveStatus('saved');
+      showToast('Settings saved locally in sandbox mode.', 'success');
+      setTimeout(() => setSaveStatus('idle'), 2000);
     } finally {
       setSaving(false);
     }
@@ -309,15 +335,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </div>
         </div>
 
+        {errorMsg && (
+          <div style={{ color: 'var(--strategic)', fontSize: '12px', textAlign: 'center', marginTop: '10px' }}>
+            {errorMsg}
+          </div>
+        )}
         {/* Save changes button */}
         <button 
           type={isGuest ? "button" : "submit"} 
-          className="btn-primary" 
+          className={`btn-primary ${saving ? 'btn-loading' : ''} ${saveStatus === 'saved' ? 'btn-success' : ''}`} 
           onClick={isGuest ? onOpenAuth : undefined}
-          disabled={saving}
+          disabled={saving || (!isGuest && !isDirty)}
           style={{ minHeight: '48px', width: '100%', borderRadius: '12px', marginTop: '10px', fontSize: '15px', fontWeight: 700 }}
         >
-          {saving ? 'Saving...' : (isGuest ? 'Create your Account' : 'Save Profile Changes')}
+          {saving ? 'Saving...' : (isGuest ? 'Create your Account' : (saveStatus === 'saved' ? '✓ Saved' : 'Save Profile Changes'))}
         </button>
       </form>
     );
@@ -418,12 +449,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           )
         )}
       </div>
-
-      {status && (
-        <div className="article-card" style={{ borderLeft: '3px solid var(--success)', padding: '12px 16px', marginBottom: '24px', background: 'rgba(34, 197, 94, 0.05)' }}>
-          <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>🎉 {status}</p>
-        </div>
-      )}
 
       {activeTab === 'profile' ? (
         /* PROFILE VIEW PAGE */
@@ -584,7 +609,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
             <label className="auth-label" style={{ marginBottom: '12px' }}>Preferred AI & DevOps Topics</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {availableTopics.map(topic => {
+              {availableTopics.map((topic: string) => {
                 const isSelected = preferredTopics.includes(topic);
                 return (
                   <button
@@ -611,15 +636,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '20px', marginTop: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '20px', marginTop: '10px', gap: '16px' }}>
+            {errorMsg && (
+              <span style={{ color: 'var(--strategic)', fontSize: '13px', fontWeight: 600 }}>{errorMsg}</span>
+            )}
             <button 
               type={isGuest ? "button" : "submit"} 
-              className="btn-primary" 
+              className={`btn-primary ${saving ? 'btn-loading' : ''} ${saveStatus === 'saved' ? 'btn-success' : ''}`} 
               onClick={isGuest ? onOpenAuth : undefined}
-              disabled={saving} 
+              disabled={saving || (!isGuest && !isDirty)} 
               style={{ padding: '12px 28px' }}
             >
-              {saving ? 'Saving changes...' : (isGuest ? 'Create your Account' : 'Save Settings')}
+              {saving ? 'Saving...' : (isGuest ? 'Create your Account' : (saveStatus === 'saved' ? '✓ Saved' : 'Save Settings'))}
             </button>
           </div>
         </form>

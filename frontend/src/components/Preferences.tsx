@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { savePreferences, fetchTopicCounts, fetchPreferences } from '../services/api';
+import { fetchTopicCounts, fetchPreferences, savePreferences } from '../services/api';
+import { useToast } from './ToastContext';
+import { CustomSelect } from './CustomSelect';
 
 interface Topic {
   id: string;
@@ -149,10 +151,39 @@ export const Preferences: React.FC<PreferencesProps> = ({
   const [collapsedNewsletter, setCollapsedNewsletter] = useState(false);
 
   const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
   const [dbCounts, setDbCounts] = useState<Record<string, number>>({});
   const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null);
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
+
+  const { showToast } = useToast();
+  const [initialState, setInitialState] = useState<{
+    localTopics: Record<string, boolean>;
+    emailEnabled: boolean;
+    deliveryTime: string;
+    frequency: string;
+  } | null>(null);
+
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!initialState && Object.keys(localTopics).length > 0) {
+      setInitialState({
+        localTopics: { ...localTopics },
+        emailEnabled,
+        deliveryTime,
+        frequency
+      });
+    }
+  }, [localTopics, emailEnabled, deliveryTime, frequency]);
+
+  const isDirty = React.useMemo(() => {
+    if (!initialState) return false;
+    return JSON.stringify(localTopics) !== JSON.stringify(initialState.localTopics) ||
+           emailEnabled !== initialState.emailEnabled ||
+           deliveryTime !== initialState.deliveryTime ||
+           frequency !== initialState.frequency;
+  }, [localTopics, emailEnabled, deliveryTime, frequency, initialState]);
 
   useEffect(() => {
     let matchedPreset: string | null = null;
@@ -250,8 +281,10 @@ export const Preferences: React.FC<PreferencesProps> = ({
   };
 
   const handleSave = async () => {
+    if (!isDirty) return;
     setSaving(true);
-    setStatus(null);
+    setErrorMsg(null);
+    setSaveStatus('idle');
 
     // Save active subscriptions
     localStorage.setItem('opsiai_subscriptions', JSON.stringify(localTopics));
@@ -273,34 +306,26 @@ export const Preferences: React.FC<PreferencesProps> = ({
     if (email) {
       try {
         const activeList = Object.keys(localTopics).filter(k => localTopics[k]);
-        
-        // Save topics to backend or fallback
         await savePreferences(email, activeList);
-
-        // Save delivery settings in user settings if available
-        // Note: For now we save locally in database if user exists, fallback to local storage
       } catch (err) {
         console.warn('Backend server offline. Settings saved locally.', err);
+        setSaving(false);
+        setErrorMsg('Unable to save your preferences. Please try again.');
+        return;
       }
     }
 
-    setTimeout(() => {
-      setSaving(false);
-      setStatus('Preferences updated successfully!');
-      setTimeout(() => setStatus(null), 3000);
-    }, 800);
+    setInitialState({ localTopics: { ...localTopics }, emailEnabled, deliveryTime, frequency });
+    setSaving(false);
+    setSaveStatus('saved');
+    showToast('Preferences saved successfully', 'success');
+    
+    setTimeout(() => setSaveStatus('idle'), 2000);
   };
 
   if (isMobile) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeIn 0.3s ease-out' }}>
-        {status && (
-          <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.05)', borderLeft: '4px solid var(--success)', padding: '12px', borderRadius: '8px' }}>
-            <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>🎉 {status}</p>
-          </div>
-        )}
-
-        {/* Presets block */}
         <div
           style={{
             background: 'rgba(255, 255, 255, 0.02)',
@@ -330,8 +355,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
                   if (onSave) onSave(loaded);
                   setAppliedPresetId(pack.id);
                   setTimeout(() => setAppliedPresetId(null), 600);
-                  setStatus(`${pack.name} preset applied! Click Save Preferences below to persist.`);
-                  setTimeout(() => setStatus(null), 4000);
+                  showToast(`${pack.name} preset applied! Click Save Preferences below to persist.`, 'success');
                 }}
                 className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''} ${activePresetId === pack.id ? 'active' : ''}`}
               >
@@ -394,23 +418,20 @@ export const Preferences: React.FC<PreferencesProps> = ({
                   <span className="icon">⏰</span>
                   <span>Delivery Time</span>
                 </div>
-                <select 
+                <CustomSelect 
                   value={deliveryTime} 
-                  onChange={(e) => setDeliveryTime(e.target.value)}
-                  style={{ border: 'none', background: 'none', color: 'var(--text-color)', fontSize: '13px', fontWeight: 600, outline: 'none', textAlign: 'right' }}
-                >
-                  <option value="03:00 PM">03:00 PM</option>
-                  <option value="06:00 AM">06:00 AM</option>
-                  <option value="08:00 AM">08:00 AM</option>
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="12:00 PM">12:00 PM</option>
-                </select>
+                  onChange={setDeliveryTime}
+                  align="right"
+                  options={[
+                    { value: "03:00 PM", label: "03:00 PM" },
+                    { value: "06:00 AM", label: "06:00 AM", disabled: true },
+                    { value: "08:00 AM", label: "08:00 AM", disabled: true },
+                    { value: "10:00 AM", label: "10:00 AM", disabled: true },
+                    { value: "12:00 PM", label: "12:00 PM", disabled: true }
+                  ]}
+                  style={{ fontSize: '13px', fontWeight: 600, width: '120px' }}
+                />
               </div>
-              {deliveryTime !== '03:00 PM' && (
-                <div style={{ color: 'var(--important)', fontSize: '11px', padding: '10px 16px', background: 'rgba(235,94,85,0.05)', borderRadius: '6px', borderLeft: '3px solid var(--important)', margin: '8px 16px', textAlign: 'left', lineHeight: '1.4' }}>
-                  Beta Feature: Custom delivery times are currently in beta and will be available soon. We're actively working on it.
-                </div>
-              )}
 
               <div className="mobile-settings-row">
                 <div className="mobile-settings-left">
@@ -431,14 +452,18 @@ export const Preferences: React.FC<PreferencesProps> = ({
           )}
         </div>
 
-        {/* Save button */}
+        {errorMsg && (
+          <div style={{ color: 'var(--strategic)', fontSize: '12px', textAlign: 'center', marginTop: '10px' }}>
+            {errorMsg}
+          </div>
+        )}
         <button 
-          className="btn-primary" 
+          className={`btn-primary ${saving ? 'btn-loading' : ''} ${saveStatus === 'saved' ? 'btn-success' : ''}`} 
           onClick={handleSave} 
-          disabled={saving}
+          disabled={!isDirty || saving}
           style={{ minHeight: '48px', width: '100%', borderRadius: '12px', marginTop: '10px', fontSize: '15px', fontWeight: 700 }}
         >
-          {saving ? 'Saving...' : 'Save Preferences'}
+          {saving ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved' : 'Save Preferences'}
         </button>
       </div>
     );
@@ -480,8 +505,7 @@ export const Preferences: React.FC<PreferencesProps> = ({
                 if (onSave) onSave(loaded);
                 setAppliedPresetId(pack.id);
                 setTimeout(() => setAppliedPresetId(null), 600);
-                setStatus(`${pack.name} preset applied! Click Save Preferences below to persist.`);
-                setTimeout(() => setStatus(null), 4000);
+                showToast(`${pack.name} preset applied! Click Save Preferences below to persist.`, 'success');
               }}
               className={`preset-chip ${appliedPresetId === pack.id ? 'applied-pulse' : ''} ${activePresetId === pack.id ? 'active' : ''}`}
             >
@@ -491,12 +515,6 @@ export const Preferences: React.FC<PreferencesProps> = ({
           ))}
         </div>
       </div>
-
-      {status && (
-        <div className="article-card" style={{ borderLeft: '3px solid var(--success)', padding: '12px 16px', marginBottom: '24px', background: 'rgba(34, 197, 94, 0.05)' }}>
-          <p style={{ color: 'var(--success)', fontSize: '13px', fontWeight: 600, margin: 0 }}>🎉 {status}</p>
-        </div>
-      )}
 
       <div className="preferences-list" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
@@ -549,23 +567,19 @@ export const Preferences: React.FC<PreferencesProps> = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <label className="auth-label" style={{ fontSize: '11px' }}>Preferred Delivery Time</label>
-                    <select 
+                    <CustomSelect 
                       value={deliveryTime} 
-                      onChange={(e) => setDeliveryTime(e.target.value)}
+                      onChange={setDeliveryTime}
                       className="auth-input"
-                      style={{ background: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border)' }}
-                    >
-                      <option value="03:00 PM">03:00 PM (IST)</option>
-                      <option value="06:00 AM">06:00 AM (IST)</option>
-                      <option value="08:00 AM">08:00 AM (IST)</option>
-                      <option value="10:00 AM">10:00 AM (IST)</option>
-                      <option value="12:00 PM">12:00 PM (IST)</option>
-                    </select>
-                    {deliveryTime !== '03:00 PM' && (
-                      <span style={{ color: 'var(--important)', fontSize: '10px', marginTop: '4px', lineHeight: '1.4' }}>
-                        Beta Feature: Custom delivery times are currently in beta and will be available soon. We're actively working on it.
-                      </span>
-                    )}
+                      options={[
+                        { value: "03:00 PM", label: "03:00 PM (IST)" },
+                        { value: "06:00 AM", label: "06:00 AM (IST)", disabled: true },
+                        { value: "08:00 AM", label: "08:00 AM (IST)", disabled: true },
+                        { value: "10:00 AM", label: "10:00 AM (IST)", disabled: true },
+                        { value: "12:00 PM", label: "12:00 PM (IST)", disabled: true }
+                      ]}
+                      style={{ background: 'var(--bg-color)', border: '1px solid var(--border)' }}
+                    />
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -658,9 +672,17 @@ export const Preferences: React.FC<PreferencesProps> = ({
         })}
       </div>
 
-      <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'flex-end' }}>
-        <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ padding: '14px 28px' }}>
-          {saving ? 'Saving...' : 'Save Settings'}
+      <div style={{ marginTop: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '16px' }}>
+        {errorMsg && (
+          <span style={{ color: 'var(--strategic)', fontSize: '13px', fontWeight: 600 }}>{errorMsg}</span>
+        )}
+        <button 
+          className={`btn-primary ${saving ? 'btn-loading' : ''} ${saveStatus === 'saved' ? 'btn-success' : ''}`} 
+          onClick={handleSave} 
+          disabled={!isDirty || saving} 
+          style={{ padding: '14px 28px' }}
+        >
+          {saving ? 'Saving...' : saveStatus === 'saved' ? '✓ Saved' : 'Save Settings'}
         </button>
       </div>
     </div>
